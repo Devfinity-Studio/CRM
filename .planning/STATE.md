@@ -1,5 +1,5 @@
 # Current State
 
-- **Milestone:** 11 (Completed)
-- **Phase:** 32 (Completed)
-- **Focus:** Milestone Finished
+- **Milestone:** 12
+- **Phase:** 33
+- **Focus:** Deals & Kanban Pipeline
