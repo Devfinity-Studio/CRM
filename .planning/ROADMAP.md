@@ -28,8 +28,5 @@
 ### Milestone 12: Expanded CRM Workflows & Sales Pipelines (Completed)
 - [x] [Archived in v12-ROADMAP.md](./milestones/v12-ROADMAP.md)
 
-### Milestone 13: UI Overhaul via Stitch MCP (Current)
-- [ ] **Phase 37: Design System & Theming**
-- [ ] **Phase 38: Layout & Navigation Redesign**
-- [ ] **Phase 39: Sales Pipeline UI Refresh**
-- [ ] **Phase 40: CRM Client Profiles Overhaul**
+### Milestone 13: UI Overhaul via Stitch MCP (Completed)
+- [x] [Archived in v13-ROADMAP.md](./milestones/v13-ROADMAP.md)
