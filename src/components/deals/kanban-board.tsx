@@ -48,7 +48,7 @@ export function KanbanBoard() {
 
   useEffect(() => {
     if (deals) {
-      setLocalDeals(deals);
+      setLocalDeals(deals.filter((d: any) => d.status === "OPEN"));
     }
   }, [deals]);
 
@@ -206,6 +206,7 @@ export function KanbanBoard() {
         title={selectedDeal?.title || ""}
         open={!!selectedDeal}
         onOpenChange={(open) => !open && setSelectedDeal(null)}
+        onStatusChange={() => refetch()}
       />
     </DragDropContext>
   );

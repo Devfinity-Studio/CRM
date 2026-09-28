@@ -96,13 +96,52 @@ export const dealsRouter = createTRPCRouter({
         .from(deals)
         .where(and(eq(deals.organizationId, input.organizationId), eq(deals.pipelineId, input.pipelineId)));
 
-      const totalValue = allDeals.reduce((sum, deal) => sum + deal.value, 0);
+      const stages = await ctx.db
+        .select()
+        .from(pipelineStages)
+        .where(eq(pipelineStages.pipelineId, input.pipelineId));
+
+      let totalPipelineValue = 0;
+      let forecastedRevenue = 0;
+      let wonDealsCount = 0;
+      let lostDealsCount = 0;
+      let openDealsCount = 0;
+
+      for (const deal of allDeals) {
+        if (deal.status === "OPEN") {
+          totalPipelineValue += deal.value;
+          const stage = stages.find((s) => s.id === deal.stageId);
+          if (stage) {
+            forecastedRevenue += deal.value * (stage.winProbability / 100);
+          }
+          openDealsCount++;
+        } else if (deal.status === "WON") {
+          wonDealsCount++;
+        } else if (deal.status === "LOST") {
+          lostDealsCount++;
+        }
+      }
+
+      const closedDealsCount = wonDealsCount + lostDealsCount;
+      const winRate = closedDealsCount > 0 ? Math.round((wonDealsCount / closedDealsCount) * 100) : 0;
 
       return {
         totalDeals: allDeals.length,
-        totalPipelineValue: totalValue,
-        forecastedMRR: Math.round(totalValue * 0.4),
-        winRate: 45, // percentage placeholder
+        openDealsCount,
+        wonDealsCount,
+        lostDealsCount,
+        totalPipelineValue,
+        forecastedRevenue: Math.round(forecastedRevenue),
+        winRate,
       };
+    }),
+
+  updateDealStatus: protectedProcedure
+    .input(z.object({ dealId: z.string(), status: z.enum(["OPEN", "WON", "LOST"]) }))
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db
+        .update(deals)
+        .set({ status: input.status, updatedAt: new Date() })
+        .where(eq(deals.id, input.dealId));
     }),
 });

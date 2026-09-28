@@ -21,6 +21,7 @@ export const orgRoleEnum = pgEnum("devcrm_org_role", ["OWNER", "ADMIN", "MEMBER"
 export const subscriptionStatusEnum = pgEnum("devcrm_subscription_status", ["ACTIVE", "TRIALING", "CANCELED", "PAST_DUE"]);
 export const leadStatusEnum = pgEnum("devcrm_lead_status", ["NEW", "QUALIFIED", "CONTACTED", "NURTURING", "UNQUALIFIED"]);
 export const qualificationStatusEnum = pgEnum("devcrm_qualification_status", ["NONE", "MQL", "SQL", "DISQUALIFIED"]);
+export const dealStatusEnum = pgEnum("devcrm_deal_status", ["OPEN", "WON", "LOST"]);
 
 // --- AUTH & USERS TABLES ---
 export const users = createTable("user", (d) => ({
@@ -288,7 +289,9 @@ export const deals = createTable("deal", (d) => ({
   value: d.integer().default(0).notNull(),
   expectedCloseDate: d.timestamp({ withTimezone: true }),
   companyId: d.varchar({ length: 255 }).references(() => companies.id, { onDelete: "set null" }),
+  contactId: d.varchar({ length: 255 }).references(() => contacts.id, { onDelete: "set null" }),
   assignedUserId: d.varchar({ length: 255 }).references(() => users.id, { onDelete: "set null" }),
+  status: dealStatusEnum("status").default("OPEN").notNull(),
   orderIndex: d.integer().default(0).notNull(),
   createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()).notNull(),
   updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),

@@ -6,8 +6,8 @@ import { DashboardLayout } from "~/components/layout/dashboard-layout";
 import { api } from "~/trpc/react";
 import { KanbanBoard } from "~/components/deals/kanban-board";
 import { Button } from "~/components/ui/button";
-import { Plus } from "lucide-react";
-import { Loader2 } from "lucide-react";
+import { Plus, BarChart3, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { DealDialog } from "~/components/deals/deal-dialog";
 
 export default function DealsPage() {
@@ -32,10 +32,18 @@ export default function DealsPage() {
               Manage your sales pipeline and track deal progress.
             </p>
           </div>
-          <Button onClick={() => setDealDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            New Deal
-          </Button>
+          <div className="flex gap-3">
+            <Button variant="secondary" asChild>
+              <Link href="/deals/forecast">
+                <BarChart3 className="mr-2 h-4 w-4" />
+                View Forecast
+              </Link>
+            </Button>
+            <Button onClick={() => setDealDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              New Deal
+            </Button>
+          </div>
         </div>
 
         {/* Board Area */}
