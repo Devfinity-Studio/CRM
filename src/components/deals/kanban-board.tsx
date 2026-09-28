@@ -8,10 +8,13 @@ import { Loader2, DollarSign } from "lucide-react";
 import { api } from "~/trpc/react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import { DealSheet } from "./deal-sheet";
 
 export function KanbanBoard() {
   const { data: session } = useSession();
   const orgId = session?.user?.organizationId as string;
+
+  const [selectedDeal, setSelectedDeal] = useState<{id: string, title: string} | null>(null);
 
   const { data: pipelines, isLoading: pipelinesLoading } = api.deals.getPipelines.useQuery(
     { organizationId: orgId },
@@ -151,7 +154,10 @@ export function KanbanBoard() {
                                 // Add styling for dragging state if needed
                               }}
                             >
-                              <Card className={`shadow-sm ${snapshot.isDragging ? 'shadow-md border-primary/50' : ''}`}>
+                              <Card 
+                                className={`shadow-sm cursor-pointer hover:border-primary/50 transition-colors ${snapshot.isDragging ? 'shadow-md border-primary/50' : ''}`}
+                                onClick={() => setSelectedDeal({ id: deal.id, title: deal.title })}
+                              >
                                 <CardContent className="p-3">
                                   <div className="font-medium text-sm mb-2">{deal.title}</div>
                                   {deal.companyId && (
@@ -184,6 +190,12 @@ export function KanbanBoard() {
           );
         })}
       </div>
+      <DealSheet
+        dealId={selectedDeal?.id || null}
+        title={selectedDeal?.title || ""}
+        open={!!selectedDeal}
+        onOpenChange={(open) => !open && setSelectedDeal(null)}
+      />
     </DragDropContext>
   );
 }

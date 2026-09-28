@@ -78,6 +78,13 @@
       "when": 1790439294030,
       "tag": "0010_serious_bastion",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1790607589922,
+      "tag": "0011_smooth_power_pack",
+      "breakpoints": true
     }
   ]
 }

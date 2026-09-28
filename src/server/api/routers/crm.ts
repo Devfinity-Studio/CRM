@@ -188,7 +188,11 @@ export const crmRouter = createTRPCRouter({
 
   // Activity Notes Procedures
   getActivityNotes: protectedProcedure
-    .input(z.object({ companyId: z.string().optional() }).optional())
+    .input(z.object({ 
+      companyId: z.string().optional(),
+      dealId: z.string().optional(),
+      contactId: z.string().optional()
+    }).optional())
     .query(async ({ ctx, input }) => {
       const member = await ctx.db.query.organizationMembers.findFirst({
         where: eq(organizationMembers.userId, ctx.session.user.id),
@@ -199,6 +203,12 @@ export const crmRouter = createTRPCRouter({
       if (input?.companyId) {
         conditions.push(eq(activityNotes.companyId, input.companyId));
       }
+      if (input?.dealId) {
+        conditions.push(eq(activityNotes.dealId, input.dealId));
+      }
+      if (input?.contactId) {
+        conditions.push(eq(activityNotes.contactId, input.contactId));
+      }
       return ctx.db.select().from(activityNotes).where(and(...conditions)).orderBy(desc(activityNotes.createdAt));
     }),
 
@@ -206,6 +216,8 @@ export const crmRouter = createTRPCRouter({
     .input(
       z.object({
         companyId: z.string().optional(),
+        dealId: z.string().optional(),
+        contactId: z.string().optional(),
         type: z.string().default("NOTE"),
         content: z.string().min(1),
       })

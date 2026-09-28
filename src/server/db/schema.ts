@@ -239,6 +239,8 @@ export const activityNotes = createTable("activity_note", (d) => ({
   id: d.varchar({ length: 255 }).notNull().primaryKey().$defaultFn(() => crypto.randomUUID()),
   organizationId: d.varchar({ length: 255 }).notNull().references(() => organizations.id, { onDelete: "cascade" }),
   companyId: d.varchar({ length: 255 }).references(() => companies.id, { onDelete: "cascade" }),
+  dealId: d.varchar({ length: 255 }).references(() => deals.id, { onDelete: "cascade" }),
+  contactId: d.varchar({ length: 255 }).references(() => contacts.id, { onDelete: "cascade" }),
   authorId: d.varchar({ length: 255 }).notNull().references(() => users.id),
   type: d.varchar({ length: 50 }).default("NOTE").notNull(), // NOTE, CALL, EMAIL, MEETING
   content: d.text().notNull(),
