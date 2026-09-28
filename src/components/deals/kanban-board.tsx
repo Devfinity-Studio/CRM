@@ -159,13 +159,24 @@ export function KanbanBoard() {
                                 onClick={() => setSelectedDeal({ id: deal.id, title: deal.title })}
                               >
                                 <CardContent className="p-3">
-                                  <div className="font-medium text-sm mb-2">{deal.title}</div>
-                                  {deal.companyId && (
-                                    <div className="text-xs text-muted-foreground mb-3 truncate">
-                                      {/* Could look up company name if joined in query */}
-                                      Client: {deal.companyId}
-                                    </div>
-                                  )}
+                                  <div className="font-medium text-sm mb-2 flex items-start justify-between gap-2">
+                                    <span>{deal.title}</span>
+                                    {deal.qualificationStatus && deal.qualificationStatus !== "NONE" && (
+                                      <Badge variant={deal.qualificationStatus === "SQL" ? "default" : deal.qualificationStatus === "MQL" ? "secondary" : "destructive"} className="text-[9px] h-4 px-1 shrink-0">
+                                        {deal.qualificationStatus}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center justify-between text-xs mb-3">
+                                    {deal.companyId ? (
+                                      <div className="text-muted-foreground truncate max-w-[120px]">
+                                        Client: {deal.companyId}
+                                      </div>
+                                    ) : <div />}
+                                    {deal.leadScore > 0 && (
+                                      <div className="text-blue-500 font-medium">Score: {deal.leadScore}</div>
+                                    )}
+                                  </div>
                                   <div className="flex items-center justify-between mt-2 pt-2 border-t text-xs">
                                     <div className="flex items-center font-medium text-emerald-600 dark:text-emerald-400">
                                       <DollarSign className="w-3 h-3 mr-0.5" />

@@ -53,6 +53,8 @@ export const crmRouter = createTRPCRouter({
         addressBuilding: z.string().optional(),
         addressStreet: z.string().optional(),
         addressZip: z.string().optional(),
+        leadScore: z.number().int().optional().default(0),
+        qualificationStatus: z.enum(["NONE", "MQL", "SQL", "DISQUALIFIED"]).optional().default("NONE"),
       })
     )
     .mutation(async ({ ctx, input }) => {

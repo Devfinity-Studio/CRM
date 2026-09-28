@@ -150,8 +150,18 @@ export default function ClientProfilePage() {
                             {poc.firstName.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-white">{poc.salutation} {poc.firstName} {poc.lastName}</p>
-                            <p className="text-xs text-slate-400 mt-1">UID: {poc.uid}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-medium text-white">{poc.salutation} {poc.firstName} {poc.lastName}</p>
+                              {poc.qualificationStatus !== "NONE" && (
+                                <Badge variant={poc.qualificationStatus === "SQL" ? "default" : poc.qualificationStatus === "MQL" ? "secondary" : "destructive"} className="text-[10px] h-4 px-1.5">
+                                  {poc.qualificationStatus}
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 mt-1">
+                              <p className="text-xs text-slate-400">UID: {poc.uid}</p>
+                              {poc.leadScore > 0 && <p className="text-xs font-medium text-blue-400">Score: {poc.leadScore}</p>}
+                            </div>
                           </div>
                         </div>
                         <div className="text-right space-y-1">

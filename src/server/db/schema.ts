@@ -20,6 +20,7 @@ export const userRoleEnum = pgEnum("devcrm_user_role", ["SUPER_ADMIN", "USER"]);
 export const orgRoleEnum = pgEnum("devcrm_org_role", ["OWNER", "ADMIN", "MEMBER", "VIEWER"]);
 export const subscriptionStatusEnum = pgEnum("devcrm_subscription_status", ["ACTIVE", "TRIALING", "CANCELED", "PAST_DUE"]);
 export const leadStatusEnum = pgEnum("devcrm_lead_status", ["NEW", "QUALIFIED", "CONTACTED", "NURTURING", "UNQUALIFIED"]);
+export const qualificationStatusEnum = pgEnum("devcrm_qualification_status", ["NONE", "MQL", "SQL", "DISQUALIFIED"]);
 
 // --- AUTH & USERS TABLES ---
 export const users = createTable("user", (d) => ({
@@ -213,6 +214,10 @@ export const contacts = createTable("contact", (d) => ({
   // Social Profiles
   socialLinks: d.jsonb().default({}), // Object with fb, linkedin, twitter, etc.
   
+  // Lead Scoring & Qualification
+  leadScore: d.integer().default(0).notNull(),
+  qualificationStatus: qualificationStatusEnum("qualification_status").default("NONE").notNull(),
+
   // Address
   addressCountry: d.varchar({ length: 100 }),
   addressState: d.varchar({ length: 100 }),

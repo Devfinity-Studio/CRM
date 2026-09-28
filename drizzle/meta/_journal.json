@@ -85,6 +85,13 @@
       "when": 1790607589922,
       "tag": "0011_smooth_power_pack",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1790607739221,
+      "tag": "0012_big_madame_masque",
+      "breakpoints": true
     }
   ]
 }

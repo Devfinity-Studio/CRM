@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { deals, pipelineStages, pipelines } from "~/server/db/schema";
+import { deals, pipelineStages, pipelines, contacts } from "~/server/db/schema";
 import { eq, asc, desc, and } from "drizzle-orm";
 
 export const dealsRouter = createTRPCRouter({
@@ -26,11 +26,25 @@ export const dealsRouter = createTRPCRouter({
   getDeals: protectedProcedure
     .input(z.object({ organizationId: z.string(), pipelineId: z.string() }))
     .query(async ({ ctx, input }) => {
-      return ctx.db
-        .select()
+      const allDeals = await ctx.db
+        .select({
+          deal: deals,
+          contact: {
+            leadScore: contacts.leadScore,
+            qualificationStatus: contacts.qualificationStatus,
+          },
+        })
         .from(deals)
+        .leftJoin(contacts, eq(deals.contactId, contacts.id))
         .where(and(eq(deals.organizationId, input.organizationId), eq(deals.pipelineId, input.pipelineId)))
         .orderBy(asc(deals.orderIndex));
+
+      // Flatten the result so frontend doesn't break
+      return allDeals.map(({ deal, contact }) => ({
+        ...deal,
+        leadScore: contact?.leadScore || 0,
+        qualificationStatus: contact?.qualificationStatus || "NONE",
+      }));
     }),
 
   // Move deal to a new stage / update index

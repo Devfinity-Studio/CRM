@@ -28,5 +28,5 @@
 ### Milestone 12: Expanded CRM Workflows & Sales Pipelines (Current)
 - [x] **Phase 33: Deals & Kanban Pipeline**
 - [x] **Phase 34: Activity Tracking Timeline**
-- [ ] **Phase 35: Lead Scoring & Qualification**
+- [x] **Phase 35: Lead Scoring & Qualification**
 - [ ] **Phase 36: Pipeline Forecasting & Reporting**
