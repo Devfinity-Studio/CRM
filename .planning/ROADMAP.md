@@ -25,8 +25,5 @@
 ### Milestone 11: User Onboarding & Experience Polish (Completed)
 - [x] [Archived in v11-ROADMAP.md](./milestones/v11-ROADMAP.md)
 
-### Milestone 12: Expanded CRM Workflows & Sales Pipelines (Current)
-- [x] **Phase 33: Deals & Kanban Pipeline**
-- [x] **Phase 34: Activity Tracking Timeline**
-- [x] **Phase 35: Lead Scoring & Qualification**
-- [x] **Phase 36: Pipeline Forecasting & Reporting**
+### Milestone 12: Expanded CRM Workflows & Sales Pipelines (Completed)
+- [x] [Archived in v12-ROADMAP.md](./milestones/v12-ROADMAP.md)
