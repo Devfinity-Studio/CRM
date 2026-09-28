@@ -1,5 +1,5 @@
 # Current State
 
 - **Milestone:** 12
-- **Phase:** 33
-- **Focus:** Deals & Kanban Pipeline
+- **Phase:** 34
+- **Focus:** Activity Tracking Timeline
