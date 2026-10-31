@@ -12,10 +12,10 @@ Implement and wire the Stitch MCP-designed layouts and components directly into 
 - [x] **REQ-41-04**: Implement the recent deals table and upcoming invoice preview widgets on the dashboard.
 
 ### Phase 42: Sales Pipeline Kanban Board UI Refresh
-- [ ] **REQ-42-01**: Overhaul deal card components (`src/components/deals/`) with Stitch glassmorphism styling, company avatars, deal tags, and value badges.
-- [ ] **REQ-42-02**: Refresh Kanban column headers with stage deal counts, aggregated values, and win probability indicators.
-- [ ] **REQ-42-03**: Ensure smooth drag-and-drop mechanics (`@hello-pangea/dnd`) with optimistic state updates wired to `dealsRouter.updateDealStage`.
-- [ ] **REQ-42-04**: Modernize the `DealSheet` and `DealDialog` with the Stitch modal/drawer styling.
+- [x] **REQ-42-01**: Overhaul deal card components (`src/components/deals/`) with Stitch glassmorphism styling, company avatars, deal tags, and value badges.
+- [x] **REQ-42-02**: Refresh Kanban column headers with stage deal counts, aggregated values, and win probability indicators.
+- [x] **REQ-42-03**: Ensure smooth drag-and-drop mechanics (`@hello-pangea/dnd`) with optimistic state updates wired to `dealsRouter.updateDealStage`.
+- [x] **REQ-42-04**: Modernize the `DealSheet` and `DealDialog` with the Stitch modal/drawer styling.
 
 ### Phase 43: CRM Client Profiles 2-Column Overhaul
 - [ ] **REQ-43-01**: Re-architect `src/app/clients/[id]/page.tsx` into the Stitch 2-column layout (Client Info & Deal History on Left/Primary, Interactive Activity Timeline on Right).
