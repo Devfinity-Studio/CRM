@@ -1,132 +1,248 @@
 "use client";
 
-import React, { useState } from "react";
-import { api } from "~/trpc/react";
-import { Card, CardContent } from "~/components/ui/card";
+import { formatDistanceToNow } from "date-fns";
+import {
+	Calendar,
+	Clock,
+	Loader2,
+	Mail,
+	MessageSquare,
+	Phone,
+	Send,
+	Sparkles,
+} from "lucide-react";
+import type React from "react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
-import { Loader2, MessageSquare, Phone, Mail, Calendar, User } from "lucide-react";
-import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
+import { api } from "~/trpc/react";
 
 interface ActivityTimelineProps {
-  companyId?: string;
-  dealId?: string;
-  contactId?: string;
+	companyId?: string;
+	dealId?: string;
+	contactId?: string;
 }
 
-export function ActivityTimeline({ companyId, dealId, contactId }: ActivityTimelineProps) {
-  const [content, setContent] = useState("");
-  const [type, setType] = useState("NOTE");
+type ActivityType = "NOTE" | "CALL" | "EMAIL" | "MEETING";
 
-  const { data: activities, isLoading, refetch } = api.crm.getActivityNotes.useQuery(
-    { companyId, dealId, contactId },
-    { enabled: !!companyId || !!dealId || !!contactId }
-  );
+const ACTIVITY_TYPES: {
+	id: ActivityType;
+	label: string;
+	icon: React.ComponentType<{ className?: string }>;
+	color: string;
+	glowClass: string;
+	placeholder: string;
+}[] = [
+	{
+		id: "NOTE",
+		label: "Note",
+		icon: MessageSquare,
+		color: "text-amber-500 bg-amber-500/10 border-amber-500/20",
+		glowClass: "ring-amber-500/20",
+		placeholder: "Record meeting insights, internal notes, or follow-ups...",
+	},
+	{
+		id: "CALL",
+		label: "Call",
+		icon: Phone,
+		color: "text-sky-500 bg-sky-500/10 border-sky-500/20",
+		glowClass: "ring-sky-500/20",
+		placeholder:
+			"Log phone conversation takeaways, objections, and next steps...",
+	},
+	{
+		id: "EMAIL",
+		label: "Email",
+		icon: Mail,
+		color: "text-indigo-500 bg-indigo-500/10 border-indigo-500/20",
+		glowClass: "ring-indigo-500/20",
+		placeholder: "Log email summary, proposal delivery, or client queries...",
+	},
+	{
+		id: "MEETING",
+		label: "Meeting",
+		icon: Calendar,
+		color: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
+		glowClass: "ring-emerald-500/20",
+		placeholder:
+			"Document agenda points, client attendees, and action items...",
+	},
+];
 
-  const addActivity = api.crm.addActivityNote.useMutation({
-    onSuccess: () => {
-      setContent("");
-      setType("NOTE");
-      toast.success("Activity logged");
-      refetch();
-    },
-    onError: (err) => {
-      toast.error(err.message);
-    }
-  });
+export function ActivityTimeline({
+	companyId,
+	dealId,
+	contactId,
+}: ActivityTimelineProps) {
+	const [content, setContent] = useState("");
+	const [type, setType] = useState<ActivityType>("NOTE");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!content.trim()) return;
+	const {
+		data: activities,
+		isLoading,
+		refetch,
+	} = api.crm.getActivityNotes.useQuery(
+		{ companyId, dealId, contactId },
+		{ enabled: !!companyId || !!dealId || !!contactId },
+	);
 
-    addActivity.mutate({
-      companyId,
-      dealId,
-      contactId,
-      type,
-      content,
-    });
-  };
+	const addActivity = api.crm.addActivityNote.useMutation({
+		onSuccess: () => {
+			setContent("");
+			toast.success("Activity logged");
+			refetch();
+		},
+		onError: (err) => {
+			toast.error(err.message);
+		},
+	});
 
-  const getIcon = (activityType: string) => {
-    switch (activityType) {
-      case "CALL": return <Phone className="h-4 w-4" />;
-      case "EMAIL": return <Mail className="h-4 w-4" />;
-      case "MEETING": return <Calendar className="h-4 w-4" />;
-      default: return <MessageSquare className="h-4 w-4" />;
-    }
-  };
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!content.trim()) return;
 
-  return (
-    <div className="space-y-6">
-      {/* Activity Input */}
-      <Card>
-        <CardContent className="pt-4">
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <Textarea
-              placeholder="Log a note, call, email, or meeting..."
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="min-h-[100px] resize-none"
-            />
-            <div className="flex items-center justify-between">
-              <div className="w-32">
-                <Select value={type} onValueChange={setType}>
-                  <SelectTrigger className="h-8">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="NOTE">Note</SelectItem>
-                    <SelectItem value="CALL">Call</SelectItem>
-                    <SelectItem value="EMAIL">Email</SelectItem>
-                    <SelectItem value="MEETING">Meeting</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button type="submit" size="sm" disabled={!content.trim() || addActivity.isPending}>
-                {addActivity.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+		addActivity.mutate({
+			companyId,
+			dealId,
+			contactId,
+			type,
+			content,
+		});
+	};
 
-      {/* Timeline Feed */}
-      <div className="space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
-        {isLoading ? (
-          <div className="flex justify-center py-4 relative z-10">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
-        ) : activities?.length === 0 ? (
-          <div className="text-center text-sm text-muted-foreground py-4 relative z-10 bg-background/80">
-            No activity history yet.
-          </div>
-        ) : (
-          activities?.map((activity) => (
-            <div key={activity.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-100 dark:bg-slate-800 text-slate-500 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 relative z-10">
-                {getIcon(activity.type)}
-              </div>
-              <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded border bg-card shadow-sm">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-bold text-sm text-foreground capitalize">
-                    {activity.type.toLowerCase()}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
-                  </span>
-                </div>
-                <div className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {activity.content}
-                </div>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
+	const currentTypeConfig =
+		ACTIVITY_TYPES.find((t) => t.id === type) ??
+		(ACTIVITY_TYPES[0] as (typeof ACTIVITY_TYPES)[number]);
+
+	return (
+		<div className="flex flex-col gap-6">
+			{/* Activity Quick-Logger Box */}
+			<div className="rounded-2xl border border-border/70 bg-card/75 p-4 shadow-xs backdrop-blur-md">
+				<form className="flex flex-col gap-3" onSubmit={handleSubmit}>
+					{/* Type Pill Selector */}
+					<div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+						{ACTIVITY_TYPES.map((t) => {
+							const Icon = t.icon;
+							const isSelected = type === t.id;
+							return (
+								<button
+									className={`flex items-center gap-1.5 rounded-xl px-2.5 py-1 font-medium text-xs transition-all ${
+										isSelected
+											? "bg-primary font-semibold text-primary-foreground shadow-xs"
+											: "text-muted-foreground hover:bg-accent/70 hover:text-foreground"
+									}`}
+									key={t.id}
+									onClick={() => setType(t.id)}
+									type="button"
+								>
+									<Icon className="h-3.5 w-3.5" />
+									<span>{t.label}</span>
+								</button>
+							);
+						})}
+					</div>
+
+					<Textarea
+						className="min-h-[85px] resize-none rounded-xl border-border/80 bg-background/60 p-3 text-xs focus-visible:ring-primary/30"
+						onChange={(e) => setContent(e.target.value)}
+						placeholder={currentTypeConfig.placeholder}
+						value={content}
+					/>
+
+					<div className="flex items-center justify-between pt-1">
+						<span className="text-[11px] text-muted-foreground">
+							Press Log Activity to sync timeline
+						</span>
+						<Button
+							className="h-8 gap-1.5 rounded-xl bg-primary px-3 font-semibold text-primary-foreground text-xs shadow-xs hover:bg-primary/90"
+							disabled={!content.trim() || addActivity.isPending}
+							size="sm"
+							type="submit"
+						>
+							{addActivity.isPending ? (
+								<Loader2 className="h-3.5 w-3.5 animate-spin" />
+							) : (
+								<Send className="h-3.5 w-3.5" />
+							)}
+							<span>Log Activity</span>
+						</Button>
+					</div>
+				</form>
+			</div>
+
+			{/* Timeline Feed Container */}
+			<div className="flex flex-col gap-4">
+				<div className="flex items-center justify-between px-1">
+					<h3 className="font-semibold text-foreground text-sm tracking-tight">
+						Chronological Timeline
+					</h3>
+					<span className="rounded-full bg-accent/60 px-2 py-0.5 text-[11px] text-muted-foreground">
+						{activities?.length ?? 0} Events
+					</span>
+				</div>
+
+				{isLoading ? (
+					<div className="flex items-center justify-center py-10">
+						<Loader2 className="h-6 w-6 animate-spin text-primary/70" />
+					</div>
+				) : activities?.length === 0 ? (
+					<div className="flex flex-col items-center justify-center rounded-2xl border border-border/60 border-dashed p-8 text-center text-muted-foreground">
+						<Sparkles className="mb-2 h-7 w-7 text-muted-foreground/40" />
+						<p className="font-medium text-foreground text-xs">
+							No activity recorded yet
+						</p>
+						<p className="text-[11px]">
+							Use the logger above to track client calls, emails, notes, or
+							meetings.
+						</p>
+					</div>
+				) : (
+					<div className="relative pl-6 before:absolute before:top-2 before:bottom-2 before:left-[11px] before:w-[2px] before:bg-gradient-to-b before:from-primary/40 before:via-border/60 before:to-border/20">
+						<div className="flex flex-col gap-4">
+							{activities?.map((activity) => {
+								const config =
+									ACTIVITY_TYPES.find(
+										(t) => t.id === activity.type.toUpperCase(),
+									) ?? (ACTIVITY_TYPES[0] as (typeof ACTIVITY_TYPES)[number]);
+								const Icon = config.icon;
+
+								return (
+									<div
+										className="relative flex flex-col gap-1"
+										key={activity.id}
+									>
+										{/* Node Dot Icon */}
+										<div
+											className={`absolute top-1.5 -left-[23px] flex h-6 w-6 items-center justify-center rounded-full border shadow-xs ring-2 ${config.color} ${config.glowClass}`}
+										>
+											<Icon className="h-3 w-3" />
+										</div>
+
+										{/* Activity Content Box */}
+										<div className="rounded-2xl border border-border/70 bg-card/75 p-3.5 shadow-xs backdrop-blur-md transition-all hover:border-primary/30">
+											<div className="mb-1.5 flex items-center justify-between text-xs">
+												<span className="font-semibold text-foreground text-xs capitalize">
+													{activity.type.toLowerCase()}
+												</span>
+												<span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+													<Clock className="h-3 w-3" />
+													{formatDistanceToNow(new Date(activity.createdAt), {
+														addSuffix: true,
+													})}
+												</span>
+											</div>
+											<p className="whitespace-pre-wrap text-muted-foreground text-xs leading-relaxed">
+												{activity.content}
+											</p>
+										</div>
+									</div>
+								);
+							})}
+						</div>
+					</div>
+				)}
+			</div>
+		</div>
+	);
 }

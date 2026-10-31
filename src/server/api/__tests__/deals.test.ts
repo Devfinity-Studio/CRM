@@ -223,4 +223,61 @@ describe("Deals Router", () => {
 
 		expect(result).toEqual(updated);
 	});
+
+	it("should get deals by companyId with stage and pipeline metadata", async () => {
+		const mockCompanyDeals = [
+			{
+				deal: {
+					id: "deal-101",
+					companyId: "comp-1",
+					title: "Enterprise License Expansion",
+					value: 4500000,
+					status: "OPEN",
+					createdAt: new Date("2026-10-15"),
+				},
+				stage: {
+					id: "stage-2",
+					name: "Proposal",
+					color: "#10b981",
+				},
+				pipeline: {
+					id: "pipe-1",
+					name: "Standard Sales",
+				},
+			},
+		];
+
+		// biome-ignore lint/suspicious/noExplicitAny: test mock
+		(db.select as any).mockReturnValue({
+			from: vi.fn().mockReturnValue({
+				leftJoin: vi.fn().mockReturnValue({
+					leftJoin: vi.fn().mockReturnValue({
+						where: vi.fn().mockReturnValue({
+							orderBy: vi.fn().mockResolvedValue(mockCompanyDeals),
+						}),
+					}),
+				}),
+			}),
+		});
+
+		const caller = createCaller({
+			// biome-ignore lint/suspicious/noExplicitAny: test mock
+			db: db as any,
+			session: {
+				user: mockUser,
+				expires: "2099",
+			},
+			headers: new Headers(),
+		});
+
+		const deals = await caller.deals.getDealsByCompanyId({
+			companyId: "comp-1",
+		});
+
+		expect(deals).toHaveLength(1);
+		expect(deals[0]?.title).toBe("Enterprise License Expansion");
+		expect(deals[0]?.stageName).toBe("Proposal");
+		expect(deals[0]?.stageColor).toBe("#10b981");
+		expect(deals[0]?.pipelineName).toBe("Standard Sales");
+	});
 });

@@ -1,4 +1,4 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
@@ -30,6 +30,35 @@ export const dealsRouter = createTRPCRouter({
 				.from(pipelineStages)
 				.where(eq(pipelineStages.pipelineId, input.pipelineId))
 				.orderBy(asc(pipelineStages.orderIndex));
+		}),
+
+	// Get all deals for a specific client company
+	getDealsByCompanyId: protectedProcedure
+		.input(z.object({ companyId: z.string() }))
+		.query(async ({ ctx, input }) => {
+			const allCompanyDeals = await ctx.db
+				.select({
+					deal: deals,
+					stage: pipelineStages,
+					pipeline: pipelines,
+				})
+				.from(deals)
+				.leftJoin(pipelineStages, eq(deals.stageId, pipelineStages.id))
+				.leftJoin(pipelines, eq(deals.pipelineId, pipelines.id))
+				.where(
+					and(
+						eq(deals.companyId, input.companyId),
+						eq(deals.organizationId, ctx.session.user.organizationId),
+					),
+				)
+				.orderBy(desc(deals.createdAt));
+
+			return allCompanyDeals.map(({ deal, stage, pipeline }) => ({
+				...deal,
+				stageName: stage?.name || "Unknown Stage",
+				stageColor: stage?.color || "#6366f1",
+				pipelineName: pipeline?.name || "Default Pipeline",
+			}));
 		}),
 
 	// Get deals for a pipeline with enriched company, contact, and user rep details
