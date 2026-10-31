@@ -13,7 +13,7 @@ Synchronize the local code and database schema across both dev and production Ne
 - [x] **REQ-45-05**: Decommission Cloudflare R2 dependencies, integrate Neon Object Storage via the Files SDK into the app's upload pipeline, and execute verification test (upload small text file, list bucket, read back content without printing secrets).
 
 ### Phase 46: Production Deployment & Live Verification
-- [ ] **REQ-46-01**: Verify Vercel project configuration, environment variables, and build checks for production.
-- [ ] **REQ-46-02**: Trigger production deployment on Vercel from the `prod` branch.
-- [ ] **REQ-46-03**: Verify live health: root page, user authentication, multi-tenant dashboard, and API status on production URL.
-- [ ] **REQ-46-04**: Execute live smoke tests on core workflows: deals pipeline, billing/invoices, and Neon Object Storage file uploads.
+- [x] **REQ-46-01**: Verify Vercel project configuration, environment variables, and build checks for production.
+- [x] **REQ-46-02**: Trigger production deployment on Vercel from the `prod` branch.
+- [x] **REQ-46-03**: Verify live health: root page, user authentication, multi-tenant dashboard, and API status on production URL.
+- [x] **REQ-46-04**: Execute live smoke tests on core workflows: deals pipeline, billing/invoices, and Neon Object Storage file uploads.
