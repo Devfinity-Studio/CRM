@@ -6,10 +6,10 @@ Implement and wire the Stitch MCP-designed layouts and components directly into 
 ## 2. Requirements
 
 ### Phase 41: Dashboard Shell & Navigation Integration
-- [ ] **REQ-41-01**: Implement the redesigned Stitch Sidebar navigation with collapse/expand support, active route indicators, and organization switcher styling.
-- [ ] **REQ-41-02**: Upgrade the top header with user profile menu, tenant notifications pill, and search bar integration.
-- [ ] **REQ-41-03**: Implement the glassmorphic KPI cards on the dashboard (`/dashboard`), connecting live metrics (Total Revenue, Active Deals, New Leads, Overdue Invoices) to `dashboardRouter`.
-- [ ] **REQ-41-04**: Implement the recent deals table and upcoming invoice preview widgets on the dashboard.
+- [x] **REQ-41-01**: Implement the redesigned Stitch Sidebar navigation with collapse/expand support, active route indicators, and organization switcher styling.
+- [x] **REQ-41-02**: Upgrade the top header with user profile menu, tenant notifications pill, and search bar integration.
+- [x] **REQ-41-03**: Implement the glassmorphic KPI cards on the dashboard (`/dashboard`), connecting live metrics (Total Revenue, Active Deals, New Leads, Overdue Invoices) to `dashboardRouter`.
+- [x] **REQ-41-04**: Implement the recent deals table and upcoming invoice preview widgets on the dashboard.
 
 ### Phase 42: Sales Pipeline Kanban Board UI Refresh
 - [ ] **REQ-42-01**: Overhaul deal card components (`src/components/deals/`) with Stitch glassmorphism styling, company avatars, deal tags, and value badges.
@@ -27,3 +27,4 @@ Implement and wire the Stitch MCP-designed layouts and components directly into 
 - [ ] **REQ-44-01**: Restyle the invoices list (`/billing/invoices`) and quotes list (`/billing/quotes`) data tables with rounded glassmorphic card containers and status badges.
 - [ ] **REQ-44-02**: Harmonize customer statement views and party ledgers (`/billing/statements`) with the DevCRM Premium Indigo theme.
 - [ ] **REQ-44-03**: Verify public invoice/quote layouts (`/public/invoice/[id]`) display cleanly with the new design system.
+
