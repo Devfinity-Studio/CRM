@@ -38,7 +38,7 @@ export function DealDialog({
 	dealId: _dealId,
 	defaultPipelineId,
 }: DealDialogProps) {
-	const { data: session } = useSession();
+	const session = useSession()?.data;
 	const orgId = session?.user?.organizationId as string;
 
 	const [title, setTitle] = useState("");

@@ -60,7 +60,7 @@ export function KanbanBoard({
 	pipelineId: propPipelineId,
 	onNewDeal,
 }: KanbanBoardProps) {
-	const { data: session } = useSession();
+	const session = useSession()?.data;
 	const orgId = session?.user?.organizationId as string;
 
 	const [selectedDeal, setSelectedDeal] = useState<{

@@ -6,11 +6,9 @@ import {
 	DollarSign,
 	Loader2,
 	Trophy,
-	XCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import React from "react";
 import { DashboardLayout } from "~/components/layout/dashboard-layout";
 import { Button } from "~/components/ui/button";
 import {
@@ -23,8 +21,11 @@ import {
 import { Progress } from "~/components/ui/progress";
 import { api } from "~/trpc/react";
 
+export const dynamic = "force-dynamic";
+
 export default function ForecastPage() {
-	const { data: session } = useSession();
+	const sessionContext = useSession();
+	const session = sessionContext?.data;
 	const orgId = session?.user?.organizationId as string;
 
 	// For MVP, we'll just pick the first pipeline (or default). In a real app, there'd be a pipeline selector.
@@ -35,7 +36,7 @@ export default function ForecastPage() {
 	const defaultPipelineId = pipelines?.[0]?.id;
 
 	const { data: metrics, isLoading } = api.deals.getMetricsSummary.useQuery(
-		{ organizationId: orgId, pipelineId: defaultPipelineId! },
+		{ organizationId: orgId, pipelineId: defaultPipelineId ?? "" },
 		{ enabled: !!orgId && !!defaultPipelineId },
 	);
 

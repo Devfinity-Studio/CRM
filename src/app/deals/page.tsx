@@ -17,8 +17,11 @@ import {
 } from "~/components/ui/select";
 import { api } from "~/trpc/react";
 
+export const dynamic = "force-dynamic";
+
 export default function DealsPage() {
-	const { data: session } = useSession();
+	const sessionContext = useSession();
+	const session = sessionContext?.data;
 	const orgId = session?.user?.organizationId as string;
 	const [dealDialogOpen, setDealDialogOpen] = useState(false);
 	const [selectedPipelineId, setSelectedPipelineId] = useState<string>("");

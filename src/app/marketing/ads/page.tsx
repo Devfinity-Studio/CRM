@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart2, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
 import type React from "react";
 import { useState } from "react";
@@ -41,7 +41,7 @@ import {
 import { api } from "~/trpc/react";
 
 export default function AdsPage() {
-	const { data: session } = useSession();
+	const session = useSession()?.data;
 	const orgId = session?.user?.organizationId as string;
 
 	const {
