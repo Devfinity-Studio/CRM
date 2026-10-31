@@ -27,4 +27,3 @@ Implement and wire the Stitch MCP-designed layouts and components directly into 
 - [x] **REQ-44-01**: Restyle the invoices list (`/billing/invoices`) and quotes list (`/billing/quotes`) data tables with rounded glassmorphic card containers and status badges.
 - [x] **REQ-44-02**: Harmonize customer statement views and party ledgers (`/billing/statements`) with the DevCRM Premium Indigo theme.
 - [x] **REQ-44-03**: Verify public invoice/quote layouts (`/public/invoice/[id]`) display cleanly with the new design system.
-
