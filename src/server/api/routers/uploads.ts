@@ -13,8 +13,8 @@ const s3 = new S3Client({
 		accessKeyId: env.S3_ACCESS_KEY_ID,
 		secretAccessKey: env.S3_SECRET_ACCESS_KEY,
 	},
-	// Cloudflare R2 specific setting if needed, though usually endpoint is enough
-	// forcePathStyle: true is sometimes required for minio/r2
+	// Required for Neon Object Storage: path-style addressing
+	forcePathStyle: true,
 });
 
 export const uploadsRouter = createTRPCRouter({
@@ -55,7 +55,7 @@ export const uploadsRouter = createTRPCRouter({
 				const base = env.S3_PUBLIC_URL.replace(/\/$/, "");
 				publicUrl = `${base}/${key}`;
 			} else {
-				// Fallback to direct bucket access if no public domain is set (might require path style)
+				// Fallback to direct bucket access if no public domain is set
 				publicUrl = `${env.S3_ENDPOINT_URL}/${env.S3_BUCKET_NAME}/${key}`;
 			}
 

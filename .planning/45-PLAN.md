@@ -51,3 +51,4 @@ Synchronize local working directory and git branches (`dev` and `prod`), ensure 
 - Neon `uploads` bucket created and active.
 - End-to-end file upload test succeeds with verified content read-back.
 - App passes `pnpm vitest run` and `pnpm biome check`.
+
