@@ -1,9 +1,9 @@
 {
-  "workflow": {
-    "auto_advance": false,
-    "parallel_execution": true
-  },
-  "git": {
-    "commit_per_plan": true
-  }
+	"workflow": {
+		"auto_advance": false,
+		"parallel_execution": true
+	},
+	"git": {
+		"commit_per_plan": true
+	}
 }

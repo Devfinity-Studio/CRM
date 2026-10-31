@@ -1,284 +1,367 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { Download, FileText, Save, Send, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { DashboardLayout } from "~/components/layout/dashboard-layout";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { DatePicker } from "~/components/ui/date-picker";
-import { ClientDropdown } from "~/components/billing/shared/client-dropdown";
-import { FileUploadDropzone } from "~/components/ui/file-upload-dropzone";
-import { PricingSummarySection } from "~/components/billing/shared/pricing-summary-section";
-import { TermsAndConditionsSection } from "~/components/billing/shared/terms-and-conditions-section";
-import { SignaturePadModal } from "~/components/billing/shared/signature-pad-modal";
-import { LineItemsTable } from "~/components/clients/line-items-table";
-import type { LineItem } from "~/components/clients/line-items-table";
-import type { DocumentData } from "~/types/document";
-import { Upload, FileText, Download, Save, Send } from "lucide-react";
-import { api } from "~/trpc/react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { ClientDropdown } from "~/components/billing/shared/client-dropdown";
+import { PricingSummarySection } from "~/components/billing/shared/pricing-summary-section";
+import { SignaturePadModal } from "~/components/billing/shared/signature-pad-modal";
+import { TermsAndConditionsSection } from "~/components/billing/shared/terms-and-conditions-section";
+import type { LineItem } from "~/components/clients/line-items-table";
+import { LineItemsTable } from "~/components/clients/line-items-table";
+import { DashboardLayout } from "~/components/layout/dashboard-layout";
+import { Button } from "~/components/ui/button";
+import { DatePicker } from "~/components/ui/date-picker";
+import { FileUploadDropzone } from "~/components/ui/file-upload-dropzone";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { api } from "~/trpc/react";
+import type { DocumentData } from "~/types/document";
 
 const defaultDocumentData: DocumentData = {
-  logoUrl: "",
-  companyId: "",
-  showTotalSection: true,
-  showTotalInWords: false,
-  summariseQuantity: false,
-  taxConfig: { type: "none" },
-  discount: { type: "total", amount: 0, isPercentage: true },
-  additionalCharges: { title: "Extra Charges", amount: 0, isPercentage: false },
-  totalLabel: "TOTAL",
-  totalInWordsLabel: "Total (in words)",
-  totalInWordsValue: "",
-  termsTitle: "Terms and conditions",
-  termsList: [],
+	logoUrl: "",
+	companyId: "",
+	showTotalSection: true,
+	showTotalInWords: false,
+	summariseQuantity: false,
+	taxConfig: { type: "none" },
+	discount: { type: "total", amount: 0, isPercentage: true },
+	additionalCharges: { title: "Extra Charges", amount: 0, isPercentage: false },
+	totalLabel: "TOTAL",
+	totalInWordsLabel: "Total (in words)",
+	totalInWordsValue: "",
+	termsTitle: "Terms and conditions",
+	termsList: [],
 };
 
 const emailSchema = z.string().email().optional().or(z.literal(""));
-const phoneSchema = z.string().regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone format").optional().or(z.literal(""));
+const phoneSchema = z
+	.string()
+	.regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone format")
+	.optional()
+	.or(z.literal(""));
 
 export default function NewQuotePage() {
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => setIsClient(true), []);
-  const router = useRouter();
+	const [isClient, setIsClient] = useState(false);
+	useEffect(() => setIsClient(true), []);
+	const router = useRouter();
 
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [dueDate, setDueDate] = useState<Date | undefined>();
-  const [quoteNumber, setQuoteNumber] = useState("EST-001");
-  const [title, setTitle] = useState("Quotation");
-  
-  const [items, setItems] = useState<LineItem[]>([]);
-  const [quoteData, setQuoteData] = useState<DocumentData>(defaultDocumentData);
-  
-  const [signatureModalOpen, setSignatureModalOpen] = useState(false);
-  const [emailError, setEmailError] = useState("");
-  const [phoneError, setPhoneError] = useState("");
+	const [date, setDate] = useState<Date | undefined>(new Date());
+	const [dueDate, setDueDate] = useState<Date | undefined>();
+	const [quoteNumber, setQuoteNumber] = useState("EST-001");
+	const [title, setTitle] = useState("Quotation");
 
-  const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
-  const taxAmount = Math.floor(subtotal * ((quoteData.taxConfig.percent || 0) / 100));
-  const totalAmount = subtotal + taxAmount;
+	const [items, setItems] = useState<LineItem[]>([]);
+	const [quoteData, setQuoteData] = useState<DocumentData>(defaultDocumentData);
 
-  const { data: userSettings } = api.billing.getUserSettings.useQuery();
-  const { data: nextNumberData } = api.billing.getNextDocumentNumber.useQuery(
-    { type: "quote", companyId: quoteData.companyId },
-    { enabled: !!userSettings }
-  );
+	const [signatureModalOpen, setSignatureModalOpen] = useState(false);
+	const [emailError, setEmailError] = useState("");
+	const [phoneError, setPhoneError] = useState("");
 
-  const createQuote = api.billing.createQuote.useMutation({
-    onSuccess: () => {
-      toast.success("Quote saved successfully");
-    },
-    onError: (err) => {
-      toast.error(`Error: ${err.message}`);
-    }
-  });
+	const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
+	const taxAmount = Math.floor(
+		subtotal * ((quoteData.taxConfig.percent || 0) / 100),
+	);
+	const totalAmount = subtotal + taxAmount;
 
-  useEffect(() => {
-    const labels = userSettings?.customLabels as any;
-    if (labels?.quoteTitle) {
-      setTitle(labels.quoteTitle);
-    }
-  }, [userSettings]);
+	const { data: userSettings } = api.billing.getUserSettings.useQuery();
+	const { data: nextNumberData } = api.billing.getNextDocumentNumber.useQuery(
+		{ type: "quote", companyId: quoteData.companyId },
+		{ enabled: !!userSettings },
+	);
 
-  useEffect(() => {
-    if (nextNumberData?.nextNumber) {
-      setQuoteNumber(nextNumberData.nextNumber);
-    }
-  }, [nextNumberData?.nextNumber]);
+	const createQuote = api.billing.createQuote.useMutation({
+		onSuccess: () => {
+			toast.success("Quote saved successfully");
+		},
+		onError: (err) => {
+			toast.error(`Error: ${err.message}`);
+		},
+	});
 
-  if (!isClient) return null;
+	useEffect(() => {
+		const labels = userSettings?.customLabels as any;
+		if (labels?.quoteTitle) {
+			setTitle(labels.quoteTitle);
+		}
+	}, [userSettings]);
 
-  const handleSave = (action: "draft" | "new" | "continue") => {
-    if (!quoteData.companyId) {
-      toast.error("Please select a client.");
-      return;
-    }
-    if (!date) {
-      toast.error("Please select a date.");
-      return;
-    }
+	useEffect(() => {
+		if (nextNumberData?.nextNumber) {
+			setQuoteNumber(nextNumberData.nextNumber);
+		}
+	}, [nextNumberData?.nextNumber]);
 
-    createQuote.mutate({
-      companyId: quoteData.companyId,
-      quoteNumber,
-      title,
-      date,
-      dueDate,
-      labels: {},
-      customFields: {},
-      showTotalInPdf: quoteData.showTotalSection,
-      showTotalInWords: quoteData.showTotalInWords,
-      lineItems: items,
-      taxPercent: quoteData.taxConfig.percent || 0,
-      discountType: quoteData.discount.isPercentage ? "PERCENT" : "AMOUNT",
-      discountValue: quoteData.discount.amount,
-      additionalCharges: quoteData.additionalCharges,
-      totalAmount,
-      signatureType: "IMAGE",
-      signatureData: quoteData.signatureUrl,
-      notes: "",
-      terms: quoteData.termsList,
-      contactEmail: quoteData.contactEmail,
-      contactPhone: quoteData.contactPhone,
-    }, {
-      onSuccess: () => {
-        if (action === "draft" || action === "continue") {
-          router.push("/billing/quotes");
-        } else if (action === "new") {
-          window.location.reload();
-        }
-      }
-    });
-  };
+	if (!isClient) return null;
 
-  return (
-    <DashboardLayout>
-      <div className="max-w-5xl mx-auto pb-24 pt-8">
-        <div className="flex items-center justify-between mb-8 border-b border-border pb-4">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Create Quotation</h2>
-            <p className="text-muted-foreground text-sm mt-1">Build a professional quotation or estimate.</p>
-          </div>
-        </div>
+	const handleSave = (action: "draft" | "new" | "continue") => {
+		if (!quoteData.companyId) {
+			toast.error("Please select a client.");
+			return;
+		}
+		if (!date) {
+			toast.error("Please select a date.");
+			return;
+		}
 
-        <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
-          <div className="p-8 pb-4 border-b border-border">
-            <div className="flex justify-between items-start gap-8">
-              <div className="flex-1 space-y-6">
-                <Input 
-                  value={title} 
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="text-3xl font-bold border-dashed bg-transparent hover:bg-slate-50 px-2 -ml-2 h-12 uppercase w-full max-w-sm" 
-                />
-                
-                <div className="flex flex-col gap-1 max-w-sm">
-                  <Label className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Quote For</Label>
-                  <ClientDropdown 
-                    value={quoteData.companyId || ""} 
-                    onChange={(val) => setQuoteData({ ...quoteData, companyId: val })} 
-                  />
-                  <div className="flex gap-4 mt-2">
-                    <div className="flex-1 space-y-1">
-                      <Label className="text-xs text-muted-foreground">Contact Email</Label>
-                      <Input 
-                        placeholder="Email address"
-                        value={quoteData.contactEmail || ""}
-                        onChange={(e) => {
-                          setQuoteData({ ...quoteData, contactEmail: e.target.value });
-                          if (emailError) setEmailError("");
-                        }}
-                        onBlur={(e) => {
-                          const res = emailSchema.safeParse(e.target.value);
-                          if (!res.success) setEmailError(res.error.errors[0].message);
-                        }}
-                        className={`h-9 ${emailError ? "border-red-500" : ""}`}
-                      />
-                      {emailError && <p className="text-[10px] text-red-500">{emailError}</p>}
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <Label className="text-xs text-muted-foreground">Contact Phone</Label>
-                      <Input 
-                        placeholder="Phone number"
-                        value={quoteData.contactPhone || ""}
-                        onChange={(e) => {
-                          setQuoteData({ ...quoteData, contactPhone: e.target.value });
-                          if (phoneError) setPhoneError("");
-                        }}
-                        onBlur={(e) => {
-                          const res = phoneSchema.safeParse(e.target.value);
-                          if (!res.success) setPhoneError(res.error.errors[0].message);
-                        }}
-                        className={`h-9 ${phoneError ? "border-red-500" : ""}`}
-                      />
-                      {phoneError && <p className="text-[10px] text-red-500">{phoneError}</p>}
-                    </div>
-                  </div>
-                </div>
-              </div>
+		createQuote.mutate(
+			{
+				companyId: quoteData.companyId,
+				quoteNumber,
+				title,
+				date,
+				dueDate,
+				labels: {},
+				customFields: {},
+				showTotalInPdf: quoteData.showTotalSection,
+				showTotalInWords: quoteData.showTotalInWords,
+				lineItems: items,
+				taxPercent: quoteData.taxConfig.percent || 0,
+				discountType: quoteData.discount.isPercentage ? "PERCENT" : "AMOUNT",
+				discountValue: quoteData.discount.amount,
+				additionalCharges: quoteData.additionalCharges,
+				totalAmount,
+				signatureType: "IMAGE",
+				signatureData: quoteData.signatureUrl,
+				notes: "",
+				terms: quoteData.termsList,
+				contactEmail: quoteData.contactEmail,
+				contactPhone: quoteData.contactPhone,
+			},
+			{
+				onSuccess: () => {
+					if (action === "draft" || action === "continue") {
+						router.push("/billing/quotes");
+					} else if (action === "new") {
+						window.location.reload();
+					}
+				},
+			},
+		);
+	};
 
-              <div className="flex-1 max-w-xs space-y-4">
-                 <FileUploadDropzone
-                   currentImageUrl={quoteData.logoUrl}
-                   onUploadSuccess={(url) => setQuoteData({ ...quoteData, logoUrl: url })}
-                   onRemove={() => setQuoteData({ ...quoteData, logoUrl: undefined })}
-                   folder="logos"
-                   className="h-24 w-full"
-                 />
+	return (
+		<DashboardLayout>
+			<div className="mx-auto max-w-5xl pt-8 pb-24">
+				<div className="mb-8 flex items-center justify-between border-border border-b pb-4">
+					<div>
+						<h2 className="font-bold text-2xl tracking-tight">
+							Create Quotation
+						</h2>
+						<p className="mt-1 text-muted-foreground text-sm">
+							Build a professional quotation or estimate.
+						</p>
+					</div>
+				</div>
 
-                <div className="grid grid-cols-[100px_1fr] items-start gap-2">
-                  <Label className="text-sm font-medium text-muted-foreground mt-2">Quote #</Label>
-                  <div className="space-y-1">
-                    <Input 
-                      value={quoteNumber} 
-                      onChange={(e) => setQuoteNumber(e.target.value)}
-                      className="h-8 text-sm"
-                    />
-                    {nextNumberData?.lastDocument && (
-                      <p className="text-[10px] text-muted-foreground">
-                        Last Quote: {nextNumberData.lastDocument.number} ({new Date(nextNumberData.lastDocument.date).toLocaleDateString()})
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <div className="grid grid-cols-[100px_1fr] items-center gap-2">
-                  <Label className="text-sm font-medium text-muted-foreground">Date</Label>
-                  <DatePicker date={date} setDate={setDate} />
-                </div>
-                <div className="grid grid-cols-[100px_1fr] items-center gap-2">
-                  <Label className="text-sm font-medium text-muted-foreground">Due Date</Label>
-                  <DatePicker date={dueDate} setDate={setDueDate} />
-                </div>
-              </div>
-            </div>
-          </div>
+				<div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+					<div className="border-border border-b p-8 pb-4">
+						<div className="flex items-start justify-between gap-8">
+							<div className="flex-1 space-y-6">
+								<Input
+									className="-ml-2 h-12 w-full max-w-sm border-dashed bg-transparent px-2 font-bold text-3xl uppercase hover:bg-slate-50"
+									onChange={(e) => setTitle(e.target.value)}
+									value={title}
+								/>
 
-          <div className="p-8 pb-4">
-             <LineItemsTable items={items} onChange={setItems} currencySymbol="₹" />
-          </div>
+								<div className="flex max-w-sm flex-col gap-1">
+									<Label className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
+										Quote For
+									</Label>
+									<ClientDropdown
+										onChange={(val) =>
+											setQuoteData({ ...quoteData, companyId: val })
+										}
+										value={quoteData.companyId || ""}
+									/>
+									<div className="mt-2 flex gap-4">
+										<div className="flex-1 space-y-1">
+											<Label className="text-muted-foreground text-xs">
+												Contact Email
+											</Label>
+											<Input
+												className={`h-9 ${emailError ? "border-red-500" : ""}`}
+												onBlur={(e) => {
+													const res = emailSchema.safeParse(e.target.value);
+													if (!res.success)
+														setEmailError(res.error.errors[0].message);
+												}}
+												onChange={(e) => {
+													setQuoteData({
+														...quoteData,
+														contactEmail: e.target.value,
+													});
+													if (emailError) setEmailError("");
+												}}
+												placeholder="Email address"
+												value={quoteData.contactEmail || ""}
+											/>
+											{emailError && (
+												<p className="text-[10px] text-red-500">{emailError}</p>
+											)}
+										</div>
+										<div className="flex-1 space-y-1">
+											<Label className="text-muted-foreground text-xs">
+												Contact Phone
+											</Label>
+											<Input
+												className={`h-9 ${phoneError ? "border-red-500" : ""}`}
+												onBlur={(e) => {
+													const res = phoneSchema.safeParse(e.target.value);
+													if (!res.success)
+														setPhoneError(res.error.errors[0].message);
+												}}
+												onChange={(e) => {
+													setQuoteData({
+														...quoteData,
+														contactPhone: e.target.value,
+													});
+													if (phoneError) setPhoneError("");
+												}}
+												placeholder="Phone number"
+												value={quoteData.contactPhone || ""}
+											/>
+											{phoneError && (
+												<p className="text-[10px] text-red-500">{phoneError}</p>
+											)}
+										</div>
+									</div>
+								</div>
+							</div>
 
-          <div className="px-8 pb-4">
-             <PricingSummarySection 
-               data={quoteData} 
-               onChange={setQuoteData} 
-               subtotal={subtotal} 
-             />
-          </div>
+							<div className="max-w-xs flex-1 space-y-4">
+								<FileUploadDropzone
+									className="h-24 w-full"
+									currentImageUrl={quoteData.logoUrl}
+									folder="logos"
+									onRemove={() =>
+										setQuoteData({ ...quoteData, logoUrl: undefined })
+									}
+									onUploadSuccess={(url) =>
+										setQuoteData({ ...quoteData, logoUrl: url })
+									}
+								/>
 
-          <div className="px-8 pb-8">
-             <TermsAndConditionsSection 
-               data={quoteData}
-               onChange={setQuoteData}
-             />
-          </div>
-          
-          <div className="px-8 pb-8 flex flex-col items-end border-t border-border pt-8 mt-8">
-              {quoteData.signatureUrl ? (
-                 <div className="flex flex-col items-center gap-2">
-                    <img src={quoteData.signatureUrl} alt="Signature" className="h-24 object-contain border p-2 rounded" />
-                    <Button variant="ghost" size="sm" onClick={() => setQuoteData({ ...quoteData, signatureUrl: undefined })}>Remove Signature</Button>
-                 </div>
-              ) : (
-                 <Button variant="outline" onClick={() => setSignatureModalOpen(true)}>
-                    Add Signature
-                 </Button>
-              )}
-          </div>
-        </div>
+								<div className="grid grid-cols-[100px_1fr] items-start gap-2">
+									<Label className="mt-2 font-medium text-muted-foreground text-sm">
+										Quote #
+									</Label>
+									<div className="space-y-1">
+										<Input
+											className="h-8 text-sm"
+											onChange={(e) => setQuoteNumber(e.target.value)}
+											value={quoteNumber}
+										/>
+										{nextNumberData?.lastDocument && (
+											<p className="text-[10px] text-muted-foreground">
+												Last Quote: {nextNumberData.lastDocument.number} (
+												{new Date(
+													nextNumberData.lastDocument.date,
+												).toLocaleDateString()}
+												)
+											</p>
+										)}
+									</div>
+								</div>
+								<div className="grid grid-cols-[100px_1fr] items-center gap-2">
+									<Label className="font-medium text-muted-foreground text-sm">
+										Date
+									</Label>
+									<DatePicker date={date} setDate={setDate} />
+								</div>
+								<div className="grid grid-cols-[100px_1fr] items-center gap-2">
+									<Label className="font-medium text-muted-foreground text-sm">
+										Due Date
+									</Label>
+									<DatePicker date={dueDate} setDate={setDueDate} />
+								</div>
+							</div>
+						</div>
+					</div>
 
-        <div className="flex justify-end gap-3 mt-8">
-           <Button variant="outline" onClick={() => handleSave("draft")} disabled={createQuote.isPending}><Save className="w-4 h-4 mr-2" /> Save to Draft</Button>
-           <Button variant="outline" onClick={() => handleSave("new")} disabled={createQuote.isPending}><FileText className="w-4 h-4 mr-2" /> Save & Create New</Button>
-           <Button onClick={() => handleSave("continue")} disabled={createQuote.isPending}><Send className="w-4 h-4 mr-2" /> Save & Continue</Button>
-        </div>
-      </div>
-      
-      <SignaturePadModal 
-        isOpen={signatureModalOpen} 
-        onClose={() => setSignatureModalOpen(false)}
-        onSave={(url) => setQuoteData({ ...quoteData, signatureUrl: url })}
-      />
-    </DashboardLayout>
-  );
+					<div className="p-8 pb-4">
+						<LineItemsTable
+							currencySymbol="₹"
+							items={items}
+							onChange={setItems}
+						/>
+					</div>
+
+					<div className="px-8 pb-4">
+						<PricingSummarySection
+							data={quoteData}
+							onChange={setQuoteData}
+							subtotal={subtotal}
+						/>
+					</div>
+
+					<div className="px-8 pb-8">
+						<TermsAndConditionsSection
+							data={quoteData}
+							onChange={setQuoteData}
+						/>
+					</div>
+
+					<div className="mt-8 flex flex-col items-end border-border border-t px-8 pt-8 pb-8">
+						{quoteData.signatureUrl ? (
+							<div className="flex flex-col items-center gap-2">
+								<img
+									alt="Signature"
+									className="h-24 rounded border object-contain p-2"
+									src={quoteData.signatureUrl}
+								/>
+								<Button
+									onClick={() =>
+										setQuoteData({ ...quoteData, signatureUrl: undefined })
+									}
+									size="sm"
+									variant="ghost"
+								>
+									Remove Signature
+								</Button>
+							</div>
+						) : (
+							<Button
+								onClick={() => setSignatureModalOpen(true)}
+								variant="outline"
+							>
+								Add Signature
+							</Button>
+						)}
+					</div>
+				</div>
+
+				<div className="mt-8 flex justify-end gap-3">
+					<Button
+						disabled={createQuote.isPending}
+						onClick={() => handleSave("draft")}
+						variant="outline"
+					>
+						<Save className="mr-2 h-4 w-4" /> Save to Draft
+					</Button>
+					<Button
+						disabled={createQuote.isPending}
+						onClick={() => handleSave("new")}
+						variant="outline"
+					>
+						<FileText className="mr-2 h-4 w-4" /> Save & Create New
+					</Button>
+					<Button
+						disabled={createQuote.isPending}
+						onClick={() => handleSave("continue")}
+					>
+						<Send className="mr-2 h-4 w-4" /> Save & Continue
+					</Button>
+				</div>
+			</div>
+
+			<SignaturePadModal
+				isOpen={signatureModalOpen}
+				onClose={() => setSignatureModalOpen(false)}
+				onSave={(url) => setQuoteData({ ...quoteData, signatureUrl: url })}
+			/>
+		</DashboardLayout>
+	);
 }

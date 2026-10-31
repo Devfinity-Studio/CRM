@@ -25,3 +25,4 @@
   - Restyled invoices list (`/billing/invoices`) and quotes list (`/billing/quotes`) with `DashboardLayout` shell, top KPI scorecards, filter pills, glassmorphic card tables, and glowing status badges.
   - Harmonized customer statement views and party ledgers (`/billing/statements` and `LedgerView`) with date presets, running balance summary cards, and debit/credit highlighting.
   - Verified public invoice/quote layouts (`/public/invoice/[id]`, `/public/quote/[id]`, and `document-viewer.tsx`) with clean types and print-ready queries.
+

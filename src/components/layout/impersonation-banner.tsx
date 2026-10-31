@@ -1,34 +1,41 @@
 "use client";
 
-import { api } from "~/trpc/react";
-import { Button } from "~/components/ui/button";
 import { ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Button } from "~/components/ui/button";
+import { api } from "~/trpc/react";
 
-export function ImpersonationBanner({ impersonatedOrgId }: { impersonatedOrgId: string }) {
-  const router = useRouter();
-  const stopImpersonation = api.superadmin.stopImpersonation.useMutation({
-    onSuccess: () => {
-      router.push("/admin/organizations");
-      router.refresh();
-    }
-  });
+export function ImpersonationBanner({
+	impersonatedOrgId,
+}: {
+	impersonatedOrgId: string;
+}) {
+	const router = useRouter();
+	const stopImpersonation = api.superadmin.stopImpersonation.useMutation({
+		onSuccess: () => {
+			router.push("/admin/organizations");
+			router.refresh();
+		},
+	});
 
-  return (
-    <div className="bg-red-600 text-white px-4 py-2 flex items-center justify-between text-sm font-medium z-50 relative shadow-md">
-      <div className="flex items-center gap-2">
-        <ShieldAlert className="h-4 w-4" />
-        <span>You are currently impersonating an organization ({impersonatedOrgId}). All actions are being performed as this organization.</span>
-      </div>
-      <Button 
-        variant="outline" 
-        size="sm" 
-        className="text-red-600 bg-white hover:bg-zinc-100 hover:text-red-700 border-0 shadow-sm"
-        onClick={() => stopImpersonation.mutate()}
-        disabled={stopImpersonation.isPending}
-      >
-        {stopImpersonation.isPending ? "Stopping..." : "Stop Impersonating"}
-      </Button>
-    </div>
-  );
+	return (
+		<div className="relative z-50 flex items-center justify-between bg-red-600 px-4 py-2 font-medium text-sm text-white shadow-md">
+			<div className="flex items-center gap-2">
+				<ShieldAlert className="h-4 w-4" />
+				<span>
+					You are currently impersonating an organization ({impersonatedOrgId}).
+					All actions are being performed as this organization.
+				</span>
+			</div>
+			<Button
+				className="border-0 bg-white text-red-600 shadow-sm hover:bg-zinc-100 hover:text-red-700"
+				disabled={stopImpersonation.isPending}
+				onClick={() => stopImpersonation.mutate()}
+				size="sm"
+				variant="outline"
+			>
+				{stopImpersonation.isPending ? "Stopping..." : "Stop Impersonating"}
+			</Button>
+		</div>
+	);
 }

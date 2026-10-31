@@ -22,3 +22,4 @@ Phase 44 is the final phase of Milestone 14 ("Stitch UI Implementation & Product
    - Wrap `/billing/invoices`, `/billing/quotes`, and `/billing/statements` in `<DashboardLayout>` so the sidebar navigation and header shell are always present.
 4. **Theme Tokens**:
    - Align with DevCRM Premium Indigo theme tokens (`.glass-panel`, `.glass-card-interactive`, `backdrop-blur-md`, `border-border/70`).
+

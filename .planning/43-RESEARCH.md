@@ -38,3 +38,4 @@
 - Unit tests in `src/server/api/__tests__/deals.test.ts` testing `getDealsByCompanyId`.
 - Biome linting and formatting check (`pnpm biome check`).
 - Full Vitest suite execution (`pnpm vitest run`).
+

@@ -1,3700 +1,3400 @@
 {
-  "id": "4689d9ca-0eb0-45df-8cd8-a99ef8477c52",
-  "prevId": "0ec699b1-6b31-4eac-b7e5-a2619f13856a",
-  "version": "7",
-  "dialect": "postgresql",
-  "tables": {
-    "public.devcrm_account": {
-      "name": "devcrm_account",
-      "schema": "",
-      "columns": {
-        "userId": {
-          "name": "userId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "type": {
-          "name": "type",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "provider": {
-          "name": "provider",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "providerAccountId": {
-          "name": "providerAccountId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "refresh_token": {
-          "name": "refresh_token",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "access_token": {
-          "name": "access_token",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "expires_at": {
-          "name": "expires_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "token_type": {
-          "name": "token_type",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "scope": {
-          "name": "scope",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "id_token": {
-          "name": "id_token",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "session_state": {
-          "name": "session_state",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_account_userId_devcrm_user_id_fk": {
-          "name": "devcrm_account_userId_devcrm_user_id_fk",
-          "tableFrom": "devcrm_account",
-          "tableTo": "devcrm_user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "devcrm_account_provider_providerAccountId_pk": {
-          "name": "devcrm_account_provider_providerAccountId_pk",
-          "columns": [
-            "provider",
-            "providerAccountId"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_activity_note": {
-      "name": "devcrm_activity_note",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "companyId": {
-          "name": "companyId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "dealId": {
-          "name": "dealId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "contactId": {
-          "name": "contactId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "authorId": {
-          "name": "authorId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "type": {
-          "name": "type",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'NOTE'"
-        },
-        "content": {
-          "name": "content",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_activity_note_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_activity_note_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_activity_note",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_activity_note_companyId_devcrm_company_id_fk": {
-          "name": "devcrm_activity_note_companyId_devcrm_company_id_fk",
-          "tableFrom": "devcrm_activity_note",
-          "tableTo": "devcrm_company",
-          "columnsFrom": [
-            "companyId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_activity_note_dealId_devcrm_deal_id_fk": {
-          "name": "devcrm_activity_note_dealId_devcrm_deal_id_fk",
-          "tableFrom": "devcrm_activity_note",
-          "tableTo": "devcrm_deal",
-          "columnsFrom": [
-            "dealId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_activity_note_contactId_devcrm_contact_id_fk": {
-          "name": "devcrm_activity_note_contactId_devcrm_contact_id_fk",
-          "tableFrom": "devcrm_activity_note",
-          "tableTo": "devcrm_contact",
-          "columnsFrom": [
-            "contactId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_activity_note_authorId_devcrm_user_id_fk": {
-          "name": "devcrm_activity_note_authorId_devcrm_user_id_fk",
-          "tableFrom": "devcrm_activity_note",
-          "tableTo": "devcrm_user",
-          "columnsFrom": [
-            "authorId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_ad_campaign": {
-      "name": "devcrm_ad_campaign",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "platform": {
-          "name": "platform",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "spend": {
-          "name": "spend",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "clicks": {
-          "name": "clicks",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "impressions": {
-          "name": "impressions",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "conversions": {
-          "name": "conversions",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_ad_campaign_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_ad_campaign_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_ad_campaign",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_api_key": {
-      "name": "devcrm_api_key",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "userId": {
-          "name": "userId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "keyHash": {
-          "name": "keyHash",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "expiresAt": {
-          "name": "expiresAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "revokedAt": {
-          "name": "revokedAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_api_key_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_api_key_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_api_key",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_api_key_userId_devcrm_user_id_fk": {
-          "name": "devcrm_api_key_userId_devcrm_user_id_fk",
-          "tableFrom": "devcrm_api_key",
-          "tableTo": "devcrm_user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_assignment_history": {
-      "name": "devcrm_assignment_history",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "companyId": {
-          "name": "companyId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "assignedByUserId": {
-          "name": "assignedByUserId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "assignedToUserId": {
-          "name": "assignedToUserId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "assignedAt": {
-          "name": "assignedAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_assignment_history_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_assignment_history_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_assignment_history",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_assignment_history_companyId_devcrm_company_id_fk": {
-          "name": "devcrm_assignment_history_companyId_devcrm_company_id_fk",
-          "tableFrom": "devcrm_assignment_history",
-          "tableTo": "devcrm_company",
-          "columnsFrom": [
-            "companyId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_assignment_history_assignedByUserId_devcrm_user_id_fk": {
-          "name": "devcrm_assignment_history_assignedByUserId_devcrm_user_id_fk",
-          "tableFrom": "devcrm_assignment_history",
-          "tableTo": "devcrm_user",
-          "columnsFrom": [
-            "assignedByUserId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "devcrm_assignment_history_assignedToUserId_devcrm_user_id_fk": {
-          "name": "devcrm_assignment_history_assignedToUserId_devcrm_user_id_fk",
-          "tableFrom": "devcrm_assignment_history",
-          "tableTo": "devcrm_user",
-          "columnsFrom": [
-            "assignedToUserId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_automation_log": {
-      "name": "devcrm_automation_log",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "ruleId": {
-          "name": "ruleId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "targetEntityId": {
-          "name": "targetEntityId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "executedAt": {
-          "name": "executedAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_automation_log_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_automation_log_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_automation_log",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_automation_log_ruleId_devcrm_automation_rule_id_fk": {
-          "name": "devcrm_automation_log_ruleId_devcrm_automation_rule_id_fk",
-          "tableFrom": "devcrm_automation_log",
-          "tableTo": "devcrm_automation_rule",
-          "columnsFrom": [
-            "ruleId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_automation_rule": {
-      "name": "devcrm_automation_rule",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "trigger_type": {
-          "name": "trigger_type",
-          "type": "devcrm_automation_trigger",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "daysOffset": {
-          "name": "daysOffset",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "action_type": {
-          "name": "action_type",
-          "type": "devcrm_automation_action",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "actionPayload": {
-          "name": "actionPayload",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "isActive": {
-          "name": "isActive",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_automation_rule_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_automation_rule_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_automation_rule",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_client_subscription": {
-      "name": "devcrm_client_subscription",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "companyId": {
-          "name": "companyId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "productId": {
-          "name": "productId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "devcrm_client_subscription_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'ACTIVE'"
-        },
-        "billing_cycle": {
-          "name": "billing_cycle",
-          "type": "devcrm_client_subscription_cycle",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'MONTHLY'"
-        },
-        "price": {
-          "name": "price",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "startDate": {
-          "name": "startDate",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "nextRenewalDate": {
-          "name": "nextRenewalDate",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_client_subscription_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_client_subscription_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_client_subscription",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_client_subscription_companyId_devcrm_company_id_fk": {
-          "name": "devcrm_client_subscription_companyId_devcrm_company_id_fk",
-          "tableFrom": "devcrm_client_subscription",
-          "tableTo": "devcrm_company",
-          "columnsFrom": [
-            "companyId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_client_subscription_productId_devcrm_product_id_fk": {
-          "name": "devcrm_client_subscription_productId_devcrm_product_id_fk",
-          "tableFrom": "devcrm_client_subscription",
-          "tableTo": "devcrm_product",
-          "columnsFrom": [
-            "productId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_communication": {
-      "name": "devcrm_communication",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "companyId": {
-          "name": "companyId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "targetEntityId": {
-          "name": "targetEntityId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "type": {
-          "name": "type",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "subject": {
-          "name": "subject",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "body": {
-          "name": "body",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "sentAt": {
-          "name": "sentAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_communication_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_communication_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_communication",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_communication_companyId_devcrm_company_id_fk": {
-          "name": "devcrm_communication_companyId_devcrm_company_id_fk",
-          "tableFrom": "devcrm_communication",
-          "tableTo": "devcrm_company",
-          "columnsFrom": [
-            "companyId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_company": {
-      "name": "devcrm_company",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "logoUrl": {
-          "name": "logoUrl",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "domain": {
-          "name": "domain",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "industry": {
-          "name": "industry",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "employeeCount": {
-          "name": "employeeCount",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "teamSize": {
-          "name": "teamSize",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "phone": {
-          "name": "phone",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "countryCode": {
-          "name": "countryCode",
-          "type": "varchar(10)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "country": {
-          "name": "country",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "currency": {
-          "name": "currency",
-          "type": "varchar(10)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "hasGst": {
-          "name": "hasGst",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "gstin": {
-          "name": "gstin",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "businessPan": {
-          "name": "businessPan",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "businessType": {
-          "name": "businessType",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "useCases": {
-          "name": "useCases",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "addressStreet": {
-          "name": "addressStreet",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "addressCity": {
-          "name": "addressCity",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "addressState": {
-          "name": "addressState",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "addressCountry": {
-          "name": "addressCountry",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "addressPincode": {
-          "name": "addressPincode",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "address": {
-          "name": "address",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "clientType": {
-          "name": "clientType",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "taxTreatment": {
-          "name": "taxTreatment",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "extraIds": {
-          "name": "extraIds",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'[]'::jsonb"
-        },
-        "shippingDetails": {
-          "name": "shippingDetails",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'[]'::jsonb"
-        },
-        "alias": {
-          "name": "alias",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "uid": {
-          "name": "uid",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "email": {
-          "name": "email",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "showEmailInInvoice": {
-          "name": "showEmailInInvoice",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "showPhoneInInvoice": {
-          "name": "showPhoneInInvoice",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "paymentDueDays": {
-          "name": "paymentDueDays",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "customFields": {
-          "name": "customFields",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'[]'::jsonb"
-        },
-        "attachments": {
-          "name": "attachments",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'[]'::jsonb"
-        },
-        "assignedUserId": {
-          "name": "assignedUserId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_company_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_company_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_company",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_company_assignedUserId_devcrm_user_id_fk": {
-          "name": "devcrm_company_assignedUserId_devcrm_user_id_fk",
-          "tableFrom": "devcrm_company",
-          "tableTo": "devcrm_user",
-          "columnsFrom": [
-            "assignedUserId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_contact": {
-      "name": "devcrm_contact",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "companyId": {
-          "name": "companyId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "uid": {
-          "name": "uid",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "avatarUrl": {
-          "name": "avatarUrl",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "salutation": {
-          "name": "salutation",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "firstName": {
-          "name": "firstName",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "lastName": {
-          "name": "lastName",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "email": {
-          "name": "email",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "phone": {
-          "name": "phone",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "additionalEmails": {
-          "name": "additionalEmails",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'[]'::jsonb"
-        },
-        "additionalPhones": {
-          "name": "additionalPhones",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'[]'::jsonb"
-        },
-        "pan": {
-          "name": "pan",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "aadhaar": {
-          "name": "aadhaar",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "passport": {
-          "name": "passport",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "socialLinks": {
-          "name": "socialLinks",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'{}'::jsonb"
-        },
-        "leadScore": {
-          "name": "leadScore",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "qualification_status": {
-          "name": "qualification_status",
-          "type": "devcrm_qualification_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'NONE'"
-        },
-        "addressCountry": {
-          "name": "addressCountry",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "addressState": {
-          "name": "addressState",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "addressDistrict": {
-          "name": "addressDistrict",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "addressCity": {
-          "name": "addressCity",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "addressBuilding": {
-          "name": "addressBuilding",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "addressStreet": {
-          "name": "addressStreet",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "addressZip": {
-          "name": "addressZip",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "adCampaignId": {
-          "name": "adCampaignId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_contact_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_contact_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_contact",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_contact_companyId_devcrm_company_id_fk": {
-          "name": "devcrm_contact_companyId_devcrm_company_id_fk",
-          "tableFrom": "devcrm_contact",
-          "tableTo": "devcrm_company",
-          "columnsFrom": [
-            "companyId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "devcrm_contact_adCampaignId_devcrm_ad_campaign_id_fk": {
-          "name": "devcrm_contact_adCampaignId_devcrm_ad_campaign_id_fk",
-          "tableFrom": "devcrm_contact",
-          "tableTo": "devcrm_ad_campaign",
-          "columnsFrom": [
-            "adCampaignId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_crm_task": {
-      "name": "devcrm_crm_task",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "dealId": {
-          "name": "dealId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "assignedUserId": {
-          "name": "assignedUserId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "title": {
-          "name": "title",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "dueDate": {
-          "name": "dueDate",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "priority": {
-          "name": "priority",
-          "type": "devcrm_task_priority",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'MEDIUM'"
-        },
-        "status": {
-          "name": "status",
-          "type": "devcrm_task_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'PENDING'"
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_crm_task_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_crm_task_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_crm_task",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_crm_task_dealId_devcrm_deal_id_fk": {
-          "name": "devcrm_crm_task_dealId_devcrm_deal_id_fk",
-          "tableFrom": "devcrm_crm_task",
-          "tableTo": "devcrm_deal",
-          "columnsFrom": [
-            "dealId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "devcrm_crm_task_assignedUserId_devcrm_user_id_fk": {
-          "name": "devcrm_crm_task_assignedUserId_devcrm_user_id_fk",
-          "tableFrom": "devcrm_crm_task",
-          "tableTo": "devcrm_user",
-          "columnsFrom": [
-            "assignedUserId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_deal": {
-      "name": "devcrm_deal",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "pipelineId": {
-          "name": "pipelineId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "stageId": {
-          "name": "stageId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "title": {
-          "name": "title",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "value": {
-          "name": "value",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "expectedCloseDate": {
-          "name": "expectedCloseDate",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "companyId": {
-          "name": "companyId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "contactId": {
-          "name": "contactId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "assignedUserId": {
-          "name": "assignedUserId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "status": {
-          "name": "status",
-          "type": "devcrm_deal_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'OPEN'"
-        },
-        "orderIndex": {
-          "name": "orderIndex",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_deal_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_deal_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_deal",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_deal_pipelineId_devcrm_pipeline_id_fk": {
-          "name": "devcrm_deal_pipelineId_devcrm_pipeline_id_fk",
-          "tableFrom": "devcrm_deal",
-          "tableTo": "devcrm_pipeline",
-          "columnsFrom": [
-            "pipelineId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_deal_stageId_devcrm_pipeline_stage_id_fk": {
-          "name": "devcrm_deal_stageId_devcrm_pipeline_stage_id_fk",
-          "tableFrom": "devcrm_deal",
-          "tableTo": "devcrm_pipeline_stage",
-          "columnsFrom": [
-            "stageId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_deal_companyId_devcrm_company_id_fk": {
-          "name": "devcrm_deal_companyId_devcrm_company_id_fk",
-          "tableFrom": "devcrm_deal",
-          "tableTo": "devcrm_company",
-          "columnsFrom": [
-            "companyId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "devcrm_deal_contactId_devcrm_contact_id_fk": {
-          "name": "devcrm_deal_contactId_devcrm_contact_id_fk",
-          "tableFrom": "devcrm_deal",
-          "tableTo": "devcrm_contact",
-          "columnsFrom": [
-            "contactId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "devcrm_deal_assignedUserId_devcrm_user_id_fk": {
-          "name": "devcrm_deal_assignedUserId_devcrm_user_id_fk",
-          "tableFrom": "devcrm_deal",
-          "tableTo": "devcrm_user",
-          "columnsFrom": [
-            "assignedUserId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_global_settings": {
-      "name": "devcrm_global_settings",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "'default'"
-        },
-        "maintenanceMode": {
-          "name": "maintenanceMode",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "enableBetaFeatures": {
-          "name": "enableBetaFeatures",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_invoice": {
-      "name": "devcrm_invoice",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "quoteId": {
-          "name": "quoteId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "companyId": {
-          "name": "companyId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "invoiceNumber": {
-          "name": "invoiceNumber",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "version": {
-          "name": "version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
-        },
-        "title": {
-          "name": "title",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "labels": {
-          "name": "labels",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "customFields": {
-          "name": "customFields",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "showTotalInPdf": {
-          "name": "showTotalInPdf",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "showTotalInWords": {
-          "name": "showTotalInWords",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "lineItems": {
-          "name": "lineItems",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "taxPercent": {
-          "name": "taxPercent",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "discountType": {
-          "name": "discountType",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'AMOUNT'"
-        },
-        "discountValue": {
-          "name": "discountValue",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "additionalCharges": {
-          "name": "additionalCharges",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "signatureType": {
-          "name": "signatureType",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'IMAGE'"
-        },
-        "signatureName": {
-          "name": "signatureName",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "signatureData": {
-          "name": "signatureData",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "notes": {
-          "name": "notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "attachments": {
-          "name": "attachments",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "terms": {
-          "name": "terms",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "contactEmail": {
-          "name": "contactEmail",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "contactPhone": {
-          "name": "contactPhone",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "status": {
-          "name": "status",
-          "type": "devcrm_invoice_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'DRAFT'"
-        },
-        "subtotal": {
-          "name": "subtotal",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "taxAmount": {
-          "name": "taxAmount",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "totalAmount": {
-          "name": "totalAmount",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "amountPaid": {
-          "name": "amountPaid",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "balanceDue": {
-          "name": "balanceDue",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "dueDate": {
-          "name": "dueDate",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "paidAt": {
-          "name": "paidAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_invoice_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_invoice_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_invoice",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_invoice_quoteId_devcrm_quote_id_fk": {
-          "name": "devcrm_invoice_quoteId_devcrm_quote_id_fk",
-          "tableFrom": "devcrm_invoice",
-          "tableTo": "devcrm_quote",
-          "columnsFrom": [
-            "quoteId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "devcrm_invoice_companyId_devcrm_company_id_fk": {
-          "name": "devcrm_invoice_companyId_devcrm_company_id_fk",
-          "tableFrom": "devcrm_invoice",
-          "tableTo": "devcrm_company",
-          "columnsFrom": [
-            "companyId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_notification": {
-      "name": "devcrm_notification",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "userId": {
-          "name": "userId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "title": {
-          "name": "title",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "message": {
-          "name": "message",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "link": {
-          "name": "link",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "isRead": {
-          "name": "isRead",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_notification_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_notification_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_notification",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_notification_userId_devcrm_user_id_fk": {
-          "name": "devcrm_notification_userId_devcrm_user_id_fk",
-          "tableFrom": "devcrm_notification",
-          "tableTo": "devcrm_user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_organization_member": {
-      "name": "devcrm_organization_member",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "userId": {
-          "name": "userId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "role": {
-          "name": "role",
-          "type": "devcrm_org_role",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'MEMBER'"
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "org_user_idx": {
-          "name": "org_user_idx",
-          "columns": [
-            {
-              "expression": "organizationId",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "userId",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "devcrm_organization_member_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_organization_member_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_organization_member",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_organization_member_userId_devcrm_user_id_fk": {
-          "name": "devcrm_organization_member_userId_devcrm_user_id_fk",
-          "tableFrom": "devcrm_organization_member",
-          "tableTo": "devcrm_user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_organization": {
-      "name": "devcrm_organization",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "slug": {
-          "name": "slug",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "logoUrl": {
-          "name": "logoUrl",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "isActive": {
-          "name": "isActive",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "displayName": {
-          "name": "displayName",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "teamSize": {
-          "name": "teamSize",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "website": {
-          "name": "website",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "phone": {
-          "name": "phone",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "countryCode": {
-          "name": "countryCode",
-          "type": "varchar(10)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "phoneVerified": {
-          "name": "phoneVerified",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "country": {
-          "name": "country",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "currency": {
-          "name": "currency",
-          "type": "varchar(10)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "hasGst": {
-          "name": "hasGst",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "gstin": {
-          "name": "gstin",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "businessPan": {
-          "name": "businessPan",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "useCases": {
-          "name": "useCases",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "businessType": {
-          "name": "businessType",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "addressStreet": {
-          "name": "addressStreet",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "addressCity": {
-          "name": "addressCity",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "addressState": {
-          "name": "addressState",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "addressCountry": {
-          "name": "addressCountry",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "addressPincode": {
-          "name": "addressPincode",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "svixAppId": {
-          "name": "svixAppId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "devcrm_organization_slug_unique": {
-          "name": "devcrm_organization_slug_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_payment": {
-      "name": "devcrm_payment",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "invoiceId": {
-          "name": "invoiceId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "amount": {
-          "name": "amount",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "paymentDate": {
-          "name": "paymentDate",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "paymentMethod": {
-          "name": "paymentMethod",
-          "type": "devcrm_payment_method",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "referenceNumber": {
-          "name": "referenceNumber",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "notes": {
-          "name": "notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_payment_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_payment_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_payment",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_payment_invoiceId_devcrm_invoice_id_fk": {
-          "name": "devcrm_payment_invoiceId_devcrm_invoice_id_fk",
-          "tableFrom": "devcrm_payment",
-          "tableTo": "devcrm_invoice",
-          "columnsFrom": [
-            "invoiceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_pipeline_stage": {
-      "name": "devcrm_pipeline_stage",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "pipelineId": {
-          "name": "pipelineId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "orderIndex": {
-          "name": "orderIndex",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "winProbability": {
-          "name": "winProbability",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 50
-        },
-        "color": {
-          "name": "color",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'#3b82f6'"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_pipeline_stage_pipelineId_devcrm_pipeline_id_fk": {
-          "name": "devcrm_pipeline_stage_pipelineId_devcrm_pipeline_id_fk",
-          "tableFrom": "devcrm_pipeline_stage",
-          "tableTo": "devcrm_pipeline",
-          "columnsFrom": [
-            "pipelineId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_pipeline": {
-      "name": "devcrm_pipeline",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "isDefault": {
-          "name": "isDefault",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_pipeline_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_pipeline_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_pipeline",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_product": {
-      "name": "devcrm_product",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "sku": {
-          "name": "sku",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "type": {
-          "name": "type",
-          "type": "devcrm_product_type",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'PRODUCT'"
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "unitPrice": {
-          "name": "unitPrice",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "unit": {
-          "name": "unit",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "stockQuantity": {
-          "name": "stockQuantity",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "isPublic": {
-          "name": "isPublic",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_product_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_product_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_product",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_quote": {
-      "name": "devcrm_quote",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "companyId": {
-          "name": "companyId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "quoteNumber": {
-          "name": "quoteNumber",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "version": {
-          "name": "version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
-        },
-        "title": {
-          "name": "title",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "date": {
-          "name": "date",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "dueDate": {
-          "name": "dueDate",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "labels": {
-          "name": "labels",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "customFields": {
-          "name": "customFields",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "showTotalInPdf": {
-          "name": "showTotalInPdf",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "showTotalInWords": {
-          "name": "showTotalInWords",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "lineItems": {
-          "name": "lineItems",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "taxPercent": {
-          "name": "taxPercent",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "discountType": {
-          "name": "discountType",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'AMOUNT'"
-        },
-        "discountValue": {
-          "name": "discountValue",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "additionalCharges": {
-          "name": "additionalCharges",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "totalAmount": {
-          "name": "totalAmount",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "signatureType": {
-          "name": "signatureType",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'IMAGE'"
-        },
-        "signatureName": {
-          "name": "signatureName",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "signatureData": {
-          "name": "signatureData",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "notes": {
-          "name": "notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "attachments": {
-          "name": "attachments",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "terms": {
-          "name": "terms",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "contactEmail": {
-          "name": "contactEmail",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "contactPhone": {
-          "name": "contactPhone",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "status": {
-          "name": "status",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'DRAFT'"
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_quote_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_quote_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_quote",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_quote_companyId_devcrm_company_id_fk": {
-          "name": "devcrm_quote_companyId_devcrm_company_id_fk",
-          "tableFrom": "devcrm_quote",
-          "tableTo": "devcrm_company",
-          "columnsFrom": [
-            "companyId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_session": {
-      "name": "devcrm_session",
-      "schema": "",
-      "columns": {
-        "sessionToken": {
-          "name": "sessionToken",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "userId": {
-          "name": "userId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "expires": {
-          "name": "expires",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_session_userId_devcrm_user_id_fk": {
-          "name": "devcrm_session_userId_devcrm_user_id_fk",
-          "tableFrom": "devcrm_session",
-          "tableTo": "devcrm_user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_statement": {
-      "name": "devcrm_statement",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "companyId": {
-          "name": "companyId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "statementNumber": {
-          "name": "statementNumber",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "startDate": {
-          "name": "startDate",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "endDate": {
-          "name": "endDate",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "openingBalance": {
-          "name": "openingBalance",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "closingBalance": {
-          "name": "closingBalance",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "transactions": {
-          "name": "transactions",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_statement_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_statement_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_statement",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_statement_companyId_devcrm_company_id_fk": {
-          "name": "devcrm_statement_companyId_devcrm_company_id_fk",
-          "tableFrom": "devcrm_statement",
-          "tableTo": "devcrm_company",
-          "columnsFrom": [
-            "companyId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_subscription_plan": {
-      "name": "devcrm_subscription_plan",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "code": {
-          "name": "code",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "priceMonthly": {
-          "name": "priceMonthly",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "priceYearly": {
-          "name": "priceYearly",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "maxUsers": {
-          "name": "maxUsers",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 5
-        },
-        "maxContacts": {
-          "name": "maxContacts",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1000
-        },
-        "isActive": {
-          "name": "isActive",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "devcrm_subscription_plan_code_unique": {
-          "name": "devcrm_subscription_plan_code_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_subscription": {
-      "name": "devcrm_subscription",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "planId": {
-          "name": "planId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "devcrm_subscription_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'ACTIVE'"
-        },
-        "currentPeriodStart": {
-          "name": "currentPeriodStart",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "currentPeriodEnd": {
-          "name": "currentPeriodEnd",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "cancelAtPeriodEnd": {
-          "name": "cancelAtPeriodEnd",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_subscription_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_subscription_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_subscription",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_subscription_planId_devcrm_subscription_plan_id_fk": {
-          "name": "devcrm_subscription_planId_devcrm_subscription_plan_id_fk",
-          "tableFrom": "devcrm_subscription",
-          "tableTo": "devcrm_subscription_plan",
-          "columnsFrom": [
-            "planId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_tag": {
-      "name": "devcrm_tag",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "color": {
-          "name": "color",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'#3b82f6'"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_tag_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_tag_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_tag",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_user_settings": {
-      "name": "devcrm_user_settings",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organizationId": {
-          "name": "organizationId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "userId": {
-          "name": "userId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "defaultCurrency": {
-          "name": "defaultCurrency",
-          "type": "varchar(10)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'INR'"
-        },
-        "customCurrencySymbol": {
-          "name": "customCurrencySymbol",
-          "type": "varchar(10)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "numberFormat": {
-          "name": "numberFormat",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'en-IN'"
-        },
-        "decimalDigits": {
-          "name": "decimalDigits",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 2
-        },
-        "roundQuantity": {
-          "name": "roundQuantity",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "roundRate": {
-          "name": "roundRate",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "customLabels": {
-          "name": "customLabels",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "signatureImage": {
-          "name": "signatureImage",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tncList": {
-          "name": "tncList",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "theme": {
-          "name": "theme",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'light'"
-        },
-        "locale": {
-          "name": "locale",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'en-US'"
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "devcrm_user_settings_organizationId_devcrm_organization_id_fk": {
-          "name": "devcrm_user_settings_organizationId_devcrm_organization_id_fk",
-          "tableFrom": "devcrm_user_settings",
-          "tableTo": "devcrm_organization",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "devcrm_user_settings_userId_devcrm_user_id_fk": {
-          "name": "devcrm_user_settings_userId_devcrm_user_id_fk",
-          "tableFrom": "devcrm_user_settings",
-          "tableTo": "devcrm_user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_user": {
-      "name": "devcrm_user",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "email": {
-          "name": "email",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "emailVerified": {
-          "name": "emailVerified",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "image": {
-          "name": "image",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "phone": {
-          "name": "phone",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "passwordHash": {
-          "name": "passwordHash",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "system_role": {
-          "name": "system_role",
-          "type": "devcrm_user_role",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'USER'"
-        },
-        "onboardingComplete": {
-          "name": "onboardingComplete",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "hasSeenWelcome": {
-          "name": "hasSeenWelcome",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "devcrm_user_email_unique": {
-          "name": "devcrm_user_email_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.devcrm_verification_token": {
-      "name": "devcrm_verification_token",
-      "schema": "",
-      "columns": {
-        "identifier": {
-          "name": "identifier",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "token": {
-          "name": "token",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "expires": {
-          "name": "expires",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "devcrm_verification_token_identifier_token_pk": {
-          "name": "devcrm_verification_token_identifier_token_pk",
-          "columns": [
-            "identifier",
-            "token"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    }
-  },
-  "enums": {
-    "public.devcrm_automation_action": {
-      "name": "devcrm_automation_action",
-      "schema": "public",
-      "values": [
-        "CREATE_NOTIFICATION",
-        "CREATE_TASK",
-        "SEND_EMAIL",
-        "INTERNAL_ALERT"
-      ]
-    },
-    "public.devcrm_automation_trigger": {
-      "name": "devcrm_automation_trigger",
-      "schema": "public",
-      "values": [
-        "INVOICE_DUE",
-        "SUBSCRIPTION_RENEWAL",
-        "DEAL_STALLED",
-        "QUOTE_SENT"
-      ]
-    },
-    "public.devcrm_client_subscription_cycle": {
-      "name": "devcrm_client_subscription_cycle",
-      "schema": "public",
-      "values": [
-        "MONTHLY",
-        "YEARLY"
-      ]
-    },
-    "public.devcrm_client_subscription_status": {
-      "name": "devcrm_client_subscription_status",
-      "schema": "public",
-      "values": [
-        "ACTIVE",
-        "CANCELLED",
-        "EXPIRED"
-      ]
-    },
-    "public.devcrm_deal_status": {
-      "name": "devcrm_deal_status",
-      "schema": "public",
-      "values": [
-        "OPEN",
-        "WON",
-        "LOST"
-      ]
-    },
-    "public.devcrm_invoice_status": {
-      "name": "devcrm_invoice_status",
-      "schema": "public",
-      "values": [
-        "DRAFT",
-        "PROFORMA",
-        "SENT",
-        "PAID",
-        "OVERDUE",
-        "CANCELLED"
-      ]
-    },
-    "public.devcrm_lead_status": {
-      "name": "devcrm_lead_status",
-      "schema": "public",
-      "values": [
-        "NEW",
-        "QUALIFIED",
-        "CONTACTED",
-        "NURTURING",
-        "UNQUALIFIED"
-      ]
-    },
-    "public.devcrm_org_role": {
-      "name": "devcrm_org_role",
-      "schema": "public",
-      "values": [
-        "OWNER",
-        "ADMIN",
-        "MEMBER",
-        "VIEWER"
-      ]
-    },
-    "public.devcrm_payment_method": {
-      "name": "devcrm_payment_method",
-      "schema": "public",
-      "values": [
-        "BANK_TRANSFER",
-        "CREDIT_CARD",
-        "CASH",
-        "CHECK"
-      ]
-    },
-    "public.devcrm_product_type": {
-      "name": "devcrm_product_type",
-      "schema": "public",
-      "values": [
-        "PRODUCT",
-        "SERVICE"
-      ]
-    },
-    "public.devcrm_qualification_status": {
-      "name": "devcrm_qualification_status",
-      "schema": "public",
-      "values": [
-        "NONE",
-        "MQL",
-        "SQL",
-        "DISQUALIFIED"
-      ]
-    },
-    "public.devcrm_subscription_status": {
-      "name": "devcrm_subscription_status",
-      "schema": "public",
-      "values": [
-        "ACTIVE",
-        "TRIALING",
-        "CANCELED",
-        "PAST_DUE"
-      ]
-    },
-    "public.devcrm_task_priority": {
-      "name": "devcrm_task_priority",
-      "schema": "public",
-      "values": [
-        "LOW",
-        "MEDIUM",
-        "HIGH",
-        "URGENT"
-      ]
-    },
-    "public.devcrm_task_status": {
-      "name": "devcrm_task_status",
-      "schema": "public",
-      "values": [
-        "PENDING",
-        "IN_PROGRESS",
-        "COMPLETED",
-        "CANCELLED"
-      ]
-    },
-    "public.devcrm_user_role": {
-      "name": "devcrm_user_role",
-      "schema": "public",
-      "values": [
-        "SUPER_ADMIN",
-        "USER"
-      ]
-    }
-  },
-  "schemas": {},
-  "sequences": {},
-  "roles": {},
-  "policies": {},
-  "views": {},
-  "_meta": {
-    "columns": {},
-    "schemas": {},
-    "tables": {}
-  }
+	"id": "4689d9ca-0eb0-45df-8cd8-a99ef8477c52",
+	"prevId": "0ec699b1-6b31-4eac-b7e5-a2619f13856a",
+	"version": "7",
+	"dialect": "postgresql",
+	"tables": {
+		"public.devcrm_account": {
+			"name": "devcrm_account",
+			"schema": "",
+			"columns": {
+				"userId": {
+					"name": "userId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"type": {
+					"name": "type",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"provider": {
+					"name": "provider",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"providerAccountId": {
+					"name": "providerAccountId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"refresh_token": {
+					"name": "refresh_token",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"access_token": {
+					"name": "access_token",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"expires_at": {
+					"name": "expires_at",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"token_type": {
+					"name": "token_type",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"scope": {
+					"name": "scope",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"id_token": {
+					"name": "id_token",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"session_state": {
+					"name": "session_state",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_account_userId_devcrm_user_id_fk": {
+					"name": "devcrm_account_userId_devcrm_user_id_fk",
+					"tableFrom": "devcrm_account",
+					"tableTo": "devcrm_user",
+					"columnsFrom": ["userId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {
+				"devcrm_account_provider_providerAccountId_pk": {
+					"name": "devcrm_account_provider_providerAccountId_pk",
+					"columns": ["provider", "providerAccountId"]
+				}
+			},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_activity_note": {
+			"name": "devcrm_activity_note",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"companyId": {
+					"name": "companyId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"dealId": {
+					"name": "dealId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"contactId": {
+					"name": "contactId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"authorId": {
+					"name": "authorId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"type": {
+					"name": "type",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'NOTE'"
+				},
+				"content": {
+					"name": "content",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_activity_note_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_activity_note_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_activity_note",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_activity_note_companyId_devcrm_company_id_fk": {
+					"name": "devcrm_activity_note_companyId_devcrm_company_id_fk",
+					"tableFrom": "devcrm_activity_note",
+					"tableTo": "devcrm_company",
+					"columnsFrom": ["companyId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_activity_note_dealId_devcrm_deal_id_fk": {
+					"name": "devcrm_activity_note_dealId_devcrm_deal_id_fk",
+					"tableFrom": "devcrm_activity_note",
+					"tableTo": "devcrm_deal",
+					"columnsFrom": ["dealId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_activity_note_contactId_devcrm_contact_id_fk": {
+					"name": "devcrm_activity_note_contactId_devcrm_contact_id_fk",
+					"tableFrom": "devcrm_activity_note",
+					"tableTo": "devcrm_contact",
+					"columnsFrom": ["contactId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_activity_note_authorId_devcrm_user_id_fk": {
+					"name": "devcrm_activity_note_authorId_devcrm_user_id_fk",
+					"tableFrom": "devcrm_activity_note",
+					"tableTo": "devcrm_user",
+					"columnsFrom": ["authorId"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_ad_campaign": {
+			"name": "devcrm_ad_campaign",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"platform": {
+					"name": "platform",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"spend": {
+					"name": "spend",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"clicks": {
+					"name": "clicks",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"impressions": {
+					"name": "impressions",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"conversions": {
+					"name": "conversions",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_ad_campaign_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_ad_campaign_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_ad_campaign",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_api_key": {
+			"name": "devcrm_api_key",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"userId": {
+					"name": "userId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"keyHash": {
+					"name": "keyHash",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"expiresAt": {
+					"name": "expiresAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"revokedAt": {
+					"name": "revokedAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"updatedAt": {
+					"name": "updatedAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_api_key_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_api_key_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_api_key",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_api_key_userId_devcrm_user_id_fk": {
+					"name": "devcrm_api_key_userId_devcrm_user_id_fk",
+					"tableFrom": "devcrm_api_key",
+					"tableTo": "devcrm_user",
+					"columnsFrom": ["userId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_assignment_history": {
+			"name": "devcrm_assignment_history",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"companyId": {
+					"name": "companyId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"assignedByUserId": {
+					"name": "assignedByUserId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"assignedToUserId": {
+					"name": "assignedToUserId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"assignedAt": {
+					"name": "assignedAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_assignment_history_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_assignment_history_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_assignment_history",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_assignment_history_companyId_devcrm_company_id_fk": {
+					"name": "devcrm_assignment_history_companyId_devcrm_company_id_fk",
+					"tableFrom": "devcrm_assignment_history",
+					"tableTo": "devcrm_company",
+					"columnsFrom": ["companyId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_assignment_history_assignedByUserId_devcrm_user_id_fk": {
+					"name": "devcrm_assignment_history_assignedByUserId_devcrm_user_id_fk",
+					"tableFrom": "devcrm_assignment_history",
+					"tableTo": "devcrm_user",
+					"columnsFrom": ["assignedByUserId"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"devcrm_assignment_history_assignedToUserId_devcrm_user_id_fk": {
+					"name": "devcrm_assignment_history_assignedToUserId_devcrm_user_id_fk",
+					"tableFrom": "devcrm_assignment_history",
+					"tableTo": "devcrm_user",
+					"columnsFrom": ["assignedToUserId"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_automation_log": {
+			"name": "devcrm_automation_log",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"ruleId": {
+					"name": "ruleId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"targetEntityId": {
+					"name": "targetEntityId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"executedAt": {
+					"name": "executedAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_automation_log_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_automation_log_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_automation_log",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_automation_log_ruleId_devcrm_automation_rule_id_fk": {
+					"name": "devcrm_automation_log_ruleId_devcrm_automation_rule_id_fk",
+					"tableFrom": "devcrm_automation_log",
+					"tableTo": "devcrm_automation_rule",
+					"columnsFrom": ["ruleId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_automation_rule": {
+			"name": "devcrm_automation_rule",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"trigger_type": {
+					"name": "trigger_type",
+					"type": "devcrm_automation_trigger",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"daysOffset": {
+					"name": "daysOffset",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"action_type": {
+					"name": "action_type",
+					"type": "devcrm_automation_action",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"actionPayload": {
+					"name": "actionPayload",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'{}'::jsonb"
+				},
+				"isActive": {
+					"name": "isActive",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": true
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"updatedAt": {
+					"name": "updatedAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_automation_rule_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_automation_rule_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_automation_rule",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_client_subscription": {
+			"name": "devcrm_client_subscription",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"companyId": {
+					"name": "companyId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"productId": {
+					"name": "productId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"status": {
+					"name": "status",
+					"type": "devcrm_client_subscription_status",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'ACTIVE'"
+				},
+				"billing_cycle": {
+					"name": "billing_cycle",
+					"type": "devcrm_client_subscription_cycle",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'MONTHLY'"
+				},
+				"price": {
+					"name": "price",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"startDate": {
+					"name": "startDate",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"nextRenewalDate": {
+					"name": "nextRenewalDate",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"updatedAt": {
+					"name": "updatedAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_client_subscription_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_client_subscription_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_client_subscription",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_client_subscription_companyId_devcrm_company_id_fk": {
+					"name": "devcrm_client_subscription_companyId_devcrm_company_id_fk",
+					"tableFrom": "devcrm_client_subscription",
+					"tableTo": "devcrm_company",
+					"columnsFrom": ["companyId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_client_subscription_productId_devcrm_product_id_fk": {
+					"name": "devcrm_client_subscription_productId_devcrm_product_id_fk",
+					"tableFrom": "devcrm_client_subscription",
+					"tableTo": "devcrm_product",
+					"columnsFrom": ["productId"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_communication": {
+			"name": "devcrm_communication",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"companyId": {
+					"name": "companyId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"targetEntityId": {
+					"name": "targetEntityId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"type": {
+					"name": "type",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"subject": {
+					"name": "subject",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"body": {
+					"name": "body",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"sentAt": {
+					"name": "sentAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_communication_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_communication_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_communication",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_communication_companyId_devcrm_company_id_fk": {
+					"name": "devcrm_communication_companyId_devcrm_company_id_fk",
+					"tableFrom": "devcrm_communication",
+					"tableTo": "devcrm_company",
+					"columnsFrom": ["companyId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_company": {
+			"name": "devcrm_company",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"logoUrl": {
+					"name": "logoUrl",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"domain": {
+					"name": "domain",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"industry": {
+					"name": "industry",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"employeeCount": {
+					"name": "employeeCount",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"teamSize": {
+					"name": "teamSize",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"phone": {
+					"name": "phone",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"countryCode": {
+					"name": "countryCode",
+					"type": "varchar(10)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"country": {
+					"name": "country",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"currency": {
+					"name": "currency",
+					"type": "varchar(10)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hasGst": {
+					"name": "hasGst",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"gstin": {
+					"name": "gstin",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"businessPan": {
+					"name": "businessPan",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"businessType": {
+					"name": "businessType",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"useCases": {
+					"name": "useCases",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"addressStreet": {
+					"name": "addressStreet",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"addressCity": {
+					"name": "addressCity",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"addressState": {
+					"name": "addressState",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"addressCountry": {
+					"name": "addressCountry",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"addressPincode": {
+					"name": "addressPincode",
+					"type": "varchar(20)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"address": {
+					"name": "address",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"clientType": {
+					"name": "clientType",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"taxTreatment": {
+					"name": "taxTreatment",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"extraIds": {
+					"name": "extraIds",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "'[]'::jsonb"
+				},
+				"shippingDetails": {
+					"name": "shippingDetails",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "'[]'::jsonb"
+				},
+				"alias": {
+					"name": "alias",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"uid": {
+					"name": "uid",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"email": {
+					"name": "email",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"showEmailInInvoice": {
+					"name": "showEmailInInvoice",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"showPhoneInInvoice": {
+					"name": "showPhoneInInvoice",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"paymentDueDays": {
+					"name": "paymentDueDays",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"customFields": {
+					"name": "customFields",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "'[]'::jsonb"
+				},
+				"attachments": {
+					"name": "attachments",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "'[]'::jsonb"
+				},
+				"assignedUserId": {
+					"name": "assignedUserId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"updatedAt": {
+					"name": "updatedAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_company_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_company_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_company",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_company_assignedUserId_devcrm_user_id_fk": {
+					"name": "devcrm_company_assignedUserId_devcrm_user_id_fk",
+					"tableFrom": "devcrm_company",
+					"tableTo": "devcrm_user",
+					"columnsFrom": ["assignedUserId"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_contact": {
+			"name": "devcrm_contact",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"companyId": {
+					"name": "companyId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"uid": {
+					"name": "uid",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"avatarUrl": {
+					"name": "avatarUrl",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"salutation": {
+					"name": "salutation",
+					"type": "varchar(20)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"firstName": {
+					"name": "firstName",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"lastName": {
+					"name": "lastName",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"email": {
+					"name": "email",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"phone": {
+					"name": "phone",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"additionalEmails": {
+					"name": "additionalEmails",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "'[]'::jsonb"
+				},
+				"additionalPhones": {
+					"name": "additionalPhones",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "'[]'::jsonb"
+				},
+				"pan": {
+					"name": "pan",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"aadhaar": {
+					"name": "aadhaar",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"passport": {
+					"name": "passport",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"socialLinks": {
+					"name": "socialLinks",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "'{}'::jsonb"
+				},
+				"leadScore": {
+					"name": "leadScore",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"qualification_status": {
+					"name": "qualification_status",
+					"type": "devcrm_qualification_status",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'NONE'"
+				},
+				"addressCountry": {
+					"name": "addressCountry",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"addressState": {
+					"name": "addressState",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"addressDistrict": {
+					"name": "addressDistrict",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"addressCity": {
+					"name": "addressCity",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"addressBuilding": {
+					"name": "addressBuilding",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"addressStreet": {
+					"name": "addressStreet",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"addressZip": {
+					"name": "addressZip",
+					"type": "varchar(20)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"adCampaignId": {
+					"name": "adCampaignId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"updatedAt": {
+					"name": "updatedAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_contact_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_contact_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_contact",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_contact_companyId_devcrm_company_id_fk": {
+					"name": "devcrm_contact_companyId_devcrm_company_id_fk",
+					"tableFrom": "devcrm_contact",
+					"tableTo": "devcrm_company",
+					"columnsFrom": ["companyId"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				},
+				"devcrm_contact_adCampaignId_devcrm_ad_campaign_id_fk": {
+					"name": "devcrm_contact_adCampaignId_devcrm_ad_campaign_id_fk",
+					"tableFrom": "devcrm_contact",
+					"tableTo": "devcrm_ad_campaign",
+					"columnsFrom": ["adCampaignId"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_crm_task": {
+			"name": "devcrm_crm_task",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"dealId": {
+					"name": "dealId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"assignedUserId": {
+					"name": "assignedUserId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"title": {
+					"name": "title",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"description": {
+					"name": "description",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"dueDate": {
+					"name": "dueDate",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"priority": {
+					"name": "priority",
+					"type": "devcrm_task_priority",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'MEDIUM'"
+				},
+				"status": {
+					"name": "status",
+					"type": "devcrm_task_status",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'PENDING'"
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_crm_task_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_crm_task_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_crm_task",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_crm_task_dealId_devcrm_deal_id_fk": {
+					"name": "devcrm_crm_task_dealId_devcrm_deal_id_fk",
+					"tableFrom": "devcrm_crm_task",
+					"tableTo": "devcrm_deal",
+					"columnsFrom": ["dealId"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				},
+				"devcrm_crm_task_assignedUserId_devcrm_user_id_fk": {
+					"name": "devcrm_crm_task_assignedUserId_devcrm_user_id_fk",
+					"tableFrom": "devcrm_crm_task",
+					"tableTo": "devcrm_user",
+					"columnsFrom": ["assignedUserId"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_deal": {
+			"name": "devcrm_deal",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"pipelineId": {
+					"name": "pipelineId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"stageId": {
+					"name": "stageId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"title": {
+					"name": "title",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"value": {
+					"name": "value",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"expectedCloseDate": {
+					"name": "expectedCloseDate",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"companyId": {
+					"name": "companyId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"contactId": {
+					"name": "contactId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"assignedUserId": {
+					"name": "assignedUserId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"status": {
+					"name": "status",
+					"type": "devcrm_deal_status",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'OPEN'"
+				},
+				"orderIndex": {
+					"name": "orderIndex",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"updatedAt": {
+					"name": "updatedAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_deal_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_deal_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_deal",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_deal_pipelineId_devcrm_pipeline_id_fk": {
+					"name": "devcrm_deal_pipelineId_devcrm_pipeline_id_fk",
+					"tableFrom": "devcrm_deal",
+					"tableTo": "devcrm_pipeline",
+					"columnsFrom": ["pipelineId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_deal_stageId_devcrm_pipeline_stage_id_fk": {
+					"name": "devcrm_deal_stageId_devcrm_pipeline_stage_id_fk",
+					"tableFrom": "devcrm_deal",
+					"tableTo": "devcrm_pipeline_stage",
+					"columnsFrom": ["stageId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_deal_companyId_devcrm_company_id_fk": {
+					"name": "devcrm_deal_companyId_devcrm_company_id_fk",
+					"tableFrom": "devcrm_deal",
+					"tableTo": "devcrm_company",
+					"columnsFrom": ["companyId"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				},
+				"devcrm_deal_contactId_devcrm_contact_id_fk": {
+					"name": "devcrm_deal_contactId_devcrm_contact_id_fk",
+					"tableFrom": "devcrm_deal",
+					"tableTo": "devcrm_contact",
+					"columnsFrom": ["contactId"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				},
+				"devcrm_deal_assignedUserId_devcrm_user_id_fk": {
+					"name": "devcrm_deal_assignedUserId_devcrm_user_id_fk",
+					"tableFrom": "devcrm_deal",
+					"tableTo": "devcrm_user",
+					"columnsFrom": ["assignedUserId"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_global_settings": {
+			"name": "devcrm_global_settings",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "'default'"
+				},
+				"maintenanceMode": {
+					"name": "maintenanceMode",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"enableBetaFeatures": {
+					"name": "enableBetaFeatures",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"updatedAt": {
+					"name": "updatedAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_invoice": {
+			"name": "devcrm_invoice",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"quoteId": {
+					"name": "quoteId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"companyId": {
+					"name": "companyId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"invoiceNumber": {
+					"name": "invoiceNumber",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"version": {
+					"name": "version",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 1
+				},
+				"title": {
+					"name": "title",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"labels": {
+					"name": "labels",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"customFields": {
+					"name": "customFields",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"showTotalInPdf": {
+					"name": "showTotalInPdf",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": true
+				},
+				"showTotalInWords": {
+					"name": "showTotalInWords",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"lineItems": {
+					"name": "lineItems",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"taxPercent": {
+					"name": "taxPercent",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"discountType": {
+					"name": "discountType",
+					"type": "varchar(20)",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'AMOUNT'"
+				},
+				"discountValue": {
+					"name": "discountValue",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"additionalCharges": {
+					"name": "additionalCharges",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"signatureType": {
+					"name": "signatureType",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'IMAGE'"
+				},
+				"signatureName": {
+					"name": "signatureName",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"signatureData": {
+					"name": "signatureData",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"notes": {
+					"name": "notes",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"attachments": {
+					"name": "attachments",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"terms": {
+					"name": "terms",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"contactEmail": {
+					"name": "contactEmail",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"contactPhone": {
+					"name": "contactPhone",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"status": {
+					"name": "status",
+					"type": "devcrm_invoice_status",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'DRAFT'"
+				},
+				"subtotal": {
+					"name": "subtotal",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"taxAmount": {
+					"name": "taxAmount",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"totalAmount": {
+					"name": "totalAmount",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"amountPaid": {
+					"name": "amountPaid",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"balanceDue": {
+					"name": "balanceDue",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"dueDate": {
+					"name": "dueDate",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"paidAt": {
+					"name": "paidAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_invoice_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_invoice_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_invoice",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_invoice_quoteId_devcrm_quote_id_fk": {
+					"name": "devcrm_invoice_quoteId_devcrm_quote_id_fk",
+					"tableFrom": "devcrm_invoice",
+					"tableTo": "devcrm_quote",
+					"columnsFrom": ["quoteId"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"devcrm_invoice_companyId_devcrm_company_id_fk": {
+					"name": "devcrm_invoice_companyId_devcrm_company_id_fk",
+					"tableFrom": "devcrm_invoice",
+					"tableTo": "devcrm_company",
+					"columnsFrom": ["companyId"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_notification": {
+			"name": "devcrm_notification",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"userId": {
+					"name": "userId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"title": {
+					"name": "title",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"message": {
+					"name": "message",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"link": {
+					"name": "link",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"isRead": {
+					"name": "isRead",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_notification_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_notification_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_notification",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_notification_userId_devcrm_user_id_fk": {
+					"name": "devcrm_notification_userId_devcrm_user_id_fk",
+					"tableFrom": "devcrm_notification",
+					"tableTo": "devcrm_user",
+					"columnsFrom": ["userId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_organization_member": {
+			"name": "devcrm_organization_member",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"userId": {
+					"name": "userId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"role": {
+					"name": "role",
+					"type": "devcrm_org_role",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'MEMBER'"
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {
+				"org_user_idx": {
+					"name": "org_user_idx",
+					"columns": [
+						{
+							"expression": "organizationId",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						},
+						{
+							"expression": "userId",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"devcrm_organization_member_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_organization_member_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_organization_member",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_organization_member_userId_devcrm_user_id_fk": {
+					"name": "devcrm_organization_member_userId_devcrm_user_id_fk",
+					"tableFrom": "devcrm_organization_member",
+					"tableTo": "devcrm_user",
+					"columnsFrom": ["userId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_organization": {
+			"name": "devcrm_organization",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"slug": {
+					"name": "slug",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"logoUrl": {
+					"name": "logoUrl",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"isActive": {
+					"name": "isActive",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": true
+				},
+				"displayName": {
+					"name": "displayName",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"teamSize": {
+					"name": "teamSize",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"website": {
+					"name": "website",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"phone": {
+					"name": "phone",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"countryCode": {
+					"name": "countryCode",
+					"type": "varchar(10)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"phoneVerified": {
+					"name": "phoneVerified",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"country": {
+					"name": "country",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"currency": {
+					"name": "currency",
+					"type": "varchar(10)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"hasGst": {
+					"name": "hasGst",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"gstin": {
+					"name": "gstin",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"businessPan": {
+					"name": "businessPan",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"useCases": {
+					"name": "useCases",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"businessType": {
+					"name": "businessType",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"addressStreet": {
+					"name": "addressStreet",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"addressCity": {
+					"name": "addressCity",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"addressState": {
+					"name": "addressState",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"addressCountry": {
+					"name": "addressCountry",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"addressPincode": {
+					"name": "addressPincode",
+					"type": "varchar(20)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"svixAppId": {
+					"name": "svixAppId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"updatedAt": {
+					"name": "updatedAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"devcrm_organization_slug_unique": {
+					"name": "devcrm_organization_slug_unique",
+					"nullsNotDistinct": false,
+					"columns": ["slug"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_payment": {
+			"name": "devcrm_payment",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"invoiceId": {
+					"name": "invoiceId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"amount": {
+					"name": "amount",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"paymentDate": {
+					"name": "paymentDate",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"paymentMethod": {
+					"name": "paymentMethod",
+					"type": "devcrm_payment_method",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"referenceNumber": {
+					"name": "referenceNumber",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"notes": {
+					"name": "notes",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_payment_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_payment_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_payment",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_payment_invoiceId_devcrm_invoice_id_fk": {
+					"name": "devcrm_payment_invoiceId_devcrm_invoice_id_fk",
+					"tableFrom": "devcrm_payment",
+					"tableTo": "devcrm_invoice",
+					"columnsFrom": ["invoiceId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_pipeline_stage": {
+			"name": "devcrm_pipeline_stage",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"pipelineId": {
+					"name": "pipelineId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"orderIndex": {
+					"name": "orderIndex",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"winProbability": {
+					"name": "winProbability",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 50
+				},
+				"color": {
+					"name": "color",
+					"type": "varchar(20)",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'#3b82f6'"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_pipeline_stage_pipelineId_devcrm_pipeline_id_fk": {
+					"name": "devcrm_pipeline_stage_pipelineId_devcrm_pipeline_id_fk",
+					"tableFrom": "devcrm_pipeline_stage",
+					"tableTo": "devcrm_pipeline",
+					"columnsFrom": ["pipelineId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_pipeline": {
+			"name": "devcrm_pipeline",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"isDefault": {
+					"name": "isDefault",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_pipeline_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_pipeline_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_pipeline",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_product": {
+			"name": "devcrm_product",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"sku": {
+					"name": "sku",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"type": {
+					"name": "type",
+					"type": "devcrm_product_type",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'PRODUCT'"
+				},
+				"description": {
+					"name": "description",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"unitPrice": {
+					"name": "unitPrice",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"unit": {
+					"name": "unit",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"stockQuantity": {
+					"name": "stockQuantity",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"isPublic": {
+					"name": "isPublic",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_product_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_product_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_product",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_quote": {
+			"name": "devcrm_quote",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"companyId": {
+					"name": "companyId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"quoteNumber": {
+					"name": "quoteNumber",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"version": {
+					"name": "version",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 1
+				},
+				"title": {
+					"name": "title",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"date": {
+					"name": "date",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"dueDate": {
+					"name": "dueDate",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"labels": {
+					"name": "labels",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"customFields": {
+					"name": "customFields",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"showTotalInPdf": {
+					"name": "showTotalInPdf",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": true
+				},
+				"showTotalInWords": {
+					"name": "showTotalInWords",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"lineItems": {
+					"name": "lineItems",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"taxPercent": {
+					"name": "taxPercent",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"discountType": {
+					"name": "discountType",
+					"type": "varchar(20)",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'AMOUNT'"
+				},
+				"discountValue": {
+					"name": "discountValue",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"additionalCharges": {
+					"name": "additionalCharges",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"totalAmount": {
+					"name": "totalAmount",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"signatureType": {
+					"name": "signatureType",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'IMAGE'"
+				},
+				"signatureName": {
+					"name": "signatureName",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"signatureData": {
+					"name": "signatureData",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"notes": {
+					"name": "notes",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"attachments": {
+					"name": "attachments",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"terms": {
+					"name": "terms",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"contactEmail": {
+					"name": "contactEmail",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"contactPhone": {
+					"name": "contactPhone",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"status": {
+					"name": "status",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'DRAFT'"
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_quote_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_quote_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_quote",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_quote_companyId_devcrm_company_id_fk": {
+					"name": "devcrm_quote_companyId_devcrm_company_id_fk",
+					"tableFrom": "devcrm_quote",
+					"tableTo": "devcrm_company",
+					"columnsFrom": ["companyId"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_session": {
+			"name": "devcrm_session",
+			"schema": "",
+			"columns": {
+				"sessionToken": {
+					"name": "sessionToken",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"userId": {
+					"name": "userId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"expires": {
+					"name": "expires",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_session_userId_devcrm_user_id_fk": {
+					"name": "devcrm_session_userId_devcrm_user_id_fk",
+					"tableFrom": "devcrm_session",
+					"tableTo": "devcrm_user",
+					"columnsFrom": ["userId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_statement": {
+			"name": "devcrm_statement",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"companyId": {
+					"name": "companyId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"statementNumber": {
+					"name": "statementNumber",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"startDate": {
+					"name": "startDate",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"endDate": {
+					"name": "endDate",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"openingBalance": {
+					"name": "openingBalance",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"closingBalance": {
+					"name": "closingBalance",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"transactions": {
+					"name": "transactions",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_statement_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_statement_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_statement",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_statement_companyId_devcrm_company_id_fk": {
+					"name": "devcrm_statement_companyId_devcrm_company_id_fk",
+					"tableFrom": "devcrm_statement",
+					"tableTo": "devcrm_company",
+					"columnsFrom": ["companyId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_subscription_plan": {
+			"name": "devcrm_subscription_plan",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"code": {
+					"name": "code",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"description": {
+					"name": "description",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"priceMonthly": {
+					"name": "priceMonthly",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"priceYearly": {
+					"name": "priceYearly",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"maxUsers": {
+					"name": "maxUsers",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 5
+				},
+				"maxContacts": {
+					"name": "maxContacts",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 1000
+				},
+				"isActive": {
+					"name": "isActive",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": true
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"devcrm_subscription_plan_code_unique": {
+					"name": "devcrm_subscription_plan_code_unique",
+					"nullsNotDistinct": false,
+					"columns": ["code"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_subscription": {
+			"name": "devcrm_subscription",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"planId": {
+					"name": "planId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"status": {
+					"name": "status",
+					"type": "devcrm_subscription_status",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'ACTIVE'"
+				},
+				"currentPeriodStart": {
+					"name": "currentPeriodStart",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"currentPeriodEnd": {
+					"name": "currentPeriodEnd",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"cancelAtPeriodEnd": {
+					"name": "cancelAtPeriodEnd",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_subscription_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_subscription_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_subscription",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_subscription_planId_devcrm_subscription_plan_id_fk": {
+					"name": "devcrm_subscription_planId_devcrm_subscription_plan_id_fk",
+					"tableFrom": "devcrm_subscription",
+					"tableTo": "devcrm_subscription_plan",
+					"columnsFrom": ["planId"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_tag": {
+			"name": "devcrm_tag",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"color": {
+					"name": "color",
+					"type": "varchar(20)",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'#3b82f6'"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_tag_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_tag_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_tag",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_user_settings": {
+			"name": "devcrm_user_settings",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"organizationId": {
+					"name": "organizationId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"userId": {
+					"name": "userId",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"defaultCurrency": {
+					"name": "defaultCurrency",
+					"type": "varchar(10)",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'INR'"
+				},
+				"customCurrencySymbol": {
+					"name": "customCurrencySymbol",
+					"type": "varchar(10)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"numberFormat": {
+					"name": "numberFormat",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'en-IN'"
+				},
+				"decimalDigits": {
+					"name": "decimalDigits",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 2
+				},
+				"roundQuantity": {
+					"name": "roundQuantity",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"roundRate": {
+					"name": "roundRate",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"customLabels": {
+					"name": "customLabels",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"signatureImage": {
+					"name": "signatureImage",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"tncList": {
+					"name": "tncList",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"theme": {
+					"name": "theme",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'light'"
+				},
+				"locale": {
+					"name": "locale",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'en-US'"
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"updatedAt": {
+					"name": "updatedAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"devcrm_user_settings_organizationId_devcrm_organization_id_fk": {
+					"name": "devcrm_user_settings_organizationId_devcrm_organization_id_fk",
+					"tableFrom": "devcrm_user_settings",
+					"tableTo": "devcrm_organization",
+					"columnsFrom": ["organizationId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"devcrm_user_settings_userId_devcrm_user_id_fk": {
+					"name": "devcrm_user_settings_userId_devcrm_user_id_fk",
+					"tableFrom": "devcrm_user_settings",
+					"tableTo": "devcrm_user",
+					"columnsFrom": ["userId"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_user": {
+			"name": "devcrm_user",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(255)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"email": {
+					"name": "email",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"emailVerified": {
+					"name": "emailVerified",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"image": {
+					"name": "image",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"phone": {
+					"name": "phone",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"passwordHash": {
+					"name": "passwordHash",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"system_role": {
+					"name": "system_role",
+					"type": "devcrm_user_role",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'USER'"
+				},
+				"onboardingComplete": {
+					"name": "onboardingComplete",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"hasSeenWelcome": {
+					"name": "hasSeenWelcome",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"updatedAt": {
+					"name": "updatedAt",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"devcrm_user_email_unique": {
+					"name": "devcrm_user_email_unique",
+					"nullsNotDistinct": false,
+					"columns": ["email"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.devcrm_verification_token": {
+			"name": "devcrm_verification_token",
+			"schema": "",
+			"columns": {
+				"identifier": {
+					"name": "identifier",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"token": {
+					"name": "token",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"expires": {
+					"name": "expires",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {
+				"devcrm_verification_token_identifier_token_pk": {
+					"name": "devcrm_verification_token_identifier_token_pk",
+					"columns": ["identifier", "token"]
+				}
+			},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		}
+	},
+	"enums": {
+		"public.devcrm_automation_action": {
+			"name": "devcrm_automation_action",
+			"schema": "public",
+			"values": [
+				"CREATE_NOTIFICATION",
+				"CREATE_TASK",
+				"SEND_EMAIL",
+				"INTERNAL_ALERT"
+			]
+		},
+		"public.devcrm_automation_trigger": {
+			"name": "devcrm_automation_trigger",
+			"schema": "public",
+			"values": [
+				"INVOICE_DUE",
+				"SUBSCRIPTION_RENEWAL",
+				"DEAL_STALLED",
+				"QUOTE_SENT"
+			]
+		},
+		"public.devcrm_client_subscription_cycle": {
+			"name": "devcrm_client_subscription_cycle",
+			"schema": "public",
+			"values": ["MONTHLY", "YEARLY"]
+		},
+		"public.devcrm_client_subscription_status": {
+			"name": "devcrm_client_subscription_status",
+			"schema": "public",
+			"values": ["ACTIVE", "CANCELLED", "EXPIRED"]
+		},
+		"public.devcrm_deal_status": {
+			"name": "devcrm_deal_status",
+			"schema": "public",
+			"values": ["OPEN", "WON", "LOST"]
+		},
+		"public.devcrm_invoice_status": {
+			"name": "devcrm_invoice_status",
+			"schema": "public",
+			"values": ["DRAFT", "PROFORMA", "SENT", "PAID", "OVERDUE", "CANCELLED"]
+		},
+		"public.devcrm_lead_status": {
+			"name": "devcrm_lead_status",
+			"schema": "public",
+			"values": ["NEW", "QUALIFIED", "CONTACTED", "NURTURING", "UNQUALIFIED"]
+		},
+		"public.devcrm_org_role": {
+			"name": "devcrm_org_role",
+			"schema": "public",
+			"values": ["OWNER", "ADMIN", "MEMBER", "VIEWER"]
+		},
+		"public.devcrm_payment_method": {
+			"name": "devcrm_payment_method",
+			"schema": "public",
+			"values": ["BANK_TRANSFER", "CREDIT_CARD", "CASH", "CHECK"]
+		},
+		"public.devcrm_product_type": {
+			"name": "devcrm_product_type",
+			"schema": "public",
+			"values": ["PRODUCT", "SERVICE"]
+		},
+		"public.devcrm_qualification_status": {
+			"name": "devcrm_qualification_status",
+			"schema": "public",
+			"values": ["NONE", "MQL", "SQL", "DISQUALIFIED"]
+		},
+		"public.devcrm_subscription_status": {
+			"name": "devcrm_subscription_status",
+			"schema": "public",
+			"values": ["ACTIVE", "TRIALING", "CANCELED", "PAST_DUE"]
+		},
+		"public.devcrm_task_priority": {
+			"name": "devcrm_task_priority",
+			"schema": "public",
+			"values": ["LOW", "MEDIUM", "HIGH", "URGENT"]
+		},
+		"public.devcrm_task_status": {
+			"name": "devcrm_task_status",
+			"schema": "public",
+			"values": ["PENDING", "IN_PROGRESS", "COMPLETED", "CANCELLED"]
+		},
+		"public.devcrm_user_role": {
+			"name": "devcrm_user_role",
+			"schema": "public",
+			"values": ["SUPER_ADMIN", "USER"]
+		}
+	},
+	"schemas": {},
+	"sequences": {},
+	"roles": {},
+	"policies": {},
+	"views": {},
+	"_meta": {
+		"columns": {},
+		"schemas": {},
+		"tables": {}
+	}
 }

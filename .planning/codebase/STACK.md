@@ -90,3 +90,4 @@ last_mapped_commit: 497081eeb4e2796116b07a5c35f52fbb96d9e957
 - Hosted PostgreSQL (Neon, Supabase, or AWS RDS)
 - Object storage (Cloudflare R2)
 - Svix account for webhook delivery
+

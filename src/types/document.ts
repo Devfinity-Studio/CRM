@@ -1,62 +1,70 @@
-export type TaxType = "none" | "GST (India)" | "VAT" | "PPN" | "SST" | "HST" | "TAX" | string;
+export type TaxType =
+	| "none"
+	| "GST (India)"
+	| "VAT"
+	| "PPN"
+	| "SST"
+	| "HST"
+	| "TAX"
+	| string;
 export type GstType = "IGST" | "CGST & SGST";
 export type DiscountType = "none" | "total" | "item";
 
 export interface DocumentData {
-  logoUrl?: string;
-  companyId?: string;
-  contactEmail?: string;
-  contactPhone?: string;
-  
-  // Invoice Specific Fields
-  poNumber?: string;
-  paymentTerms?: string;
-  
-  // Settings & Toggles
-  showTotalSection: boolean;
-  showTotalInWords: boolean;
-  summariseQuantity: boolean;
+	logoUrl?: string;
+	companyId?: string;
+	contactEmail?: string;
+	contactPhone?: string;
 
-  // Tax Configuration
-  taxConfig: {
-    type: TaxType;
-    placeOfSupply?: string;
-    gstType?: GstType;
-  };
+	// Invoice Specific Fields
+	poNumber?: string;
+	paymentTerms?: string;
 
-  // Cess Configuration
-  cessConfig?: {
-    enabled: boolean;
-    type: "central" | "state";
-    name: string;
-    isReverseCharge: boolean;
-  };
+	// Settings & Toggles
+	showTotalSection: boolean;
+	showTotalInWords: boolean;
+	summariseQuantity: boolean;
 
-  // Pricing
-  discount: {
-    type: DiscountType;
-    amount: number;
-    isPercentage: boolean;
-  };
-  additionalCharges: {
-    title: string;
-    amount: number;
-    isPercentage: boolean;
-  };
+	// Tax Configuration
+	taxConfig: {
+		type: TaxType;
+		placeOfSupply?: string;
+		gstType?: GstType;
+	};
 
-  // Custom Labels
-  totalLabel: string;
-  totalInWordsLabel: string;
-  totalInWordsValue: string;
+	// Cess Configuration
+	cessConfig?: {
+		enabled: boolean;
+		type: "central" | "state";
+		name: string;
+		isReverseCharge: boolean;
+	};
 
-  // Rich Text Fields
-  notes?: string;
-  attachments?: string;
-  info?: string;
+	// Pricing
+	discount: {
+		type: DiscountType;
+		amount: number;
+		isPercentage: boolean;
+	};
+	additionalCharges: {
+		title: string;
+		amount: number;
+		isPercentage: boolean;
+	};
 
-  // Terms and Conditions
-  termsTitle: string;
-  termsList: string[];
+	// Custom Labels
+	totalLabel: string;
+	totalInWordsLabel: string;
+	totalInWordsValue: string;
 
-  signatureUrl?: string;
+	// Rich Text Fields
+	notes?: string;
+	attachments?: string;
+	info?: string;
+
+	// Terms and Conditions
+	termsTitle: string;
+	termsList: string[];
+
+	signatureUrl?: string;
 }

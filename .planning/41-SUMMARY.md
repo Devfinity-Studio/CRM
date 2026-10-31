@@ -42,3 +42,4 @@
 
 ## Next Steps
 - Advance to **Phase 42: Sales Pipeline Kanban Board UI Refresh** (`/gsd-plan-phase 42`).
+

@@ -64,3 +64,4 @@ last_mapped_commit: 497081eeb4e2796116b07a5c35f52fbb96d9e957
 - **Endpoint:** `src/app/api/cron/process-automations/route.ts`
 - **Auth:** Authorization Bearer token comparison against `CRON_SECRET`
 - **Execution:** Queries active `automation_rule` records, scans for expiring subscriptions, upcoming invoice due dates, stalled deals, or sent quotes, and dispatches automated tasks, internal notifications, or email alerts while writing to `automation_log`.
+

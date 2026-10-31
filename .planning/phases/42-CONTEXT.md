@@ -31,3 +31,4 @@ Phase 42 implements the Stitch UI redesign of the Sales Pipeline Kanban board, d
 5. **Modernized Modals & Drawers**:
    - `DealSheet`: Slide-out drawer with tabs/sections for Overview, Deal Details (Client, Owner, Value, Stage, Close Date), Quick Won/Lost triggers, and Activity Timeline.
    - `DealDialog`: Glassmorphic modal with company autocomplete, contact selection, pipeline/stage picker, and value formatting.
+

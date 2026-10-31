@@ -87,3 +87,4 @@ Phase 44 brings full Stitch design harmony to all financial and billing interfac
 1. `pnpm biome check src/app/billing/invoices/page.tsx src/app/billing/quotes/page.tsx src/app/billing/statements/page.tsx src/components/billing/ledger-view.tsx src/components/public/document-viewer.tsx`
 2. `pnpm vitest run` (all 12 unit tests passing)
 3. Git commit and status report.
+

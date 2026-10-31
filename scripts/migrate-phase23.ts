@@ -1,12 +1,12 @@
-import { db } from "../src/server/db";
 import { sql } from "drizzle-orm";
+import { db } from "../src/server/db";
 
 async function main() {
-  console.log("Running Phase 23 migrations...");
+	console.log("Running Phase 23 migrations...");
 
-  try {
-    console.log("Creating devcrm_automation_trigger enum...");
-    await db.execute(sql`
+	try {
+		console.log("Creating devcrm_automation_trigger enum...");
+		await db.execute(sql`
       DO $$ BEGIN
         CREATE TYPE devcrm_automation_trigger AS ENUM ('INVOICE_DUE', 'SUBSCRIPTION_RENEWAL', 'DEAL_STALLED');
       EXCEPTION
@@ -14,8 +14,8 @@ async function main() {
       END $$;
     `);
 
-    console.log("Creating devcrm_automation_action enum...");
-    await db.execute(sql`
+		console.log("Creating devcrm_automation_action enum...");
+		await db.execute(sql`
       DO $$ BEGIN
         CREATE TYPE devcrm_automation_action AS ENUM ('CREATE_NOTIFICATION', 'CREATE_TASK');
       EXCEPTION
@@ -23,8 +23,8 @@ async function main() {
       END $$;
     `);
 
-    console.log("Creating automation_rule table...");
-    await db.execute(sql`
+		console.log("Creating automation_rule table...");
+		await db.execute(sql`
       CREATE TABLE IF NOT EXISTS "devcrm_automation_rule" (
         "id" varchar(255) PRIMARY KEY NOT NULL,
         "organizationId" varchar(255) NOT NULL REFERENCES "devcrm_organization"("id") ON DELETE CASCADE,
@@ -38,12 +38,12 @@ async function main() {
       );
     `);
 
-    console.log("Phase 23 migration completed successfully!");
-  } catch (error) {
-    console.error("Migration failed:", error);
-    process.exit(1);
-  }
-  process.exit(0);
+		console.log("Phase 23 migration completed successfully!");
+	} catch (error) {
+		console.error("Migration failed:", error);
+		process.exit(1);
+	}
+	process.exit(0);
 }
 
 main();

@@ -1,140 +1,173 @@
 "use client";
 
-import * as React from "react";
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import type * as React from "react";
+import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import Link from "next/link";
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+	const router = useRouter();
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [error, setError] = useState<string | null>(null);
+	const [loading, setLoading] = useState(false);
 
-  const handleCredentialsLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+	const handleCredentialsLogin = async (e: React.FormEvent) => {
+		e.preventDefault();
+		setLoading(true);
+		setError(null);
 
-    const res = await signIn("credentials", {
-      identifier: email,
-      password,
-      redirect: false,
-    });
+		const res = await signIn("credentials", {
+			identifier: email,
+			password,
+			redirect: false,
+		});
 
-    if (res?.error) {
-      setError("Invalid credentials. Please try again.");
-      setLoading(false);
-    } else {
-      router.push("/dashboard");
-      router.refresh();
-    }
-  };
+		if (res?.error) {
+			setError("Invalid credentials. Please try again.");
+			setLoading(false);
+		} else {
+			router.push("/dashboard");
+			router.refresh();
+		}
+	};
 
-  const handleOAuthLogin = (provider: string) => {
-    signIn(provider, { callbackUrl: "/dashboard" });
-  };
+	const handleOAuthLogin = (provider: string) => {
+		signIn(provider, { callbackUrl: "/dashboard" });
+	};
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 p-4">
-      <div className="w-full max-w-md space-y-8 rounded-xl bg-zinc-900 p-8 shadow-2xl border border-zinc-800">
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold tracking-tight text-white">
-            Welcome back to DevCRM
-          </h2>
-          <p className="mt-2 text-sm text-zinc-400">
-            Sign in to your account to continue
-          </p>
-        </div>
+	return (
+		<div className="flex min-h-screen items-center justify-center bg-zinc-950 p-4">
+			<div className="w-full max-w-md space-y-8 rounded-xl border border-zinc-800 bg-zinc-900 p-8 shadow-2xl">
+				<div className="text-center">
+					<h2 className="mt-6 font-bold text-3xl text-white tracking-tight">
+						Welcome back to DevCRM
+					</h2>
+					<p className="mt-2 text-sm text-zinc-400">
+						Sign in to your account to continue
+					</p>
+				</div>
 
-        {error && (
-          <div className="rounded-md bg-red-900/50 p-4 border border-red-800">
-            <p className="text-sm text-red-200">{error}</p>
-          </div>
-        )}
+				{error && (
+					<div className="rounded-md border border-red-800 bg-red-900/50 p-4">
+						<p className="text-red-200 text-sm">{error}</p>
+					</div>
+				)}
 
-        <form className="mt-8 space-y-6" onSubmit={handleCredentialsLogin}>
-          <div className="space-y-4 rounded-md shadow-sm">
-            <div>
-              <label className="text-sm font-medium text-zinc-300">Email Address</label>
-              <Input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 bg-zinc-950 border-zinc-800 text-white"
-                placeholder="you@example.com"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-zinc-300">Password</label>
-              <Input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 bg-zinc-950 border-zinc-800 text-white"
-                placeholder="••••••••"
-              />
-            </div>
-          </div>
+				<form className="mt-8 space-y-6" onSubmit={handleCredentialsLogin}>
+					<div className="space-y-4 rounded-md shadow-sm">
+						<div>
+							<label className="font-medium text-sm text-zinc-300">
+								Email Address
+							</label>
+							<Input
+								className="mt-1 border-zinc-800 bg-zinc-950 text-white"
+								onChange={(e) => setEmail(e.target.value)}
+								placeholder="you@example.com"
+								required
+								type="email"
+								value={email}
+							/>
+						</div>
+						<div>
+							<label className="font-medium text-sm text-zinc-300">
+								Password
+							</label>
+							<Input
+								className="mt-1 border-zinc-800 bg-zinc-950 text-white"
+								onChange={(e) => setPassword(e.target.value)}
+								placeholder="••••••••"
+								required
+								type="password"
+								value={password}
+							/>
+						</div>
+					</div>
 
-          <div>
-            <Button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              disabled={loading}
-            >
-              {loading ? "Signing in..." : "Sign in"}
-            </Button>
-          </div>
-        </form>
+					<div>
+						<Button
+							className="w-full bg-blue-600 text-white hover:bg-blue-700"
+							disabled={loading}
+							type="submit"
+						>
+							{loading ? "Signing in..." : "Sign in"}
+						</Button>
+					</div>
+				</form>
 
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-zinc-800" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-zinc-900 px-2 text-zinc-400">Or continue with</span>
-            </div>
-          </div>
+				<div className="mt-6">
+					<div className="relative">
+						<div className="absolute inset-0 flex items-center">
+							<div className="w-full border-zinc-800 border-t" />
+						</div>
+						<div className="relative flex justify-center text-sm">
+							<span className="bg-zinc-900 px-2 text-zinc-400">
+								Or continue with
+							</span>
+						</div>
+					</div>
 
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <Button
-              variant="outline"
-              onClick={() => handleOAuthLogin("github")}
-              className="bg-zinc-950 border-zinc-800 text-zinc-300 hover:bg-zinc-800 hover:text-white"
-            >
-              <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="github" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512">
-                <path fill="currentColor" d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"></path>
-              </svg>
-              GitHub
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => handleOAuthLogin("google")}
-              className="bg-zinc-950 border-zinc-800 text-zinc-300 hover:bg-zinc-800 hover:text-white"
-            >
-              <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
-                <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
-              </svg>
-              Google
-            </Button>
-          </div>
-        </div>
-        
-        <p className="mt-8 text-center text-sm text-zinc-400">
-          Don't have an account?{" "}
-          <Link href="/register" className="font-medium text-blue-400 hover:text-blue-300">
-            Sign up for free
-          </Link>
-        </p>
-      </div>
-    </div>
-  );
+					<div className="mt-6 grid grid-cols-2 gap-3">
+						<Button
+							className="border-zinc-800 bg-zinc-950 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+							onClick={() => handleOAuthLogin("github")}
+							variant="outline"
+						>
+							<svg
+								aria-hidden="true"
+								className="mr-2 h-4 w-4"
+								data-icon="github"
+								data-prefix="fab"
+								focusable="false"
+								role="img"
+								viewBox="0 0 496 512"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"
+									fill="currentColor"
+								></path>
+							</svg>
+							GitHub
+						</Button>
+						<Button
+							className="border-zinc-800 bg-zinc-950 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+							onClick={() => handleOAuthLogin("google")}
+							variant="outline"
+						>
+							<svg
+								aria-hidden="true"
+								className="mr-2 h-4 w-4"
+								data-icon="google"
+								data-prefix="fab"
+								focusable="false"
+								role="img"
+								viewBox="0 0 488 512"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"
+									fill="currentColor"
+								></path>
+							</svg>
+							Google
+						</Button>
+					</div>
+				</div>
+
+				<p className="mt-8 text-center text-sm text-zinc-400">
+					Don't have an account?{" "}
+					<Link
+						className="font-medium text-blue-400 hover:text-blue-300"
+						href="/register"
+					>
+						Sign up for free
+					</Link>
+				</p>
+			</div>
+		</div>
+	);
 }

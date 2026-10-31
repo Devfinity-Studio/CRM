@@ -1,29 +1,29 @@
 import { redirect } from "next/navigation";
-import { auth } from "~/server/auth";
 import { SuperAdminLayout } from "~/components/layout/superadmin-layout";
+import { auth } from "~/server/auth";
 
 export default async function AdminLayout({
-  children,
+	children,
 }: {
-  children: React.ReactNode;
+	children: React.ReactNode;
 }) {
-  const session = await auth();
+	const session = await auth();
 
-  if (!session?.user) {
-    redirect("/login");
-  }
+	if (!session?.user) {
+		redirect("/login");
+	}
 
-  // Strict guard for Super Admin
-  if (session.user.systemRole !== "SUPER_ADMIN") {
-    redirect("/dashboard");
-  }
+	// Strict guard for Super Admin
+	if (session.user.systemRole !== "SUPER_ADMIN") {
+		redirect("/dashboard");
+	}
 
-  return (
-    <SuperAdminLayout
-      userName={session.user.name ?? undefined}
-      userEmail={session.user.email ?? undefined}
-    >
-      {children}
-    </SuperAdminLayout>
-  );
+	return (
+		<SuperAdminLayout
+			userEmail={session.user.email ?? undefined}
+			userName={session.user.name ?? undefined}
+		>
+			{children}
+		</SuperAdminLayout>
+	);
 }

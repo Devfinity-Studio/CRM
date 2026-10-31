@@ -4,78 +4,81 @@ import { useState } from "react";
 import { api } from "~/trpc/react";
 
 interface UseS3UploadOptions {
-  onSuccess?: (publicUrl: string) => void;
-  onError?: (error: Error) => void;
+	onSuccess?: (publicUrl: string) => void;
+	onError?: (error: Error) => void;
 }
 
 export function useS3Upload(options?: UseS3UploadOptions) {
-  const [isUploading, setIsUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
+	const [isUploading, setIsUploading] = useState(false);
+	const [progress, setProgress] = useState(0);
 
-  const getPresignedUrl = api.uploads.getPresignedUrl.useMutation();
+	const getPresignedUrl = api.uploads.getPresignedUrl.useMutation();
 
-  const uploadFile = async (file: File, folder = "misc") => {
-    try {
-      setIsUploading(true);
-      setProgress(0);
+	const uploadFile = async (file: File, folder = "misc") => {
+		try {
+			setIsUploading(true);
+			setProgress(0);
 
-      // 1. Get the presigned URL from our tRPC backend
-      const { uploadUrl, publicUrl } = await getPresignedUrl.mutateAsync({
-        filename: file.name,
-        contentType: file.type,
-        folder,
-      });
+			// 1. Get the presigned URL from our tRPC backend
+			const { uploadUrl, publicUrl } = await getPresignedUrl.mutateAsync({
+				filename: file.name,
+				contentType: file.type,
+				folder,
+			});
 
-      // 2. Upload the file directly to S3 using XMLHttpRequest for progress tracking
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            const percentComplete = Math.round((event.loaded / event.total) * 100);
-            setProgress(percentComplete);
-          }
-        };
+			// 2. Upload the file directly to S3 using XMLHttpRequest for progress tracking
+			await new Promise<void>((resolve, reject) => {
+				const xhr = new XMLHttpRequest();
 
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve();
-          } else {
-            reject(new Error(`Upload failed with status ${xhr.status}`));
-          }
-        };
+				xhr.upload.onprogress = (event) => {
+					if (event.lengthComputable) {
+						const percentComplete = Math.round(
+							(event.loaded / event.total) * 100,
+						);
+						setProgress(percentComplete);
+					}
+				};
 
-        xhr.onerror = () => reject(new Error("Network error occurred during upload"));
+				xhr.onload = () => {
+					if (xhr.status >= 200 && xhr.status < 300) {
+						resolve();
+					} else {
+						reject(new Error(`Upload failed with status ${xhr.status}`));
+					}
+				};
 
-        xhr.open("PUT", uploadUrl);
-        xhr.setRequestHeader("Content-Type", file.type);
-        xhr.send(file);
-      });
+				xhr.onerror = () =>
+					reject(new Error("Network error occurred during upload"));
 
-      setProgress(100);
-      setIsUploading(false);
+				xhr.open("PUT", uploadUrl);
+				xhr.setRequestHeader("Content-Type", file.type);
+				xhr.send(file);
+			});
 
-      if (options?.onSuccess) {
-        options.onSuccess(publicUrl);
-      }
+			setProgress(100);
+			setIsUploading(false);
 
-      return publicUrl;
-    } catch (error) {
-      setIsUploading(false);
-      setProgress(0);
-      const e = error instanceof Error ? error : new Error("Unknown error");
-      if (options?.onError) {
-        options.onError(e);
-      } else {
-        console.error("Upload error:", e);
-      }
-      throw e;
-    }
-  };
+			if (options?.onSuccess) {
+				options.onSuccess(publicUrl);
+			}
 
-  return {
-    uploadFile,
-    isUploading,
-    progress,
-  };
+			return publicUrl;
+		} catch (error) {
+			setIsUploading(false);
+			setProgress(0);
+			const e = error instanceof Error ? error : new Error("Unknown error");
+			if (options?.onError) {
+				options.onError(e);
+			} else {
+				console.error("Upload error:", e);
+			}
+			throw e;
+		}
+	};
+
+	return {
+		uploadFile,
+		isUploading,
+		progress,
+	};
 }

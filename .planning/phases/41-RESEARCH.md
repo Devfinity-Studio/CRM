@@ -97,3 +97,4 @@ Currently `dashboardRouter` provides basic counters (`totalContacts`, `unpaidInv
    - Clicking period pills (`This Month`, `This Quarter`, etc.) triggers React Query refetch and updates card figures.
    - Clicking a deal row opens `DealSheet` without page reload.
    - Responsive check: Mobile viewport displays hamburger button and opens drawer sheet.
+

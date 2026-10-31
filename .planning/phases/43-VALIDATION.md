@@ -15,3 +15,4 @@
 - **Contact Lead Scores & Badges (REQ-43-04)**: Renders lead scores with flame/sparkle icon and SQL/MQL qualification pills using theme tokens.
 - **Activity Timeline (REQ-43-02)**: Type switcher pills (Note, Call, Email, Meeting) function smoothly and post to the timeline feed.
 - **POC Modal**: In-context `AddPocDialog` creates contacts linked directly to the client company.
+

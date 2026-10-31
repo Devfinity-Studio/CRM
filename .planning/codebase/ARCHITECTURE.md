@@ -97,3 +97,4 @@ last_mapped_commit: 497081eeb4e2796116b07a5c35f52fbb96d9e957
 - **NextAuth Handler:** `src/app/api/auth/[...nextauth]/route.ts`
 - **Automations Cron:** `src/app/api/cron/process-automations/route.ts`
 - **Edge Middleware:** `src/middleware.ts`
+

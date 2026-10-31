@@ -39,3 +39,4 @@
 
 ## Next Steps
 - Advance to **Phase 43: CRM Client Profiles 2-Column Overhaul** (`/gsd-plan-phase 43`).
+

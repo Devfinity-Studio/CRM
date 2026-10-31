@@ -1,12 +1,12 @@
-import { db } from "~/server/db";
 import { sql } from "drizzle-orm";
+import { db } from "~/server/db";
 
 async function main() {
-  console.log("Running Phase 19 manual migration...");
-  try {
-    console.log("Creating devcrm_statement table...");
-    try {
-      await db.execute(sql`
+	console.log("Running Phase 19 manual migration...");
+	try {
+		console.log("Creating devcrm_statement table...");
+		try {
+			await db.execute(sql`
         CREATE TABLE IF NOT EXISTS devcrm_statement (
           id varchar(255) PRIMARY KEY NOT NULL,
           "organizationId" varchar(255) NOT NULL REFERENCES devcrm_organization(id) ON DELETE CASCADE,
@@ -20,17 +20,17 @@ async function main() {
           "createdAt" timestamp with time zone DEFAULT now() NOT NULL
         );
       `);
-      console.log("Created devcrm_statement table.");
-    } catch (e: any) {
-      throw e;
-    }
+			console.log("Created devcrm_statement table.");
+		} catch (e: any) {
+			throw e;
+		}
 
-    console.log("Migration completed successfully.");
-    process.exit(0);
-  } catch (error) {
-    console.error("Migration failed:", error);
-    process.exit(1);
-  }
+		console.log("Migration completed successfully.");
+		process.exit(0);
+	} catch (error) {
+		console.error("Migration failed:", error);
+		process.exit(1);
+	}
 }
 
 main();

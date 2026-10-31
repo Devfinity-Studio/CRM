@@ -1,148 +1,159 @@
 "use client";
 
-import * as React from "react";
-import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import type * as React from "react";
+import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import Link from "next/link";
 import { api } from "~/trpc/react";
 
 export default function RegisterPage() {
-  const router = useRouter();
-  
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  
-  const [error, setError] = useState<string | null>(null);
+	const router = useRouter();
 
-  const registerMutation = api.auth.register.useMutation({
-    onSuccess: async () => {
-      // Auto-login after successful registration
-      const res = await signIn("credentials", {
-        identifier: email,
-        password,
-        redirect: false,
-      });
+	const [name, setName] = useState("");
+	const [email, setEmail] = useState("");
+	const [phone, setPhone] = useState("");
+	const [password, setPassword] = useState("");
 
-      if (res?.error) {
-        router.push("/login"); // Fallback to login
-      }
-      if (res?.ok) {
-        router.push("/dashboard");
-        router.refresh();
-      }
-    },
-    onError: (e) => {
-      setError(e.message || "An error occurred during registration.");
-    },
-  });
+	const [error, setError] = useState<string | null>(null);
 
-  const handleOAuthRegister = (provider: string) => {
-    signIn(provider, { callbackUrl: "/dashboard" });
-  };
+	const registerMutation = api.auth.register.useMutation({
+		onSuccess: async () => {
+			// Auto-login after successful registration
+			const res = await signIn("credentials", {
+				identifier: email,
+				password,
+				redirect: false,
+			});
 
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    registerMutation.mutate({
-      name,
-      email,
-      phone,
-      password,
-    });
-  };
+			if (res?.error) {
+				router.push("/login"); // Fallback to login
+			}
+			if (res?.ok) {
+				router.push("/dashboard");
+				router.refresh();
+			}
+		},
+		onError: (e) => {
+			setError(e.message || "An error occurred during registration.");
+		},
+	});
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 p-4">
-      <div className="w-full max-w-md space-y-8 rounded-xl bg-zinc-900 p-8 shadow-2xl border border-zinc-800">
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold tracking-tight text-white">
-            Create an account
-          </h2>
-          <p className="mt-2 text-sm text-zinc-400">
-            Start managing your CRM today
-          </p>
-        </div>
+	const handleOAuthRegister = (provider: string) => {
+		signIn(provider, { callbackUrl: "/dashboard" });
+	};
 
-        {error && (
-          <div className="rounded-md bg-red-900/50 p-4 border border-red-800">
-            <p className="text-sm text-red-200">{error}</p>
-          </div>
-        )}
+	const handleRegister = (e: React.FormEvent) => {
+		e.preventDefault();
+		setError(null);
+		registerMutation.mutate({
+			name,
+			email,
+			phone,
+			password,
+		});
+	};
 
-        <form className="mt-8 space-y-6" onSubmit={handleRegister}>
-          <div className="space-y-4 rounded-md shadow-sm">
-            <div>
-              <label className="text-sm font-medium text-zinc-300">Full Name</label>
-              <Input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="mt-1 bg-zinc-950 border-zinc-800 text-white"
-                placeholder="John Doe"
-              />
-            </div>
+	return (
+		<div className="flex min-h-screen items-center justify-center bg-zinc-950 p-4">
+			<div className="w-full max-w-md space-y-8 rounded-xl border border-zinc-800 bg-zinc-900 p-8 shadow-2xl">
+				<div className="text-center">
+					<h2 className="mt-6 font-bold text-3xl text-white tracking-tight">
+						Create an account
+					</h2>
+					<p className="mt-2 text-sm text-zinc-400">
+						Start managing your CRM today
+					</p>
+				</div>
 
-            <div>
-              <label className="text-sm font-medium text-zinc-300">Email Address</label>
-              <Input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 bg-zinc-950 border-zinc-800 text-white"
-                placeholder="you@example.com"
-              />
-            </div>
+				{error && (
+					<div className="rounded-md border border-red-800 bg-red-900/50 p-4">
+						<p className="text-red-200 text-sm">{error}</p>
+					</div>
+				)}
 
-            <div>
-              <label className="text-sm font-medium text-zinc-300">Phone (Optional)</label>
-              <Input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="mt-1 bg-zinc-950 border-zinc-800 text-white"
-                placeholder="+1 555-0199"
-              />
-            </div>
+				<form className="mt-8 space-y-6" onSubmit={handleRegister}>
+					<div className="space-y-4 rounded-md shadow-sm">
+						<div>
+							<label className="font-medium text-sm text-zinc-300">
+								Full Name
+							</label>
+							<Input
+								className="mt-1 border-zinc-800 bg-zinc-950 text-white"
+								onChange={(e) => setName(e.target.value)}
+								placeholder="John Doe"
+								required
+								type="text"
+								value={name}
+							/>
+						</div>
 
-            <div>
-              <label className="text-sm font-medium text-zinc-300">Password</label>
-              <Input
-                type="password"
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 bg-zinc-950 border-zinc-800 text-white"
-                placeholder="••••••••"
-              />
-            </div>
-          </div>
+						<div>
+							<label className="font-medium text-sm text-zinc-300">
+								Email Address
+							</label>
+							<Input
+								className="mt-1 border-zinc-800 bg-zinc-950 text-white"
+								onChange={(e) => setEmail(e.target.value)}
+								placeholder="you@example.com"
+								required
+								type="email"
+								value={email}
+							/>
+						</div>
 
-          <div>
-            <Button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              disabled={registerMutation.isPending}
-            >
-              {registerMutation.isPending ? "Creating account..." : "Sign up"}
-            </Button>
-          </div>
-        </form>
+						<div>
+							<label className="font-medium text-sm text-zinc-300">
+								Phone (Optional)
+							</label>
+							<Input
+								className="mt-1 border-zinc-800 bg-zinc-950 text-white"
+								onChange={(e) => setPhone(e.target.value)}
+								placeholder="+1 555-0199"
+								type="tel"
+								value={phone}
+							/>
+						</div>
 
-        <p className="mt-8 text-center text-sm text-zinc-400">
-          Already have an account?{" "}
-          <Link href="/login" className="font-medium text-blue-400 hover:text-blue-300">
-            Sign in instead
-          </Link>
-        </p>
-      </div>
-    </div>
-  );
+						<div>
+							<label className="font-medium text-sm text-zinc-300">
+								Password
+							</label>
+							<Input
+								className="mt-1 border-zinc-800 bg-zinc-950 text-white"
+								minLength={6}
+								onChange={(e) => setPassword(e.target.value)}
+								placeholder="••••••••"
+								required
+								type="password"
+								value={password}
+							/>
+						</div>
+					</div>
+
+					<div>
+						<Button
+							className="w-full bg-blue-600 text-white hover:bg-blue-700"
+							disabled={registerMutation.isPending}
+							type="submit"
+						>
+							{registerMutation.isPending ? "Creating account..." : "Sign up"}
+						</Button>
+					</div>
+				</form>
+
+				<p className="mt-8 text-center text-sm text-zinc-400">
+					Already have an account?{" "}
+					<Link
+						className="font-medium text-blue-400 hover:text-blue-300"
+						href="/login"
+					>
+						Sign in instead
+					</Link>
+				</p>
+			</div>
+		</div>
+	);
 }

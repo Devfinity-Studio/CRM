@@ -11,3 +11,4 @@ Synchronize the local code and database schema across both dev and production Ne
 - [ ] **REQ-45-03**: Initialize and link the Neon CLI (`npm install -g neon@latest` / `npx neon@latest`) with `neon init -y --project-id royal-field-53532962 --branch production --services postgres,object-storage`.
 - [ ] **REQ-45-04**: Create and configure the Neon Object Storage bucket: run `neon config add bucket uploads` and `neon deploy`, syncing credentials into `.env`.
 - [ ] **REQ-45-05**: Decommission Cloudflare R2 dependencies, integrate Neon Object Storage via the Files SDK into the app's upload pipeline, and execute verification test (upload small text file, list bucket, read back content without printing secrets).
+

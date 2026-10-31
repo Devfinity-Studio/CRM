@@ -1,12 +1,12 @@
 // @ts-nocheck
-require('dotenv').config();
-const postgres = require('postgres');
+require("dotenv").config();
+const postgres = require("postgres");
 const sql = postgres(process.env.DATABASE_URL);
 
 async function run() {
-  try {
-    await sql.unsafe(`DROP TABLE IF EXISTS "devcrm_contact" CASCADE`);
-    await sql.unsafe(`
+	try {
+		await sql.unsafe(`DROP TABLE IF EXISTS "devcrm_contact" CASCADE`);
+		await sql.unsafe(`
       CREATE TABLE "devcrm_contact" (
         "id" character varying(255) PRIMARY KEY NOT NULL,
         "organizationId" character varying(255) NOT NULL,
@@ -36,24 +36,24 @@ async function run() {
       );
     `);
 
-    // Add foreign key constraints
-    await sql.unsafe(`
+		// Add foreign key constraints
+		await sql.unsafe(`
       ALTER TABLE "devcrm_contact" 
       ADD CONSTRAINT devcrm_contact_organizationId_fkey 
       FOREIGN KEY ("organizationId") REFERENCES "devcrm_organization"("id") ON DELETE CASCADE;
     `);
 
-    await sql.unsafe(`
+		await sql.unsafe(`
       ALTER TABLE "devcrm_contact" 
       ADD CONSTRAINT devcrm_contact_companyId_fkey 
       FOREIGN KEY ("companyId") REFERENCES "devcrm_company"("id") ON DELETE SET NULL;
     `);
 
-    console.log('Created devcrm_contact successfully');
-  } catch(e) {
-    console.error(e);
-  } finally {
-    process.exit(0);
-  }
+		console.log("Created devcrm_contact successfully");
+	} catch (e) {
+		console.error(e);
+	} finally {
+		process.exit(0);
+	}
 }
 run();

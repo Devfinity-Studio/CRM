@@ -55,3 +55,4 @@ In `src/server/api/routers/deals.ts`:
 - Unit tests in `src/server/api/__tests__/deals.test.ts` testing `getDeals`, `getMetricsSummary`, and `moveDeal`.
 - Biome check (`pnpm biome check`) across all modified deals files.
 - Vitest run (`pnpm vitest run`) to confirm 100% test pass rate.
+

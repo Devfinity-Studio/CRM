@@ -15,3 +15,4 @@
 - **Column Header Metrics**: Deal count badge, total stage amount ($), and win probability indicator display accurate live aggregates.
 - **Top Pipeline Summary Bar**: Displays Total Pipeline Value, Forecasted Weighted Revenue, Win Rate %, and active deals count.
 - **Modernized Drawers/Modals**: Opening `DealSheet` displays rich properties and activity timeline; opening `DealDialog` offers complete deal creation fields.
+

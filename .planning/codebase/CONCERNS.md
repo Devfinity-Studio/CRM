@@ -68,3 +68,4 @@ last_mapped_commit: 497081eeb4e2796116b07a5c35f52fbb96d9e957
 - **Problem:** Client profile views and Kanban boards fetch entire deal/activity lists without infinite scrolling or virtualization.
 - **Impact:** Performance degradation on organizations with thousands of leads and historical activities.
 - **Recommendation:** Implement cursor-based pagination in `src/server/api/routers/deals.ts` and `src/server/api/routers/crm.ts`.
+

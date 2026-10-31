@@ -38,3 +38,4 @@
 
 ## Next Steps
 - Advance to **Phase 44: Billing & Financial Views Polish** (`/gsd-plan-phase 44`).
+

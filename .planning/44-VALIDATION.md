@@ -14,3 +14,4 @@
 - **Status Badges & Filtering**: Filter pills (All, Paid, Sent, Overdue, Draft) filter rows seamlessly; status badges render with glowing accents and color dots.
 - **Party Ledger Harmonization (REQ-44-02)**: `LedgerView` displays clean date range controls, balance summaries, and color-coded transaction debit/credit amounts.
 - **Public Document Viewer (REQ-44-03)**: Document viewer loads without authentication, displays clean branding, and triggers print styling accurately.
+

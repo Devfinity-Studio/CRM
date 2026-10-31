@@ -84,3 +84,4 @@ Phase 43 re-architects the CRM Client Profile page (`src/app/clients/[id]/page.t
 2. `pnpm vitest run src/server/api/__tests__/deals.test.ts`
 3. `pnpm vitest run`
 4. Git commit and status report.
+

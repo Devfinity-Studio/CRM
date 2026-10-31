@@ -56,3 +56,4 @@
 ### 5. Automated Verification Plan
 - Biome check (`pnpm biome check`) across all modified billing files.
 - Vitest run (`pnpm vitest run`) to confirm full test pass across all suites.
+

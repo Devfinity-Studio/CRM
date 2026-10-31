@@ -72,3 +72,4 @@ last_mapped_commit: 497081eeb4e2796116b07a5c35f52fbb96d9e957
 
 **Multi-Tenancy Guarding:**
 - Every query operating on tenant-owned data must explicitly filter by `organizationId: ctx.session.user.organizationId` to enforce strict isolation.
+
