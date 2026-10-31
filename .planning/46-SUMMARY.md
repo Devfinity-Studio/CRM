@@ -50,3 +50,4 @@
 - [x] **REQ-46-02**: Commit and push all build stability fixes (safe session access and .env handling) to `dev` and `prod`, triggering a clean Vercel production deployment.
 - [x] **REQ-46-03**: Verify live health on production URL: root landing page, tenant login, dashboard KPI queries, and API route responses.
 - [x] **REQ-46-04**: Execute live smoke tests on core workflows: deals pipeline, billing/invoices, and Neon Object Storage file uploads.
+

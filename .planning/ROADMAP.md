@@ -2,13 +2,8 @@
 
 ## Milestones & Phases
 
-### Milestone 15: Production Sync & Neon Object Storage Migration (In Progress)
-- [x] **Phase 45: Database Branch Sync & Neon Object Storage Migration**
-  - **Goal:** Commit and push dev changes, sync database migrations across both dev and production Neon database branches, replace Cloudflare R2 with Neon Object Storage (uploads bucket via Neon Files SDK), and verify with live file upload, listing, and read-back tests.
-  - **Plans:** 1/1 completed
-- [x] **Phase 46: Production Deployment & Live Verification**
-  - **Goal:** Deploy the synchronized Next.js codebase to Vercel production, configure production environment variables (Neon Postgres, Neon Object Storage, NextAuth, Svix), and verify live end-to-end functionality (login, dashboard KPIs, sales pipeline, billing, and file uploads).
-  - **Plans:** 1/1 completed
+### Milestone 15: Production Sync & Neon Object Storage Migration (Completed)
+- [x] [Archived in v15-ROADMAP.md](./milestones/v15-ROADMAP.md)
 
 ### Milestone 14: Stitch UI Implementation & Production Integration (Completed)
 - [x] [Archived in v14-ROADMAP.md](./milestones/v14-ROADMAP.md)
