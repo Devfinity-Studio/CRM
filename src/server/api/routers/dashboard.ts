@@ -1,112 +1,301 @@
+import { subDays } from "date-fns";
+import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { companies, deals, invoices, crmTasks, pipelineStages, organizationMembers, organizations, users } from "~/server/db/schema";
-import { eq, inArray, and, not, sql } from "drizzle-orm";
+import {
+	companies,
+	crmTasks,
+	deals,
+	invoices,
+	organizationMembers,
+	organizations,
+	pipelineStages,
+	users,
+} from "~/server/db/schema";
 
 export const dashboardRouter = createTRPCRouter({
-  getLayoutData: protectedProcedure.query(async ({ ctx }) => {
-    const member = await ctx.db.query.organizationMembers.findFirst({
-      where: eq(organizationMembers.userId, ctx.session.user.id),
-    });
+	getLayoutData: protectedProcedure.query(async ({ ctx }) => {
+		// 1. Fetch user's organization memberships
+		const userMemberships = await ctx.db
+			.select({
+				organizationId: organizationMembers.organizationId,
+				role: organizationMembers.role,
+				name: organizations.name,
+				logoUrl: organizations.logoUrl,
+				slug: organizations.slug,
+			})
+			.from(organizationMembers)
+			.innerJoin(
+				organizations,
+				eq(organizationMembers.organizationId, organizations.id),
+			)
+			.where(eq(organizationMembers.userId, ctx.session.user.id));
 
-    let organizationName = "My Workspace";
-    if (member?.organizationId) {
-      const org = await ctx.db.query.organizations.findFirst({
-        where: eq(organizations.id, member.organizationId),
-      });
-      if (org?.name) {
-        organizationName = org.name;
-      }
-    }
+		const activeOrgId =
+			ctx.session.user.organizationId || userMemberships[0]?.organizationId;
+		const activeMembership =
+			userMemberships.find((m) => m.organizationId === activeOrgId) ||
+			userMemberships[0];
 
-    const userDb = await ctx.db.query.users.findFirst({
-      where: eq(users.id, ctx.session.user.id)
-    });
+		const userDb = await ctx.db.query.users.findFirst({
+			where: eq(users.id, ctx.session.user.id),
+		});
 
-    return {
-      user: {
-        ...ctx.session.user,
-        name: userDb?.name || ctx.session.user.name,
-        email: userDb?.email || ctx.session.user.email,
-      },
-      organizationName,
-      tenantRole: member?.role ?? "MEMBER",
-      onboardingComplete: userDb?.onboardingComplete ?? false,
-    };
-  }),
+		return {
+			user: {
+				...ctx.session.user,
+				name: userDb?.name || ctx.session.user.name,
+				email: userDb?.email || ctx.session.user.email,
+				image: userDb?.image || ctx.session.user.image,
+			},
+			activeOrganization: {
+				id: activeMembership?.organizationId || "",
+				name: activeMembership?.name || "My Workspace",
+				logoUrl: activeMembership?.logoUrl || null,
+				slug: activeMembership?.slug || "",
+				role: activeMembership?.role || "MEMBER",
+			},
+			organizations: userMemberships.map((m) => ({
+				id: m.organizationId,
+				name: m.name,
+				logoUrl: m.logoUrl,
+				slug: m.slug,
+				role: m.role,
+			})),
+			tenantRole: activeMembership?.role ?? "MEMBER",
+			onboardingComplete: userDb?.onboardingComplete ?? false,
+		};
+	}),
 
-  getMetrics: protectedProcedure.query(async ({ ctx }) => {
-    const member = await ctx.db.query.organizationMembers.findFirst({
-      where: eq(organizationMembers.userId, ctx.session.user.id),
-    });
-    const organizationId = member?.organizationId;
+	getMetrics: protectedProcedure
+		.input(
+			z
+				.object({
+					period: z.enum(["month", "quarter", "year", "all"]).default("month"),
+				})
+				.optional(),
+		)
+		.query(async ({ ctx, input }) => {
+			const period = input?.period ?? "month";
 
-    if (!organizationId) {
-      return {
-        totalContacts: 0,
-        unpaidInvoices: 0,
-        tasksDue: 0,
-        activePipelineValue: 0,
-      };
-    }
+			const member = await ctx.db.query.organizationMembers.findFirst({
+				where: eq(organizationMembers.userId, ctx.session.user.id),
+			});
+			const organizationId =
+				ctx.session.user.organizationId || member?.organizationId;
 
-    const [contactsCount] = await ctx.db
-      .select({ count: sql<number>`cast(count(${companies.id}) as integer)` })
-      .from(companies)
-      .where(eq(companies.organizationId, organizationId));
+			if (!organizationId) {
+				return {
+					totalRevenue: 0,
+					revenueTrend: 0,
+					activeDealsCount: 0,
+					pipelineValue: 0,
+					overdueInvoicesCount: 0,
+					overdueAmount: 0,
+					totalContacts: 0,
+					period,
+				};
+			}
 
-    const [invoicesCount] = await ctx.db
-      .select({ count: sql<number>`cast(count(${invoices.id}) as integer)` })
-      .from(invoices)
-      .where(
-        and(
-          eq(invoices.organizationId, organizationId),
-          inArray(invoices.status, ["SENT", "OVERDUE"])
-        )
-      );
+			const now = new Date();
+			let startDate: Date | null = null;
+			let priorStartDate: Date | null = null;
+			let priorEndDate: Date | null = null;
 
-    const [tasksCount] = await ctx.db
-      .select({ count: sql<number>`cast(count(${crmTasks.id}) as integer)` })
-      .from(crmTasks)
-      .where(
-        and(
-          eq(crmTasks.organizationId, organizationId),
-          inArray(crmTasks.status, ["PENDING", "IN_PROGRESS"])
-        )
-      );
+			if (period === "month") {
+				startDate = subDays(now, 30);
+				priorEndDate = startDate;
+				priorStartDate = subDays(startDate, 30);
+			} else if (period === "quarter") {
+				startDate = subDays(now, 90);
+				priorEndDate = startDate;
+				priorStartDate = subDays(startDate, 90);
+			} else if (period === "year") {
+				startDate = subDays(now, 365);
+				priorEndDate = startDate;
+				priorStartDate = subDays(startDate, 365);
+			}
 
-    const [dealsSum] = await ctx.db
-      .select({ total: sql<number>`cast(sum(${deals.value}) as integer)` })
-      .from(deals)
-      .where(eq(deals.organizationId, organizationId));
+			// 1. Current Period Paid Revenue
+			const currentRevenueConditions = [
+				eq(invoices.organizationId, organizationId),
+				eq(invoices.status, "PAID"),
+			];
+			if (startDate) {
+				currentRevenueConditions.push(gte(invoices.createdAt, startDate));
+			}
 
-    // For a real app, we'd join with pipelineStages to exclude 0 or 100 prob deals.
-    // Simplifying to sum of all deal values for MVP.
+			const [currentRevenueResult] = await ctx.db
+				.select({
+					total: sql<number>`cast(coalesce(sum(${invoices.amountPaid}), 0) as integer)`,
+				})
+				.from(invoices)
+				.where(and(...currentRevenueConditions));
 
-    return {
-      totalContacts: contactsCount?.count || 0,
-      unpaidInvoices: invoicesCount?.count || 0,
-      tasksDue: tasksCount?.count || 0,
-      activePipelineValue: dealsSum?.total || 0,
-    };
-  }),
+			const totalRevenue = currentRevenueResult?.total || 0;
 
-  getRecentActivity: protectedProcedure.query(async ({ ctx }) => {
-    const member = await ctx.db.query.organizationMembers.findFirst({
-      where: eq(organizationMembers.userId, ctx.session.user.id),
-    });
-    const organizationId = member?.organizationId;
+			// 2. Prior Period Paid Revenue for Trend calculation
+			let revenueTrend = 0;
+			if (priorStartDate && priorEndDate) {
+				const [priorRevenueResult] = await ctx.db
+					.select({
+						total: sql<number>`cast(coalesce(sum(${invoices.amountPaid}), 0) as integer)`,
+					})
+					.from(invoices)
+					.where(
+						and(
+							eq(invoices.organizationId, organizationId),
+							eq(invoices.status, "PAID"),
+							gte(invoices.createdAt, priorStartDate),
+							lte(invoices.createdAt, priorEndDate),
+						),
+					);
+				const priorTotal = priorRevenueResult?.total || 0;
+				if (priorTotal > 0) {
+					revenueTrend =
+						Math.round(((totalRevenue - priorTotal) / priorTotal) * 1000) / 10;
+				} else if (totalRevenue > 0) {
+					revenueTrend = 100;
+				}
+			}
 
-    if (!organizationId) {
-      return [];
-    }
+			// 3. Active Deals & Pipeline Value
+			const [dealsResult] = await ctx.db
+				.select({
+					count: sql<number>`cast(count(${deals.id}) as integer)`,
+					value: sql<number>`cast(coalesce(sum(${deals.value}), 0) as integer)`,
+				})
+				.from(deals)
+				.where(
+					and(
+						eq(deals.organizationId, organizationId),
+						eq(deals.status, "OPEN"),
+					),
+				);
 
-    const recentTasks = await ctx.db.query.crmTasks.findMany({
-      where: eq(crmTasks.organizationId, organizationId),
-      orderBy: (tasks, { desc }) => [desc(tasks.createdAt)],
-      limit: 5,
-    });
+			// 4. Overdue Invoices
+			const [overdueResult] = await ctx.db
+				.select({
+					count: sql<number>`cast(count(${invoices.id}) as integer)`,
+					amount: sql<number>`cast(coalesce(sum(${invoices.balanceDue}), 0) as integer)`,
+				})
+				.from(invoices)
+				.where(
+					and(
+						eq(invoices.organizationId, organizationId),
+						sql`(${invoices.status} = 'OVERDUE' OR (${invoices.status} = 'SENT' AND ${invoices.dueDate} < ${now}))`,
+					),
+				);
 
-    return recentTasks;
-  }),
+			// 5. Total Contacts Count
+			const [contactsResult] = await ctx.db
+				.select({ count: sql<number>`cast(count(${companies.id}) as integer)` })
+				.from(companies)
+				.where(eq(companies.organizationId, organizationId));
+
+			return {
+				totalRevenue,
+				revenueTrend,
+				activeDealsCount: dealsResult?.count || 0,
+				pipelineValue: dealsResult?.value || 0,
+				overdueInvoicesCount: overdueResult?.count || 0,
+				overdueAmount: overdueResult?.amount || 0,
+				totalContacts: contactsResult?.count || 0,
+				period,
+			};
+		}),
+
+	getRecentDeals: protectedProcedure.query(async ({ ctx }) => {
+		const member = await ctx.db.query.organizationMembers.findFirst({
+			where: eq(organizationMembers.userId, ctx.session.user.id),
+		});
+		const organizationId =
+			ctx.session.user.organizationId || member?.organizationId;
+
+		if (!organizationId) {
+			return [];
+		}
+
+		const recentDeals = await ctx.db
+			.select({
+				id: deals.id,
+				title: deals.title,
+				value: deals.value,
+				status: deals.status,
+				createdAt: deals.createdAt,
+				updatedAt: deals.updatedAt,
+				companyName: companies.name,
+				companyLogo: companies.logoUrl,
+				stageName: pipelineStages.name,
+				stageColor: pipelineStages.color,
+				assignedUserName: users.name,
+				assignedUserImage: users.image,
+			})
+			.from(deals)
+			.leftJoin(companies, eq(deals.companyId, companies.id))
+			.leftJoin(pipelineStages, eq(deals.stageId, pipelineStages.id))
+			.leftJoin(users, eq(deals.assignedUserId, users.id))
+			.where(eq(deals.organizationId, organizationId))
+			.orderBy(desc(deals.updatedAt))
+			.limit(5);
+
+		return recentDeals;
+	}),
+
+	getUpcomingInvoices: protectedProcedure.query(async ({ ctx }) => {
+		const member = await ctx.db.query.organizationMembers.findFirst({
+			where: eq(organizationMembers.userId, ctx.session.user.id),
+		});
+		const organizationId =
+			ctx.session.user.organizationId || member?.organizationId;
+
+		if (!organizationId) {
+			return [];
+		}
+
+		const upcomingInvoices = await ctx.db
+			.select({
+				id: invoices.id,
+				invoiceNumber: invoices.invoiceNumber,
+				totalAmount: invoices.totalAmount,
+				amountPaid: invoices.amountPaid,
+				balanceDue: invoices.balanceDue,
+				dueDate: invoices.dueDate,
+				status: invoices.status,
+				companyName: companies.name,
+				companyLogo: companies.logoUrl,
+			})
+			.from(invoices)
+			.leftJoin(companies, eq(invoices.companyId, companies.id))
+			.where(
+				and(
+					eq(invoices.organizationId, organizationId),
+					inArray(invoices.status, ["SENT", "OVERDUE"]),
+				),
+			)
+			.orderBy(asc(invoices.dueDate))
+			.limit(5);
+
+		return upcomingInvoices;
+	}),
+
+	getRecentActivity: protectedProcedure.query(async ({ ctx }) => {
+		const member = await ctx.db.query.organizationMembers.findFirst({
+			where: eq(organizationMembers.userId, ctx.session.user.id),
+		});
+		const organizationId =
+			ctx.session.user.organizationId || member?.organizationId;
+
+		if (!organizationId) {
+			return [];
+		}
+
+		const recentTasks = await ctx.db.query.crmTasks.findMany({
+			where: eq(crmTasks.organizationId, organizationId),
+			orderBy: (tasks, { desc }) => [desc(tasks.createdAt)],
+			limit: 5,
+		});
+
+		return recentTasks;
+	}),
 });
