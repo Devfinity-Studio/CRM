@@ -5,7 +5,7 @@
 ### Milestone 14: Stitch UI Implementation & Production Integration (In Progress)
 - [x] **Phase 41: Dashboard Shell & Navigation Integration**
 - [x] **Phase 42: Sales Pipeline Kanban Board UI Refresh**
-- [ ] **Phase 43: CRM Client Profiles 2-Column Overhaul**
+- [x] **Phase 43: CRM Client Profiles 2-Column Overhaul**
 - [ ] **Phase 44: Billing & Financial Views Polish**
 
 ### Milestone 13: UI Overhaul via Stitch MCP (Completed)

@@ -18,10 +18,10 @@ Implement and wire the Stitch MCP-designed layouts and components directly into 
 - [x] **REQ-42-04**: Modernize the `DealSheet` and `DealDialog` with the Stitch modal/drawer styling.
 
 ### Phase 43: CRM Client Profiles 2-Column Overhaul
-- [ ] **REQ-43-01**: Re-architect `src/app/clients/[id]/page.tsx` into the Stitch 2-column layout (Client Info & Deal History on Left/Primary, Interactive Activity Timeline on Right).
-- [ ] **REQ-43-02**: Polish the chronological `ActivityTimeline` with modern icons for notes, calls, emails, and meetings, plus inline quick-add forms.
-- [ ] **REQ-43-03**: Add deal history cards showing historical and open deals associated with the client.
-- [ ] **REQ-43-04**: Display contact lead scores and qualification badges with consistent theme tokens.
+- [x] **REQ-43-01**: Re-architect `src/app/clients/[id]/page.tsx` into the Stitch 2-column layout (Client Info & Deal History on Left/Primary, Interactive Activity Timeline on Right).
+- [x] **REQ-43-02**: Polish the chronological `ActivityTimeline` with modern icons for notes, calls, emails, and meetings, plus inline quick-add forms.
+- [x] **REQ-43-03**: Add deal history cards showing historical and open deals associated with the client.
+- [x] **REQ-43-04**: Display contact lead scores and qualification badges with consistent theme tokens.
 
 ### Phase 44: Billing & Financial Views Polish
 - [ ] **REQ-44-01**: Restyle the invoices list (`/billing/invoices`) and quotes list (`/billing/quotes`) data tables with rounded glassmorphic card containers and status badges.
