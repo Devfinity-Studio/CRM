@@ -1,0 +1,161 @@
+---
+phase: 41-dashboard-shell-navigation
+plan: 01
+type: execute
+wave: 1
+depends_on: []
+files_modified:
+  - src/server/api/routers/dashboard.ts
+  - src/server/api/__tests__/dashboard.test.ts
+  - src/components/layout/dashboard-layout.tsx
+  - src/app/dashboard/page.tsx
+autonomous: true
+requirements:
+  - REQ-41-01
+  - REQ-41-02
+  - REQ-41-03
+  - REQ-41-04
+user_setup: []
+
+must_haves:
+  truths:
+    - "Desktop sidebar expands to ~240px and collapses to 64px icon-only rail with tooltips"
+    - "Organization switcher displays in sidebar header with active tenant name and switch dropdown"
+    - "Top header has search input with ⌘K, notifications bell, and user avatar menu"
+    - "Dashboard displays 4 glassmorphic KPI cards with trend percentage badges and period filter pills"
+    - "Recent deals table rows open DealSheet directly in slide-out mode on click"
+  artifacts:
+    - "src/server/api/routers/dashboard.ts"
+    - "src/server/api/__tests__/dashboard.test.ts"
+    - "src/components/layout/dashboard-layout.tsx"
+    - "src/app/dashboard/page.tsx"
+  key_links:
+    - "src/app/dashboard/page.tsx calls api.dashboard.getMetrics and api.dashboard.getRecentDeals"
+    - "src/components/layout/dashboard-layout.tsx calls api.dashboard.getLayoutData"
+---
+
+<objective>
+Implement and wire the Stitch MCP-designed Dashboard Shell and Layout into production.
+This encompasses the responsive collapsible sidebar, top navigation header with organization switcher, glassmorphic KPI summary cards with trend badges, and recent deals / upcoming invoices widgets.
+
+Purpose: Deliver the unified modern visual identity and telemetry overview for DevCRM's core landing experience.
+Output: Upgraded `dashboard-layout.tsx`, `dashboard.ts` router, `dashboard/page.tsx`, and accompanying unit tests.
+</objective>
+
+<execution_context>
+@.planning/41-CONTEXT.md
+@.planning/41-RESEARCH.md
+@.planning/41-VALIDATION.md
+@.planning/REQUIREMENTS.md
+</execution_context>
+
+<context>
+@.planning/PROJECT.md
+@.planning/ROADMAP.md
+@.planning/STATE.md
+@src/styles/globals.css
+@src/components/layout/dashboard-layout.tsx
+@src/server/api/routers/dashboard.ts
+</context>
+
+<tasks>
+
+<task type="auto">
+  <name>Task 1: Backend dashboardRouter Enhancements & Unit Tests</name>
+  <files>src/server/api/routers/dashboard.ts, src/server/api/__tests__/dashboard.test.ts</files>
+  <read_first>src/server/db/schema.ts, src/server/api/routers/dashboard.ts</read_first>
+  <action>
+    Enhance `dashboardRouter` in `src/server/api/routers/dashboard.ts`:
+    1. Upgrade `getLayoutData`: Return user organizations list from `organizationMembers` joined with `organizations` so the user can switch organizations.
+    2. Upgrade `getMetrics`:
+       - Accept input schema `z.object({ period: z.enum(["month", "quarter", "year", "all"]).default("month") }).optional()`.
+       - Query `totalRevenue` from `invoices` where `status = 'PAID'` within the selected date window.
+       - Calculate `revenueTrend` (% change vs preceding period).
+       - Query `activeDealsCount` and `pipelineValue` from `deals` where `status = 'OPEN'`.
+       - Query `overdueInvoicesCount` and `overdueAmount` where `status = 'OVERDUE'` or (`status = 'SENT'` and `dueDate < NOW()`).
+    3. Add `getRecentDeals`:
+       - Query top 5 deals for the organization ordered by `updatedAt DESC` with relations (`company`, `stage`, `assignedUser`).
+    4. Add `getUpcomingInvoices`:
+       - Query top 5 invoices where `status IN ('SENT', 'OVERDUE')` ordered by `dueDate ASC` with relations (`company`).
+    5. Create `src/server/api/__tests__/dashboard.test.ts` testing metric calculations and period filter bounds.
+  </action>
+  <verify>pnpm vitest run src/server/api/__tests__/dashboard.test.ts</verify>
+  <acceptance_criteria>
+    - `src/server/api/routers/dashboard.ts` exports updated `dashboardRouter` with `getMetrics`, `getRecentDeals`, `getUpcomingInvoices`
+    - `pnpm vitest run src/server/api/__tests__/dashboard.test.ts` passes with 0 failures
+  </acceptance_criteria>
+</task>
+
+<task type="auto">
+  <name>Task 2: Stitch Collapsible Sidebar Navigation & Organization Switcher</name>
+  <files>src/components/layout/dashboard-layout.tsx</files>
+  <read_first>src/components/layout/dashboard-layout.tsx, src/styles/globals.css</read_first>
+  <action>
+    Refactor `src/components/layout/dashboard-layout.tsx` to match the Stitch design:
+    1. Implement desktop collapsible sidebar state (persisted or local state, e.g. `isCollapsed`):
+       - Expanded state: 240px (`w-60` or `w-64`) displaying logo, organization switcher, nav item labels, and collapse toggle.
+       - Collapsed rail: 64px (`w-16`) displaying logo mark, compact icons, and hover tooltips for navigation labels.
+    2. Organization switcher in sidebar header:
+       - Displays active organization avatar and name with dropdown menu to switch organizations.
+    3. Navigation links:
+       - Dashboard (`/dashboard`), Deals (`/deals`), Contacts (`/clients`), Invoices (`/billing/invoices`), Products (`/products`), Tasks (`/tasks`), Marketing (`/marketing`), Automations (`/automations`), Settings (`/settings`).
+       - Active link styling with vibrant Indigo accent (`bg-primary/10 text-primary font-semibold`).
+    4. Mobile drawer:
+       - Responsive Sheet for mobile viewports (`< md`) opening full navigation overlay.
+  </action>
+  <verify>pnpm typecheck && pnpm check</verify>
+  <acceptance_criteria>
+    - `src/components/layout/dashboard-layout.tsx` contains collapsible rail logic and org switcher dropdown
+    - `pnpm typecheck` passes with 0 errors
+    - `pnpm check` passes with 0 lint errors
+  </acceptance_criteria>
+</task>
+
+<task type="auto">
+  <name>Task 3: Top Navigation Header with Search, Actions & User Menu</name>
+  <files>src/components/layout/dashboard-layout.tsx</files>
+  <read_first>src/components/layout/notifications-bell.tsx</read_first>
+  <action>
+    Upgrade the sticky top header in `src/components/layout/dashboard-layout.tsx`:
+    1. Apply glassmorphic backdrop: `sticky top-0 z-30 h-16 w-full bg-background/80 backdrop-blur-md border-b border-border/60`.
+    2. Search bar with `⌘K` keyboard badge on left.
+    3. Trailing actions:
+       - Primary "+ New Deal" quick action button linking to `/deals` or opening creation modal.
+       - Integrated Notifications bell (`<NotificationsBell />`).
+       - User profile avatar dropdown with user name, email, system role badge, and Sign Out action.
+  </action>
+  <verify>pnpm typecheck && pnpm check</verify>
+  <acceptance_criteria>
+    - Top header includes search bar with ⌘K shortcut indicator
+    - Top header renders `<NotificationsBell />` and user account menu
+    - `pnpm typecheck` passes with 0 errors
+  </acceptance_criteria>
+</task>
+
+<task type="auto">
+  <name>Task 4: Dashboard Canvas, Glassmorphic KPI Cards & Overview Tables</name>
+  <files>src/app/dashboard/page.tsx</files>
+  <read_first>src/app/dashboard/page.tsx, src/components/deals/deal-sheet.tsx</read_first>
+  <action>
+    Overhaul `src/app/dashboard/page.tsx` based on the Stitch layout:
+    1. Greeting banner:
+       - Displays user's name ("Good morning, {name}"), velocity stage badge, and time filter pills (`This Month`, `This Quarter`, `This Year`, `All Time`).
+       - Clicking a pill updates the state and passes `period` to `api.dashboard.getMetrics.useQuery({ period })`.
+    2. 4 Glassmorphic KPI cards (`glass-card-interactive` style with `bg-card/75 backdrop-blur-md border border-border/60 hover:border-primary/50 transition-all`):
+       - Total Revenue: Formatted currency with comparative `% change` green/red trend badge.
+       - Active Deals: Deal count with progress bar towards monthly quota.
+       - Pipeline Value: Sum of open deals with high confidence indicator.
+       - Overdue / Invoices: Status indicator of pending collections.
+    3. Asymmetric two-column overview:
+       - Left column (8 cols): Recent Deals & Pipeline table displaying deal initials avatar, title, stage badge, deal value, and lead dev. Clicking row opens `DealSheet` directly in slide-out mode via local `selectedDealId` state.
+       - Right column (4 cols): Upcoming Invoices with glassmorphic dashed container empty state, "Generate Invoice" CTA button linking to `/billing/invoices/new`.
+  </action>
+  <verify>pnpm typecheck && pnpm check</verify>
+  <acceptance_criteria>
+    - `src/app/dashboard/page.tsx` renders 4 KPI cards with period filters and trend badges
+    - Row click in recent deals opens `DealSheet`
+    - `pnpm typecheck` and `pnpm check` pass with 0 errors
+  </acceptance_criteria>
+</task>
+
+</tasks>
