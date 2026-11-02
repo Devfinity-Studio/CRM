@@ -3,11 +3,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { City, Country, State } from "country-state-city";
 import {
+	ArrowLeft,
+	ArrowRight,
 	Building2,
 	CheckCircle2,
 	FileText,
 	Globe,
 	Loader2,
+	MapPin,
+	ShieldCheck,
+	Sparkles,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -138,8 +143,8 @@ export default function OnboardingPage() {
 
 	if (statusLoading || status?.onboardingComplete) {
 		return (
-			<div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
-				<Loader2 className="h-8 w-8 animate-spin" />
+			<div className="flex min-h-screen items-center justify-center bg-background text-foreground">
+				<Loader2 className="h-8 w-8 animate-spin text-primary" />
 			</div>
 		);
 	}
@@ -159,7 +164,6 @@ export default function OnboardingPage() {
 		const isStepValid = await trigger(fieldsToValidate);
 
 		if (isStepValid) {
-			// Custom validation for Mock Verification steps
 			if (step === 1 && !otpVerified) {
 				form.setError("phone", {
 					type: "manual",
@@ -183,10 +187,9 @@ export default function OnboardingPage() {
 	const handlePrev = () => setStep((s) => Math.max(s - 1, 1));
 
 	const onSubmit = (data: OnboardingFormValues) => {
-		// Need to provide countryCode for the API, we can derive or set empty
 		const apiPayload = {
 			...data,
-			countryCode: data.phone ? data.phone.substring(0, 4) : "+1", // Simplified for API payload compatibility
+			countryCode: data.phone ? data.phone.substring(0, 4) : "+1",
 		};
 		completeOnboarding.mutate(apiPayload);
 	};
@@ -221,80 +224,141 @@ export default function OnboardingPage() {
 	};
 
 	return (
-		<div className="flex min-h-screen bg-slate-950 text-white">
-			{/* Left side: branding/info */}
-			<div className="hidden flex-col justify-between border-slate-800 border-r bg-slate-900 p-12 lg:flex lg:w-1/3">
-				<div>
-					<div className="mb-12 flex items-center gap-2">
-						<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
-							<span className="font-bold text-white">D</span>
+		<div className="flex min-h-screen bg-background text-foreground">
+			{/* Left side: branding & progress */}
+			<div className="hidden flex-col justify-between border-r border-border bg-card p-10 lg:flex lg:w-1/3 shadow-sm">
+				<div className="space-y-8">
+					<div className="flex items-center gap-3">
+						<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-lg shadow-sm">
+							D
 						</div>
-						<span className="font-bold text-xl">DevCRM</span>
+						<span className="font-bold text-2xl tracking-tight text-foreground">DevCRM</span>
 					</div>
-					<h1 className="mb-4 font-bold text-3xl">Set up your workspace</h1>
-					<p className="text-lg text-slate-400">
-						Tell us a bit about your company to get the most out of your CRM.
-						This information helps us tailor your experience.
-					</p>
-				</div>
-				<div className="text-slate-500 text-sm">
-					&copy; {new Date().getFullYear()} DevCRM. All rights reserved.
-				</div>
-			</div>
 
-			{/* Right side: form */}
-			<div className="flex h-screen flex-1 flex-col overflow-y-auto px-6 py-12 sm:px-12 lg:px-24 xl:px-32">
-				<div className="mx-auto w-full max-w-3xl">
-					<div className="mb-8 lg:hidden">
-						<h2 className="mb-2 font-bold text-3xl text-white">
-							Welcome to DevCRM
-						</h2>
-						<p className="text-slate-400">
-							Let's set up your workspace. This will only take a minute.
+					<div className="space-y-3">
+						<div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+							<Sparkles className="h-3.5 w-3.5" />
+							<span>Quick Setup Wizard</span>
+						</div>
+						<h1 className="font-bold text-3xl text-foreground tracking-tight leading-tight">
+							Set up your organization workspace
+						</h1>
+						<p className="text-muted-foreground text-sm leading-relaxed">
+							Tell us about your company to customize financial ledgers, tax rules, and CRM automation settings for your team.
 						</p>
 					</div>
 
-					<div className="mb-12 flex items-center justify-between border-slate-800 border-b pb-6">
-						<div className="flex w-full items-center space-x-2">
-							<div
-								className={`flex flex-1 flex-col items-center ${step >= 1 ? "text-blue-500" : "text-slate-500"}`}
-							>
+					<div className="space-y-4 pt-6 border-t border-border">
+						<div className="flex items-center gap-3 text-sm">
+							<div className={`h-8 w-8 rounded-full flex items-center justify-center font-semibold text-xs ${step >= 1 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+								1
+							</div>
+							<div>
+								<p className="font-semibold text-foreground">Company Essentials</p>
+								<p className="text-xs text-muted-foreground">Legal name, team scale & contact</p>
+							</div>
+						</div>
+						<div className="flex items-center gap-3 text-sm">
+							<div className={`h-8 w-8 rounded-full flex items-center justify-center font-semibold text-xs ${step >= 2 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+								2
+							</div>
+							<div>
+								<p className="font-semibold text-foreground">Regional & Tax Identity</p>
+								<p className="text-xs text-muted-foreground">Currency, GSTIN & tax verification</p>
+							</div>
+						</div>
+						<div className="flex items-center gap-3 text-sm">
+							<div className={`h-8 w-8 rounded-full flex items-center justify-center font-semibold text-xs ${step >= 3 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+								3
+							</div>
+							<div>
+								<p className="font-semibold text-foreground">Operating Address</p>
+								<p className="text-xs text-muted-foreground">Registered headquarters & profile</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div className="text-xs text-muted-foreground">
+					&copy; {new Date().getFullYear()} DevCRM Systems. All rights reserved.
+				</div>
+			</div>
+
+			{/* Right side: step form */}
+			<div className="flex h-screen flex-1 flex-col overflow-y-auto px-4 py-8 sm:px-8 lg:px-16 xl:px-24">
+				<div className="mx-auto w-full max-w-2xl">
+					{/* Mobile Header */}
+					<div className="mb-6 lg:hidden space-y-1">
+						<div className="flex items-center gap-2 mb-2">
+							<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
+								D
+							</div>
+							<span className="font-bold text-xl text-foreground">DevCRM</span>
+						</div>
+						<h2 className="font-bold text-2xl text-foreground">
+							Welcome to DevCRM
+						</h2>
+						<p className="text-xs sm:text-sm text-muted-foreground">
+							Let&apos;s configure your workspace in three simple steps.
+						</p>
+					</div>
+
+					{/* Stepper Bar */}
+					<div className="mb-8 border-b border-border pb-6">
+						<div className="flex w-full items-center justify-between">
+							<div className="flex flex-1 flex-col items-center">
 								<div
-									className={`mb-2 flex h-10 w-10 items-center justify-center rounded-full ${step >= 1 ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-400"}`}
+									className={`mb-1.5 flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full font-semibold text-xs sm:text-sm ${
+										step >= 1
+											? "bg-primary text-primary-foreground shadow-xs"
+											: "bg-muted text-muted-foreground"
+									}`}
 								>
 									1
 								</div>
-								<span className="font-medium text-xs uppercase tracking-wider">
-									Basic
+								<span className="font-medium text-[11px] sm:text-xs text-muted-foreground uppercase tracking-wider">
+									Profile
 								</span>
 							</div>
+
 							<div
-								className={`h-[2px] w-full max-w-[50px] ${step >= 2 ? "bg-blue-600" : "bg-slate-800"}`}
+								className={`h-[2px] w-full max-w-[60px] sm:max-w-[100px] ${
+									step >= 2 ? "bg-primary" : "bg-border"
+								}`}
 							/>
-							<div
-								className={`flex flex-1 flex-col items-center ${step >= 2 ? "text-blue-500" : "text-slate-500"}`}
-							>
+
+							<div className="flex flex-1 flex-col items-center">
 								<div
-									className={`mb-2 flex h-10 w-10 items-center justify-center rounded-full ${step >= 2 ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-400"}`}
+									className={`mb-1.5 flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full font-semibold text-xs sm:text-sm ${
+										step >= 2
+											? "bg-primary text-primary-foreground shadow-xs"
+											: "bg-muted text-muted-foreground"
+									}`}
 								>
 									2
 								</div>
-								<span className="font-medium text-xs uppercase tracking-wider">
-									Region
+								<span className="font-medium text-[11px] sm:text-xs text-muted-foreground uppercase tracking-wider">
+									Tax
 								</span>
 							</div>
+
 							<div
-								className={`h-[2px] w-full max-w-[50px] ${step >= 3 ? "bg-blue-600" : "bg-slate-800"}`}
+								className={`h-[2px] w-full max-w-[60px] sm:max-w-[100px] ${
+									step >= 3 ? "bg-primary" : "bg-border"
+								}`}
 							/>
-							<div
-								className={`flex flex-1 flex-col items-center ${step >= 3 ? "text-blue-500" : "text-slate-500"}`}
-							>
+
+							<div className="flex flex-1 flex-col items-center">
 								<div
-									className={`mb-2 flex h-10 w-10 items-center justify-center rounded-full ${step >= 3 ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-400"}`}
+									className={`mb-1.5 flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full font-semibold text-xs sm:text-sm ${
+										step >= 3
+											? "bg-primary text-primary-foreground shadow-xs"
+											: "bg-muted text-muted-foreground"
+									}`}
 								>
 									3
 								</div>
-								<span className="font-medium text-xs uppercase tracking-wider">
+								<span className="font-medium text-[11px] sm:text-xs text-muted-foreground uppercase tracking-wider">
 									Address
 								</span>
 							</div>
@@ -303,22 +367,28 @@ export default function OnboardingPage() {
 
 					<Form {...form}>
 						<form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+							{/* STEP 1: BASIC DETAILS */}
 							{step === 1 && (
-								<div className="fade-in slide-in-from-bottom-4 animate-in space-y-4">
-									<h3 className="flex items-center gap-2 border-slate-800 border-b pb-2 font-semibold text-lg">
-										<Building2 className="h-5 w-5" /> Basic Details
-									</h3>
+								<div className="space-y-5">
+									<div className="flex items-center gap-2 border-b border-border pb-3">
+										<Building2 className="h-5 w-5 text-primary" />
+										<h3 className="font-bold text-lg text-foreground tracking-tight">
+											Basic Company Information
+										</h3>
+									</div>
 
-									<div className="grid grid-cols-2 gap-4">
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 										<FormField
 											control={form.control as any}
 											name="name"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Legal Company Name *</FormLabel>
+													<FormLabel className="text-foreground font-semibold">
+														Legal Company Name <span className="text-destructive">*</span>
+													</FormLabel>
 													<FormControl>
 														<Input
-															className="border-slate-800 bg-slate-950"
+															className="min-h-[44px] bg-background border-border text-foreground"
 															placeholder="Acme Corp LLC"
 															{...field}
 														/>
@@ -332,10 +402,10 @@ export default function OnboardingPage() {
 											name="displayName"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Brand / Display Name</FormLabel>
+													<FormLabel className="text-foreground font-semibold">Brand / Display Name</FormLabel>
 													<FormControl>
 														<Input
-															className="border-slate-800 bg-slate-950"
+															className="min-h-[44px] bg-background border-border text-foreground"
 															placeholder="Acme"
 															{...field}
 														/>
@@ -346,23 +416,25 @@ export default function OnboardingPage() {
 										/>
 									</div>
 
-									<div className="grid grid-cols-2 gap-4">
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 										<FormField
 											control={form.control as any}
 											name="teamSize"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Team Size *</FormLabel>
+													<FormLabel className="text-foreground font-semibold">
+														Team Size <span className="text-destructive">*</span>
+													</FormLabel>
 													<Select
 														defaultValue={field.value}
 														onValueChange={field.onChange}
 													>
 														<FormControl>
-															<SelectTrigger className="border-slate-800 bg-slate-950">
+															<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground">
 																<SelectValue placeholder="Select team size" />
 															</SelectTrigger>
 														</FormControl>
-														<SelectContent className="border-slate-800 bg-slate-900 text-white">
+														<SelectContent className="bg-popover text-popover-foreground border-border">
 															<SelectItem value="1-10">
 																1 - 10 employees
 															</SelectItem>
@@ -386,12 +458,12 @@ export default function OnboardingPage() {
 											name="website"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Website</FormLabel>
+													<FormLabel className="text-foreground font-semibold">Company Website</FormLabel>
 													<div className="relative">
-														<Globe className="absolute top-3 left-3 h-4 w-4 text-slate-500" />
+														<Globe className="absolute top-3.5 left-3 h-4 w-4 text-muted-foreground" />
 														<FormControl>
 															<Input
-																className="border-slate-800 bg-slate-950 pl-9"
+																className="min-h-[44px] pl-9 bg-background border-border text-foreground"
 																placeholder="https://acme.com"
 																{...field}
 															/>
@@ -408,15 +480,13 @@ export default function OnboardingPage() {
 										name="phone"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Phone Number *</FormLabel>
-												<div className="flex items-center gap-2">
+												<FormLabel className="text-foreground font-semibold">
+													Primary Phone Number <span className="text-destructive">*</span>
+												</FormLabel>
+												<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
 													<div className="PhoneInputWrapper flex-1">
-														{/* 
-                          We use a wrapper class to target PhoneInput styles cleanly
-                          react-phone-number-input renders an input and a flag select automatically 
-                        */}
 														<PhoneInput
-															className="w-full border-slate-800 bg-slate-950"
+															className="w-full min-h-[44px] rounded-md border border-border bg-background px-3 py-2 text-foreground"
 															defaultCountry="IN"
 															disabled={otpVerified}
 															onChange={(v) => field.onChange(v || "")}
@@ -429,27 +499,27 @@ export default function OnboardingPage() {
 															onClick={handleMockOtp}
 															type="button"
 															variant="secondary"
+															className="min-h-[44px] px-5 font-semibold shrink-0"
 														>
 															{otpSent ? (
 																<Loader2 className="h-4 w-4 animate-spin" />
 															) : (
-																"Verify"
+																"Verify Phone"
 															)}
 														</Button>
 													) : (
 														<Button
-															className="bg-emerald-600 hover:bg-emerald-700"
+															className="min-h-[44px] px-5 font-semibold shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white"
 															disabled
 															type="button"
-															variant="default"
 														>
 															<CheckCircle2 className="mr-2 h-4 w-4" /> Verified
 														</Button>
 													)}
 												</div>
 												{otpSent && !otpVerified && (
-													<p className="text-blue-400 text-xs">
-														Mock: Sending OTP... Auto-verifying in 1.5s.
+													<p className="text-primary text-xs">
+														Mock: Sending verification OTP... Auto-verifying in 1.5s.
 													</p>
 												)}
 												<FormMessage />
@@ -459,19 +529,25 @@ export default function OnboardingPage() {
 								</div>
 							)}
 
+							{/* STEP 2: REGION & TAX */}
 							{step === 2 && (
-								<div className="fade-in slide-in-from-right-4 animate-in space-y-4">
-									<h3 className="flex items-center gap-2 border-slate-800 border-b pb-2 font-semibold text-lg">
-										<FileText className="h-5 w-5" /> Region & Tax
-									</h3>
+								<div className="space-y-5">
+									<div className="flex items-center gap-2 border-b border-border pb-3">
+										<FileText className="h-5 w-5 text-primary" />
+										<h3 className="font-bold text-lg text-foreground tracking-tight">
+											Regional Configuration & Tax Identity
+										</h3>
+									</div>
 
-									<div className="grid grid-cols-2 gap-4">
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 										<FormField
 											control={form.control as any}
 											name="country"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Country *</FormLabel>
+													<FormLabel className="text-foreground font-semibold">
+														Operating Country <span className="text-destructive">*</span>
+													</FormLabel>
 													<Select
 														defaultValue={field.value}
 														onValueChange={(v) => {
@@ -481,11 +557,11 @@ export default function OnboardingPage() {
 														}}
 													>
 														<FormControl>
-															<SelectTrigger className="border-slate-800 bg-slate-950">
+															<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground">
 																<SelectValue placeholder="Select Country" />
 															</SelectTrigger>
 														</FormControl>
-														<SelectContent className="max-h-[300px] border-slate-800 bg-slate-900 text-white">
+														<SelectContent className="max-h-[300px] bg-popover text-popover-foreground border-border">
 															{countries.map((c) => (
 																<SelectItem key={c.isoCode} value={c.isoCode}>
 																	{c.name}
@@ -502,21 +578,23 @@ export default function OnboardingPage() {
 											name="currency"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Currency *</FormLabel>
+													<FormLabel className="text-foreground font-semibold">
+														Billing Currency <span className="text-destructive">*</span>
+													</FormLabel>
 													<Select
 														defaultValue={field.value}
 														onValueChange={field.onChange}
 													>
 														<FormControl>
-															<SelectTrigger className="border-slate-800 bg-slate-950">
+															<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground">
 																<SelectValue placeholder="Select Currency" />
 															</SelectTrigger>
 														</FormControl>
-														<SelectContent className="border-slate-800 bg-slate-900 text-white">
-															<SelectItem value="USD">USD ($)</SelectItem>
-															<SelectItem value="EUR">EUR (€)</SelectItem>
-															<SelectItem value="GBP">GBP (£)</SelectItem>
-															<SelectItem value="INR">INR (₹)</SelectItem>
+														<SelectContent className="bg-popover text-popover-foreground border-border">
+															<SelectItem value="USD">USD ($) - US Dollar</SelectItem>
+															<SelectItem value="EUR">EUR (€) - Euro</SelectItem>
+															<SelectItem value="GBP">GBP (£) - British Pound</SelectItem>
+															<SelectItem value="INR">INR (₹) - Indian Rupee</SelectItem>
 														</SelectContent>
 													</Select>
 													<FormMessage />
@@ -529,11 +607,14 @@ export default function OnboardingPage() {
 										control={form.control as any}
 										name="hasGst"
 										render={({ field }) => (
-											<FormItem className="flex flex-row items-center justify-between rounded-lg border border-slate-800 bg-slate-950 p-4">
+											<FormItem className="flex flex-row items-center justify-between rounded-xl border border-border bg-muted/20 p-4">
 												<div className="space-y-0.5">
-													<FormLabel className="font-semibold text-base">
-														Do you have a GST Number?
+													<FormLabel className="font-semibold text-foreground text-sm sm:text-base cursor-pointer">
+														Do you have a registered GSTIN / Tax ID?
 													</FormLabel>
+													<p className="text-xs text-muted-foreground">
+														Enable to attach tax credentials onto generated invoice headers.
+													</p>
 												</div>
 												<FormControl>
 													<Switch
@@ -546,17 +627,19 @@ export default function OnboardingPage() {
 									/>
 
 									{hasGst && (
-										<div className="fade-in zoom-in-95 animate-in space-y-4 rounded-lg border border-blue-900/30 bg-blue-950/20 p-4">
+										<div className="space-y-4 rounded-xl border border-primary/20 bg-primary/5 p-4 sm:p-5">
 											<FormField
 												control={form.control as any}
 												name="gstin"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>GSTIN Number *</FormLabel>
-														<div className="flex gap-2">
+														<FormLabel className="text-foreground font-semibold">
+															GSTIN Registration Number <span className="text-destructive">*</span>
+														</FormLabel>
+														<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
 															<FormControl>
 																<Input
-																	className="border-slate-800 bg-slate-950 uppercase"
+																	className="min-h-[44px] bg-background border-border text-foreground uppercase font-mono"
 																	placeholder="22AAAAA0000A1Z5"
 																	{...field}
 																	onChange={(e) =>
@@ -571,20 +654,20 @@ export default function OnboardingPage() {
 																onClick={handleMockGst}
 																type="button"
 																variant="secondary"
+																className="min-h-[44px] px-5 font-semibold shrink-0"
 															>
 																{mockLoading && !gstVerified ? (
 																	<Loader2 className="h-4 w-4 animate-spin" />
 																) : gstVerified ? (
 																	"Verified"
 																) : (
-																	"Check GST"
+																	"Verify GST"
 																)}
 															</Button>
 														</div>
 														{gstVerified && (
-															<p className="flex items-center gap-1 text-emerald-400 text-xs">
-																<CheckCircle2 className="h-3 w-3" /> GST Details
-																Verified
+															<p className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-xs font-medium">
+																<CheckCircle2 className="h-3.5 w-3.5" /> GST Credentials Verified
 															</p>
 														)}
 														<FormMessage />
@@ -596,10 +679,10 @@ export default function OnboardingPage() {
 												name="businessPan"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>Business PAN</FormLabel>
+														<FormLabel className="text-foreground font-semibold">Business PAN Number</FormLabel>
 														<FormControl>
 															<Input
-																className="border-slate-800 bg-slate-950 uppercase"
+																className="min-h-[44px] bg-background border-border text-foreground uppercase font-mono"
 																placeholder="AAAAA0000A"
 																{...field}
 																onChange={(e) =>
@@ -616,19 +699,25 @@ export default function OnboardingPage() {
 								</div>
 							)}
 
+							{/* STEP 3: ADDRESS & PROFILE */}
 							{step === 3 && (
-								<div className="fade-in slide-in-from-right-4 animate-in space-y-4">
-									<h3 className="border-slate-800 border-b pb-2 font-semibold text-lg">
-										Address & Business Profile
-									</h3>
+								<div className="space-y-5">
+									<div className="flex items-center gap-2 border-b border-border pb-3">
+										<MapPin className="h-5 w-5 text-primary" />
+										<h3 className="font-bold text-lg text-foreground tracking-tight">
+											Registered Address & Business Profile
+										</h3>
+									</div>
 
-									<div className="grid grid-cols-2 gap-4">
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 										<FormField
 											control={form.control as any}
 											name="addressState"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>State / Province *</FormLabel>
+													<FormLabel className="text-foreground font-semibold">
+														State / Province <span className="text-destructive">*</span>
+													</FormLabel>
 													<Select
 														defaultValue={field.value}
 														disabled={!currentCountry}
@@ -638,11 +727,11 @@ export default function OnboardingPage() {
 														}}
 													>
 														<FormControl>
-															<SelectTrigger className="border-slate-800 bg-slate-950">
+															<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground disabled:opacity-50">
 																<SelectValue placeholder="Select State" />
 															</SelectTrigger>
 														</FormControl>
-														<SelectContent className="max-h-[200px] border-slate-800 bg-slate-900 text-white">
+														<SelectContent className="max-h-[200px] bg-popover text-popover-foreground border-border">
 															{states.map((s) => (
 																<SelectItem key={s.isoCode} value={s.isoCode}>
 																	{s.name}
@@ -659,18 +748,20 @@ export default function OnboardingPage() {
 											name="addressCity"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>City / Town *</FormLabel>
+													<FormLabel className="text-foreground font-semibold">
+														City / Town <span className="text-destructive">*</span>
+													</FormLabel>
 													<Select
 														defaultValue={field.value}
 														disabled={!currentState}
 														onValueChange={field.onChange}
 													>
 														<FormControl>
-															<SelectTrigger className="border-slate-800 bg-slate-950">
+															<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground disabled:opacity-50">
 																<SelectValue placeholder="Select City" />
 															</SelectTrigger>
 														</FormControl>
-														<SelectContent className="max-h-[200px] border-slate-800 bg-slate-900 text-white">
+														<SelectContent className="max-h-[200px] bg-popover text-popover-foreground border-border">
 															{cities.map((c) => (
 																<SelectItem key={c.name} value={c.name}>
 																	{c.name}
@@ -684,16 +775,19 @@ export default function OnboardingPage() {
 										/>
 									</div>
 
-									<div className="grid grid-cols-2 gap-4">
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 										<FormField
 											control={form.control as any}
 											name="addressPincode"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Pincode / Zip *</FormLabel>
+													<FormLabel className="text-foreground font-semibold">
+														Postal / Pincode <span className="text-destructive">*</span>
+													</FormLabel>
 													<FormControl>
 														<Input
-															className="border-slate-800 bg-slate-950"
+															className="min-h-[44px] bg-background border-border text-foreground"
+															placeholder="e.g. 560001"
 															{...field}
 															onChange={(e) => {
 																e.target.value = e.target.value.replace(
@@ -713,10 +807,13 @@ export default function OnboardingPage() {
 											name="addressStreet"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Street Address *</FormLabel>
+													<FormLabel className="text-foreground font-semibold">
+														Street Address <span className="text-destructive">*</span>
+													</FormLabel>
 													<FormControl>
 														<Input
-															className="border-slate-800 bg-slate-950"
+															className="min-h-[44px] bg-background border-border text-foreground"
+															placeholder="e.g. 100 Innovation Park, Floor 3"
 															{...field}
 														/>
 													</FormControl>
@@ -730,35 +827,31 @@ export default function OnboardingPage() {
 										control={form.control as any}
 										name="useCases"
 										render={() => (
-											<FormItem>
-												<div className="mb-4">
-													<FormLabel className="text-base">
-														What will you use this for? (Select all that apply)
-													</FormLabel>
-												</div>
-												<div className="grid grid-cols-2 gap-2">
+											<FormItem className="border-t border-border pt-4">
+												<FormLabel className="text-foreground font-semibold text-sm sm:text-base block mb-2">
+													What will you use DevCRM for? (Select all that apply)
+												</FormLabel>
+												<div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
 													{[
-														"CRM / Contacts",
-														"Invoicing",
-														"Proposals / Quotes",
-														"Project Management",
+														"CRM & Pipeline Deals",
+														"Invoicing & Billing",
+														"Proposals & Client Quotes",
+														"Automations & Webhooks",
 													].map((usecase) => (
-														<div
-															className="flex items-center space-x-2 rounded-md border border-slate-800 bg-slate-950 p-2"
+														<label
+															className="flex items-center space-x-3 rounded-xl border border-border bg-muted/20 p-3.5 transition hover:bg-muted/40 cursor-pointer min-h-[44px]"
 															key={usecase}
+															htmlFor={`uc-${usecase}`}
 														>
 															<Checkbox
 																checked={watch("useCases").includes(usecase)}
 																id={`uc-${usecase}`}
 																onCheckedChange={() => toggleUseCase(usecase)}
 															/>
-															<Label
-																className="cursor-pointer text-sm"
-																htmlFor={`uc-${usecase}`}
-															>
+															<span className="text-xs sm:text-sm font-medium text-foreground">
 																{usecase}
-															</Label>
-														</div>
+															</span>
+														</label>
 													))}
 												</div>
 												<FormMessage />
@@ -770,41 +863,41 @@ export default function OnboardingPage() {
 										control={form.control as any}
 										name="businessType"
 										render={({ field }) => (
-											<FormItem>
-												<FormLabel className="text-base">
-													What best describes your business?
+											<FormItem className="border-t border-border pt-4">
+												<FormLabel className="text-foreground font-semibold text-sm sm:text-base block mb-2">
+													What best describes your business model?
 												</FormLabel>
 												<FormControl>
 													<RadioGroup
-														className="grid grid-cols-1 gap-2"
+														className="grid grid-cols-1 sm:grid-cols-2 gap-2.5"
 														defaultValue={field.value}
 														onValueChange={field.onChange}
 													>
 														<Label
-															className="flex cursor-pointer items-center space-x-3 rounded-lg border border-slate-800 bg-slate-950 p-3 transition hover:bg-slate-900"
+															className="flex cursor-pointer items-start space-x-3 rounded-xl border border-border bg-muted/20 p-3.5 transition hover:bg-muted/40 min-h-[56px]"
 															htmlFor="t-service"
 														>
-															<RadioGroupItem id="t-service" value="service" />
+															<RadioGroupItem id="t-service" value="service" className="mt-0.5" />
 															<div>
-																<p className="font-medium text-white">
-																	Service Provider
+																<p className="font-semibold text-sm text-foreground">
+																	Service Provider / Agency
 																</p>
-																<p className="text-slate-400 text-xs">
-																	Agencies, Consultants, Freelancers
+																<p className="text-muted-foreground text-xs">
+																	Consultancies, Agencies, Professional Services
 																</p>
 															</div>
 														</Label>
 														<Label
-															className="flex cursor-pointer items-center space-x-3 rounded-lg border border-slate-800 bg-slate-950 p-3 transition hover:bg-slate-900"
+															className="flex cursor-pointer items-start space-x-3 rounded-xl border border-border bg-muted/20 p-3.5 transition hover:bg-muted/40 min-h-[56px]"
 															htmlFor="t-product"
 														>
-															<RadioGroupItem id="t-product" value="product" />
+															<RadioGroupItem id="t-product" value="product" className="mt-0.5" />
 															<div>
-																<p className="font-medium text-white">
-																	Product / SaaS
+																<p className="font-semibold text-sm text-foreground">
+																	Product / SaaS / Retail
 																</p>
-																<p className="text-slate-400 text-xs">
-																	Software, physical products, e-commerce
+																<p className="text-muted-foreground text-xs">
+																	Software products, eCommerce, Inventory
 																</p>
 															</div>
 														</Label>
@@ -817,29 +910,42 @@ export default function OnboardingPage() {
 								</div>
 							)}
 
-							<div className="flex justify-between border-slate-800 border-t pt-6">
+							{/* Step Navigation Controls */}
+							<div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-border pt-6">
 								<Button
 									disabled={step === 1 || completeOnboarding.isPending}
 									onClick={handlePrev}
 									type="button"
 									variant="outline"
+									className="min-h-[44px] px-6 gap-2 order-2 sm:order-1"
 								>
-									Back
+									<ArrowLeft className="h-4 w-4" /> Back
 								</Button>
 								{step < 3 ? (
-									<Button onClick={handleNext} type="button">
-										Continue
+									<Button
+										onClick={handleNext}
+										type="button"
+										className="min-h-[44px] px-8 gap-2 font-semibold order-1 sm:order-2 shadow-xs"
+									>
+										Continue <ArrowRight className="h-4 w-4" />
 									</Button>
 								) : (
 									<Button
-										className="bg-blue-600 hover:bg-blue-700"
+										className="min-h-[44px] px-8 gap-2 font-semibold order-1 sm:order-2 shadow-sm"
 										disabled={completeOnboarding.isPending}
 										type="submit"
 									>
-										{completeOnboarding.isPending && (
-											<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+										{completeOnboarding.isPending ? (
+											<>
+												<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+												Finalizing Setup...
+											</>
+										) : (
+											<>
+												<CheckCircle2 className="h-4 w-4" />
+												Complete Onboarding
+											</>
 										)}
-										Complete Onboarding
 									</Button>
 								)}
 							</div>

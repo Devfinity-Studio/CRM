@@ -12,10 +12,10 @@ const sidebarNavItems = [
 	},
 	{
 		title: "Team Members",
-		href: "/settings/team", // Keep existing or move later
+		href: "/settings/organization",
 	},
 	{
-		title: "Billing",
+		title: "Billing & Plans",
 		href: "/billing",
 	},
 	{
@@ -32,26 +32,26 @@ export function TenantAdminLayout({ children }: { children: React.ReactNode }) {
 	const pathname = usePathname();
 
 	return (
-		<div className="flex-1 space-y-4 p-8 pt-6">
-			<div className="space-y-0.5">
-				<h2 className="font-bold text-2xl text-foreground tracking-tight">
+		<div className="flex-1 space-y-6 px-3 sm:px-6 py-4 sm:py-8 max-w-7xl mx-auto">
+			<div className="space-y-1 border-b border-border pb-5">
+				<h2 className="font-bold text-2xl sm:text-3xl text-foreground tracking-tight">
 					Tenant Administration
 				</h2>
-				<p className="text-muted-foreground">
-					Manage your organization workspace, members, and advanced features.
+				<p className="text-sm text-muted-foreground">
+					Manage your organization workspace, member access permissions, and enterprise settings.
 				</p>
 			</div>
-			<div className="h-[1px] w-full shrink-0 bg-border" />
-			<div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
-				<aside className="-mx-4 lg:w-1/5">
-					<nav className="flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1">
+
+			<div className="flex flex-col space-y-6 lg:flex-row lg:space-x-8 lg:space-y-0">
+				<aside className="lg:w-1/4">
+					<nav className="flex space-x-1 overflow-x-auto pb-2 no-scrollbar lg:flex-col lg:space-x-0 lg:space-y-1">
 						{sidebarNavItems.map((item) => (
 							<Link
 								className={cn(
-									"inline-flex h-9 items-center justify-start whitespace-nowrap rounded-md px-4 py-2 font-medium text-sm transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
+									"inline-flex min-h-[42px] items-center justify-start whitespace-nowrap rounded-xl px-4 py-2 font-medium text-xs sm:text-sm transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
 									pathname === item.href
-										? "bg-muted font-medium text-primary"
-										: "text-muted-foreground",
+										? "bg-primary text-primary-foreground font-semibold shadow-xs hover:bg-primary/90 hover:text-primary-foreground"
+										: "text-muted-foreground hover:bg-muted/60",
 								)}
 								href={item.href}
 								key={item.href}
@@ -61,7 +61,7 @@ export function TenantAdminLayout({ children }: { children: React.ReactNode }) {
 						))}
 					</nav>
 				</aside>
-				<div className="flex-1 lg:max-w-2xl">{children}</div>
+				<div className="flex-1 lg:max-w-3xl">{children}</div>
 			</div>
 		</div>
 	);

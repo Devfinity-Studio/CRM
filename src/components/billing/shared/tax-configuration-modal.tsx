@@ -1,10 +1,12 @@
 "use client";
 
+import { Percent } from "lucide-react";
 import * as React from "react";
 import { Button } from "~/components/ui/button";
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
@@ -54,7 +56,6 @@ export function TaxConfigurationModal({
 	const [customTax, setCustomTax] = React.useState("");
 	const [isAddingCustom, setIsAddingCustom] = React.useState(false);
 
-	// Sync state when modal opens
 	React.useEffect(() => {
 		if (isOpen) {
 			setConfig(taxConfig);
@@ -88,35 +89,45 @@ export function TaxConfigurationModal({
 
 	return (
 		<Dialog onOpenChange={(open) => !open && onClose()} open={isOpen}>
-			<DialogContent className="sm:max-w-[425px]">
-				<DialogHeader>
-					<DialogTitle>Configure Tax</DialogTitle>
+			<DialogContent className="sm:max-w-[460px] rounded-2xl sm:rounded-3xl border border-border bg-popover text-popover-foreground p-5 sm:p-6 shadow-xl">
+				<DialogHeader className="space-y-1">
+					<div className="flex items-center gap-2">
+						<Percent className="h-5 w-5 text-primary" />
+						<DialogTitle className="font-bold text-foreground text-xl tracking-tight">
+							Configure Tax Regime
+						</DialogTitle>
+					</div>
+					<DialogDescription className="text-muted-foreground text-xs sm:text-sm">
+						Set billing tax classification, place of supply, and inter/intra-state rules.
+					</DialogDescription>
 				</DialogHeader>
-				<div className="grid gap-4 py-4">
-					<div className="grid gap-2">
-						<Label htmlFor="tax-type">Select Tax Type</Label>
+
+				<div className="space-y-4 py-2">
+					<div className="space-y-1.5">
+						<Label htmlFor="tax-type" className="text-xs font-semibold text-foreground">
+							Select Tax Type <span className="text-destructive">*</span>
+						</Label>
 						{!isAddingCustom ? (
 							<Select onValueChange={handleTaxTypeChange} value={config.type}>
-								<SelectTrigger id="tax-type">
+								<SelectTrigger id="tax-type" className="min-h-[44px] bg-background border-border text-foreground">
 									<SelectValue placeholder="Select tax type" />
 								</SelectTrigger>
-								<SelectContent>
+								<SelectContent className="bg-popover text-popover-foreground border-border">
 									{DEFAULT_TAX_OPTIONS.map((opt) => (
 										<SelectItem key={opt} value={opt}>
-											{opt === "none" ? "None" : opt}
+											{opt === "none" ? "None (Zero-rated / Export)" : opt}
 										</SelectItem>
 									))}
-									{/* If current type is not in defaults, show it */}
 									{config.type &&
 										!DEFAULT_TAX_OPTIONS.includes(config.type) &&
 										config.type !== "none" && (
 											<SelectItem value={config.type}>{config.type}</SelectItem>
 										)}
 									<SelectItem
-										className="font-medium text-blue-600"
+										className="font-semibold text-primary"
 										value="add_new"
 									>
-										+ Create New Tax
+										+ Create Custom Tax Type
 									</SelectItem>
 								</SelectContent>
 							</Select>
@@ -124,14 +135,16 @@ export function TaxConfigurationModal({
 							<div className="flex gap-2">
 								<Input
 									autoFocus
+									className="min-h-[44px] bg-background border-border text-foreground flex-1"
 									onChange={(e) => {
 										setCustomTax(e.target.value);
 										setConfig({ ...config, type: e.target.value });
 									}}
-									placeholder="Enter custom tax name"
+									placeholder="e.g. Sales Tax (California)"
 									value={customTax}
 								/>
 								<Button
+									className="min-h-[44px]"
 									onClick={() => setIsAddingCustom(false)}
 									type="button"
 									variant="outline"
@@ -143,61 +156,78 @@ export function TaxConfigurationModal({
 					</div>
 
 					{isGst && (
-						<>
-							<div className="grid gap-2">
-								<Label htmlFor="place-of-supply">Place of Supply *</Label>
+						<div className="space-y-4 pt-2 border-t border-border">
+							<div className="space-y-1.5">
+								<Label htmlFor="place-of-supply" className="text-xs font-semibold text-foreground">
+									Place of Supply (State / Territory) <span className="text-destructive">*</span>
+								</Label>
 								<Input
 									id="place-of-supply"
+									className="min-h-[44px] bg-background border-border text-foreground"
 									onChange={(e) =>
 										setConfig({ ...config, placeOfSupply: e.target.value })
 									}
-									placeholder="e.g. Maharashtra"
+									placeholder="e.g. Maharashtra, Karnataka, Delhi"
 									required
 									value={config.placeOfSupply || ""}
 								/>
 							</div>
 
-							<div className="grid gap-3 pt-2">
-								<Label>GST Type *</Label>
+							<div className="space-y-2">
+								<Label className="text-xs font-semibold text-foreground">
+									GST Application Mode <span className="text-destructive">*</span>
+								</Label>
 								<RadioGroup
-									className="flex flex-col gap-2"
+									className="flex flex-col gap-2 pt-1"
 									onValueChange={(val) =>
 										setConfig({ ...config, gstType: val as GstType })
 									}
 									value={config.gstType || "IGST"}
 								>
-									<div className="flex items-center space-x-2">
+									<Label
+										className="flex items-center space-x-3 rounded-xl border border-border bg-muted/20 p-3 hover:bg-muted/40 cursor-pointer min-h-[44px]"
+										htmlFor="igst"
+									>
 										<RadioGroupItem id="igst" value="IGST" />
-										<Label
-											className="cursor-pointer font-normal"
-											htmlFor="igst"
-										>
-											IGST (Inter-state)
-										</Label>
-									</div>
-									<div className="flex items-center space-x-2">
+										<div>
+											<span className="font-semibold text-xs sm:text-sm text-foreground block">
+												IGST (Inter-state Supply)
+											</span>
+											<span className="text-[11px] text-muted-foreground">
+												Combined integrated goods and services tax rate.
+											</span>
+										</div>
+									</Label>
+									<Label
+										className="flex items-center space-x-3 rounded-xl border border-border bg-muted/20 p-3 hover:bg-muted/40 cursor-pointer min-h-[44px]"
+										htmlFor="cgst"
+									>
 										<RadioGroupItem id="cgst" value="CGST & SGST" />
-										<Label
-											className="cursor-pointer font-normal"
-											htmlFor="cgst"
-										>
-											CGST & SGST (Intra-state)
-										</Label>
-									</div>
+										<div>
+											<span className="font-semibold text-xs sm:text-sm text-foreground block">
+												CGST & SGST (Intra-state Supply)
+											</span>
+											<span className="text-[11px] text-muted-foreground">
+												Split equally between central and state tax authorities.
+											</span>
+										</div>
+									</Label>
 								</RadioGroup>
 							</div>
-						</>
+						</div>
 					)}
 				</div>
-				<DialogFooter>
-					<Button onClick={onClose} variant="outline">
+
+				<DialogFooter className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
+					<Button onClick={onClose} variant="outline" className="min-h-[44px]">
 						Cancel
 					</Button>
 					<Button
+						className="min-h-[44px] px-6 font-semibold shadow-xs"
 						disabled={isGst && (!config.placeOfSupply || !config.gstType)}
 						onClick={handleSave}
 					>
-						Save Tax Configuration
+						Save Configuration
 					</Button>
 				</DialogFooter>
 			</DialogContent>

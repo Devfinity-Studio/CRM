@@ -2,7 +2,22 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { City, Country, State } from "country-state-city";
-import { Loader2, Plus, Trash2, UploadCloud, User } from "lucide-react";
+import {
+	ArrowLeft,
+	Building2,
+	ChevronRight,
+	Globe,
+	IdCard,
+	Loader2,
+	Mail,
+	MapPin,
+	Phone,
+	Plus,
+	Share2,
+	Trash2,
+	UploadCloud,
+	User,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -161,7 +176,6 @@ export default function NewContactFullPage() {
 
 			await createContact.mutateAsync(payload);
 			toast.success("Contact created successfully!");
-			// We don't have a /contacts page yet, so just go back or to clients
 			router.push("/clients");
 		} catch (e: any) {
 			toast.error(e.message || "Failed to create contact");
@@ -176,65 +190,86 @@ export default function NewContactFullPage() {
 
 	return (
 		<DashboardLayout>
-			<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
-				<div className="flex items-center justify-between">
-					<div>
-						<h2 className="font-bold text-3xl text-white tracking-tight">
-							New Contact
-						</h2>
-						<p className="mt-1 text-slate-400">
-							Create a new independent contact or point of contact (POC).
+			<div className="mx-auto max-w-4xl px-3 sm:px-6 py-4 sm:py-8 space-y-6">
+				{/* Header & Breadcrumbs */}
+				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-5">
+					<div className="space-y-1">
+						<div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+							<Link
+								href="/clients"
+								className="hover:text-foreground transition-colors"
+							>
+								Contacts
+							</Link>
+							<ChevronRight className="h-3.5 w-3.5" />
+							<span className="text-foreground font-medium">New Contact</span>
+						</div>
+						<h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+							Create New Contact
+						</h1>
+						<p className="text-sm text-muted-foreground">
+							Register an independent stakeholder, executive, or client representative.
 						</p>
 					</div>
-					<Button asChild variant="outline">
-						<Link href="/clients">Cancel</Link>
-					</Button>
+					<div className="flex items-center gap-2 self-start sm:self-center">
+						<Button asChild variant="outline" className="min-h-[44px] px-4">
+							<Link href="/clients">
+								<ArrowLeft className="mr-2 h-4 w-4" /> Cancel
+							</Link>
+						</Button>
+					</div>
 				</div>
 
 				<Form {...form}>
 					<form
-						className="max-w-4xl space-y-8"
+						className="space-y-6"
 						onSubmit={form.handleSubmit(onSubmit)}
 					>
-						<Card className="border-slate-800 bg-slate-900">
-							<CardHeader>
-								<CardTitle>Basic Information</CardTitle>
+						{/* Basic Information Card */}
+						<Card className="border border-border bg-card shadow-sm">
+							<CardHeader className="pb-3 border-b border-border/60">
+								<div className="flex items-center gap-2">
+									<User className="h-4 w-4 text-primary" />
+									<CardTitle className="text-base sm:text-lg font-bold text-foreground">
+										Basic Stakeholder Profile
+									</CardTitle>
+								</div>
 							</CardHeader>
-							<CardContent className="space-y-6">
-								<div className="flex flex-col items-center gap-6 sm:flex-row">
-									<div className="group relative flex h-24 w-24 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-full border-2 border-slate-700 border-dashed bg-slate-950 transition hover:border-slate-500">
-										<span className="font-bold text-3xl text-slate-500 transition group-hover:opacity-0">
+							<CardContent className="space-y-6 pt-5 p-4 sm:p-6">
+								<div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+									<div className="group relative flex h-24 w-24 shrink-0 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-border bg-muted/30 transition hover:border-primary/50 hover:bg-muted/50">
+										<span className="font-bold text-3xl text-muted-foreground transition group-hover:opacity-0">
 											{nameInitial}
 										</span>
-										<div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/80 opacity-0 transition group-hover:opacity-100">
-											<UploadCloud className="mb-1 h-6 w-6 text-slate-400" />
-											<span className="text-[10px] text-slate-300">
+										<div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 opacity-0 transition group-hover:opacity-100">
+											<UploadCloud className="mb-1 h-6 w-6 text-primary" />
+											<span className="text-[10px] font-medium text-foreground">
 												Upload DP
 											</span>
 										</div>
 									</div>
 
-									<div className="grid w-full flex-1 grid-cols-1 gap-4 sm:grid-cols-2">
+									<div className="grid w-full flex-1 grid-cols-1 sm:grid-cols-2 gap-4">
 										<FormField
 											control={form.control}
 											name="companyId"
 											render={({ field }) => (
 												<FormItem className="sm:col-span-2">
-													<FormLabel>
-														Linked Client (Company) - Optional
+													<FormLabel className="text-foreground font-semibold">
+														Linked Organization (Optional)
 													</FormLabel>
 													<Select
 														defaultValue={field.value}
 														onValueChange={field.onChange}
 													>
 														<FormControl>
-															<SelectTrigger className="border-slate-800 bg-slate-950">
-																<SelectValue placeholder="Select a company (or leave blank for individual)" />
+															<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground">
+																<SelectValue placeholder="Select an organization (or leave blank for individual)" />
 															</SelectTrigger>
 														</FormControl>
-														<SelectContent className="max-h-[300px] border-slate-800 bg-slate-900 text-white">
+														<SelectContent className="max-h-[300px] bg-popover text-popover-foreground border-border">
 															<SelectItem value="none">
-																None (Individual Contact)
+																None (Independent Stakeholder)
 															</SelectItem>
 															{companies?.map((c) => (
 																<SelectItem key={c.id} value={c.id}>
@@ -253,17 +288,17 @@ export default function NewContactFullPage() {
 											name="salutation"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Salutation</FormLabel>
+													<FormLabel className="text-foreground font-semibold">Salutation</FormLabel>
 													<Select
 														defaultValue={field.value}
 														onValueChange={field.onChange}
 													>
 														<FormControl>
-															<SelectTrigger className="border-slate-800 bg-slate-950">
-																<SelectValue placeholder="e.g. Mr, Mrs, Dr" />
+															<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground">
+																<SelectValue placeholder="e.g. Mr, Ms, Dr" />
 															</SelectTrigger>
 														</FormControl>
-														<SelectContent className="border-slate-800 bg-slate-900 text-white">
+														<SelectContent className="bg-popover text-popover-foreground border-border">
 															<SelectItem value="Mr.">Mr.</SelectItem>
 															<SelectItem value="Mrs.">Mrs.</SelectItem>
 															<SelectItem value="Ms.">Ms.</SelectItem>
@@ -276,19 +311,20 @@ export default function NewContactFullPage() {
 											)}
 										/>
 
-										<div className="hidden sm:block"></div>
+										<div className="hidden sm:block" />
 
 										<FormField
 											control={form.control}
 											name="firstName"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>
-														First Name <span className="text-red-500">*</span>
+													<FormLabel className="text-foreground font-semibold">
+														First Name <span className="text-destructive">*</span>
 													</FormLabel>
 													<FormControl>
 														<Input
-															className="border-slate-800 bg-slate-950"
+															className="min-h-[44px] bg-background border-border text-foreground"
+															placeholder="Jane"
 															{...field}
 														/>
 													</FormControl>
@@ -302,10 +338,11 @@ export default function NewContactFullPage() {
 											name="lastName"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Last Name</FormLabel>
+													<FormLabel className="text-foreground font-semibold">Last Name</FormLabel>
 													<FormControl>
 														<Input
-															className="border-slate-800 bg-slate-950"
+															className="min-h-[44px] bg-background border-border text-foreground"
+															placeholder="Doe"
 															{...field}
 														/>
 													</FormControl>
@@ -318,22 +355,29 @@ export default function NewContactFullPage() {
 							</CardContent>
 						</Card>
 
-						<Card className="border-slate-800 bg-slate-900">
-							<CardHeader>
-								<CardTitle>Contact Methods</CardTitle>
+						{/* Contact Methods Card */}
+						<Card className="border border-border bg-card shadow-sm">
+							<CardHeader className="pb-3 border-b border-border/60">
+								<div className="flex items-center gap-2">
+									<Mail className="h-4 w-4 text-primary" />
+									<CardTitle className="text-base sm:text-lg font-bold text-foreground">
+										Communication Channels
+									</CardTitle>
+								</div>
 							</CardHeader>
-							<CardContent className="space-y-6">
-								<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+							<CardContent className="space-y-6 pt-5 p-4 sm:p-6">
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 									<FormField
 										control={form.control}
 										name="email"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Primary Email</FormLabel>
+												<FormLabel className="text-foreground font-semibold">Primary Email</FormLabel>
 												<FormControl>
 													<Input
-														className="border-slate-800 bg-slate-950"
+														className="min-h-[44px] bg-background border-border text-foreground"
 														type="email"
+														placeholder="jane.doe@company.com"
 														{...field}
 													/>
 												</FormControl>
@@ -347,10 +391,11 @@ export default function NewContactFullPage() {
 										name="phone"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Primary Phone</FormLabel>
+												<FormLabel className="text-foreground font-semibold">Primary Phone</FormLabel>
 												<FormControl>
 													<Input
-														className="border-slate-800 bg-slate-950"
+														className="min-h-[44px] bg-background border-border text-foreground"
+														placeholder="+1 (555) 000-0000"
 														{...field}
 													/>
 												</FormControl>
@@ -360,10 +405,25 @@ export default function NewContactFullPage() {
 									/>
 								</div>
 
-								<div className="space-y-3">
-									<Label>Additional Emails</Label>
+								{/* Additional Emails */}
+								<div className="space-y-3 border-t border-border/60 pt-4">
+									<div className="flex items-center justify-between">
+										<Label className="text-sm font-semibold text-foreground">
+											Additional Emails
+										</Label>
+										<Button
+											onClick={() => additionalEmailsArray.append({ email: "" })}
+											size="sm"
+											type="button"
+											variant="outline"
+											className="min-h-[36px] gap-1.5"
+										>
+											<Plus className="h-3.5 w-3.5" /> Add Email
+										</Button>
+									</div>
+
 									{additionalEmailsArray.fields.map((field, index) => (
-										<div className="flex items-start gap-2" key={field.id}>
+										<div className="flex items-center gap-2" key={field.id}>
 											<FormField
 												control={form.control}
 												name={`additionalEmails.${index}.email`}
@@ -371,8 +431,8 @@ export default function NewContactFullPage() {
 													<FormItem className="flex-1">
 														<FormControl>
 															<Input
-																className="border-slate-800 bg-slate-950"
-																placeholder="Another email"
+																className="min-h-[44px] bg-background border-border text-foreground"
+																placeholder="alternate.email@company.com"
 																type="email"
 																{...f}
 															/>
@@ -382,30 +442,38 @@ export default function NewContactFullPage() {
 												)}
 											/>
 											<Button
-												className="text-slate-400 hover:text-red-400"
+												className="h-11 w-11 text-destructive hover:bg-destructive/10 shrink-0"
 												onClick={() => additionalEmailsArray.remove(index)}
 												size="icon"
 												type="button"
 												variant="ghost"
+												aria-label="Remove email"
 											>
 												<Trash2 className="h-4 w-4" />
 											</Button>
 										</div>
 									))}
-									<Button
-										onClick={() => additionalEmailsArray.append({ email: "" })}
-										size="sm"
-										type="button"
-										variant="outline"
-									>
-										<Plus className="mr-1 h-3 w-3" /> Add Email
-									</Button>
 								</div>
 
-								<div className="space-y-3">
-									<Label>Additional Phones</Label>
+								{/* Additional Phones */}
+								<div className="space-y-3 border-t border-border/60 pt-4">
+									<div className="flex items-center justify-between">
+										<Label className="text-sm font-semibold text-foreground">
+											Additional Phone Numbers
+										</Label>
+										<Button
+											onClick={() => additionalPhonesArray.append({ phone: "" })}
+											size="sm"
+											type="button"
+											variant="outline"
+											className="min-h-[36px] gap-1.5"
+										>
+											<Plus className="h-3.5 w-3.5" /> Add Phone
+										</Button>
+									</div>
+
 									{additionalPhonesArray.fields.map((field, index) => (
-										<div className="flex items-start gap-2" key={field.id}>
+										<div className="flex items-center gap-2" key={field.id}>
 											<FormField
 												control={form.control}
 												name={`additionalPhones.${index}.phone`}
@@ -413,8 +481,8 @@ export default function NewContactFullPage() {
 													<FormItem className="flex-1">
 														<FormControl>
 															<Input
-																className="border-slate-800 bg-slate-950"
-																placeholder="Another phone"
+																className="min-h-[44px] bg-background border-border text-foreground"
+																placeholder="Secondary Mobile / Direct Line"
 																{...f}
 															/>
 														</FormControl>
@@ -423,45 +491,47 @@ export default function NewContactFullPage() {
 												)}
 											/>
 											<Button
-												className="text-slate-400 hover:text-red-400"
+												className="h-11 w-11 text-destructive hover:bg-destructive/10 shrink-0"
 												onClick={() => additionalPhonesArray.remove(index)}
 												size="icon"
 												type="button"
 												variant="ghost"
+												aria-label="Remove phone"
 											>
 												<Trash2 className="h-4 w-4" />
 											</Button>
 										</div>
 									))}
-									<Button
-										onClick={() => additionalPhonesArray.append({ phone: "" })}
-										size="sm"
-										type="button"
-										variant="outline"
-									>
-										<Plus className="mr-1 h-3 w-3" /> Add Phone
-									</Button>
 								</div>
 							</CardContent>
 						</Card>
 
-						<Card className="border-slate-800 bg-slate-900">
-							<CardHeader>
-								<CardTitle>Tax & Identification</CardTitle>
+						{/* Tax & Identification */}
+						<Card className="border border-border bg-card shadow-sm">
+							<CardHeader className="pb-3 border-b border-border/60">
+								<div className="flex items-center gap-2">
+									<IdCard className="h-4 w-4 text-primary" />
+									<CardTitle className="text-base sm:text-lg font-bold text-foreground">
+										Identity & Compliance Details
+									</CardTitle>
+								</div>
 							</CardHeader>
-							<CardContent>
-								<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+							<CardContent className="pt-5 p-4 sm:p-6">
+								<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 									<FormField
 										control={form.control}
 										name="pan"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>PAN Number</FormLabel>
+												<FormLabel className="text-foreground font-semibold">PAN Number</FormLabel>
 												<FormControl>
 													<Input
-														className="border-slate-800 bg-slate-950 uppercase"
+														className="min-h-[44px] bg-background border-border text-foreground uppercase"
 														placeholder="ABCDE1234F"
 														{...field}
+														onChange={(e) =>
+															field.onChange(e.target.value.toUpperCase())
+														}
 													/>
 												</FormControl>
 												<FormMessage />
@@ -473,10 +543,10 @@ export default function NewContactFullPage() {
 										name="aadhaar"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Aadhaar Number</FormLabel>
+												<FormLabel className="text-foreground font-semibold">Aadhaar ID</FormLabel>
 												<FormControl>
 													<Input
-														className="border-slate-800 bg-slate-950"
+														className="min-h-[44px] bg-background border-border text-foreground"
 														placeholder="123456789012"
 														{...field}
 													/>
@@ -490,11 +560,15 @@ export default function NewContactFullPage() {
 										name="passport"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Passport Number</FormLabel>
+												<FormLabel className="text-foreground font-semibold">Passport Number</FormLabel>
 												<FormControl>
 													<Input
-														className="border-slate-800 bg-slate-950 uppercase"
+														className="min-h-[44px] bg-background border-border text-foreground uppercase"
+														placeholder="A1234567"
 														{...field}
+														onChange={(e) =>
+															field.onChange(e.target.value.toUpperCase())
+														}
 													/>
 												</FormControl>
 												<FormMessage />
@@ -505,28 +579,47 @@ export default function NewContactFullPage() {
 							</CardContent>
 						</Card>
 
-						<Card className="border-slate-800 bg-slate-900">
-							<CardHeader>
-								<CardTitle>Social Profiles</CardTitle>
+						{/* Social Profiles */}
+						<Card className="border border-border bg-card shadow-sm">
+							<CardHeader className="pb-3 border-b border-border/60">
+								<div className="flex items-center justify-between">
+									<div className="flex items-center gap-2">
+										<Share2 className="h-4 w-4 text-primary" />
+										<CardTitle className="text-base sm:text-lg font-bold text-foreground">
+											Social & Web Profiles
+										</CardTitle>
+									</div>
+									<Button
+										onClick={() =>
+											socialsArray.append({ platform: "linkedin", url: "" })
+										}
+										size="sm"
+										type="button"
+										variant="outline"
+										className="min-h-[36px] gap-1.5"
+									>
+										<Plus className="h-3.5 w-3.5" /> Add Profile
+									</Button>
+								</div>
 							</CardHeader>
-							<CardContent className="space-y-4">
+							<CardContent className="space-y-3 pt-5 p-4 sm:p-6">
 								{socialsArray.fields.map((field, index) => (
-									<div className="flex items-start gap-4" key={field.id}>
+									<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2" key={field.id}>
 										<FormField
 											control={form.control}
 											name={`socialLinks.${index}.platform`}
 											render={({ field: f }) => (
-												<FormItem className="w-[150px]">
+												<FormItem className="w-full sm:w-[160px]">
 													<Select
 														defaultValue={f.value}
 														onValueChange={f.onChange}
 													>
 														<FormControl>
-															<SelectTrigger className="border-slate-800 bg-slate-950">
+															<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground">
 																<SelectValue placeholder="Platform" />
 															</SelectTrigger>
 														</FormControl>
-														<SelectContent className="border-slate-800 bg-slate-900 text-white">
+														<SelectContent className="bg-popover text-popover-foreground border-border">
 															<SelectItem value="linkedin">LinkedIn</SelectItem>
 															<SelectItem value="twitter">
 																X (Twitter)
@@ -550,7 +643,7 @@ export default function NewContactFullPage() {
 												<FormItem className="flex-1">
 													<FormControl>
 														<Input
-															className="border-slate-800 bg-slate-950"
+															className="min-h-[44px] bg-background border-border text-foreground"
 															placeholder="https://..."
 															{...f}
 														/>
@@ -560,51 +653,54 @@ export default function NewContactFullPage() {
 											)}
 										/>
 										<Button
-											className="text-slate-400 hover:text-red-400"
+											className="h-11 w-11 text-destructive hover:bg-destructive/10 shrink-0 self-end sm:self-center"
 											onClick={() => socialsArray.remove(index)}
 											size="icon"
 											type="button"
 											variant="ghost"
+											aria-label="Remove social profile"
 										>
 											<Trash2 className="h-4 w-4" />
 										</Button>
 									</div>
 								))}
-								<Button
-									onClick={() =>
-										socialsArray.append({ platform: "linkedin", url: "" })
-									}
-									size="sm"
-									type="button"
-									variant="outline"
-								>
-									<Plus className="mr-1 h-3 w-3" /> Add Profile
-								</Button>
+
+								{socialsArray.fields.length === 0 && (
+									<div className="text-xs text-muted-foreground italic py-2">
+										No social profiles linked.
+									</div>
+								)}
 							</CardContent>
 						</Card>
 
-						<Card className="border-slate-800 bg-slate-900">
-							<CardHeader>
-								<CardTitle>Address Details</CardTitle>
+						{/* Address Details */}
+						<Card className="border border-border bg-card shadow-sm">
+							<CardHeader className="pb-3 border-b border-border/60">
+								<div className="flex items-center gap-2">
+									<MapPin className="h-4 w-4 text-primary" />
+									<CardTitle className="text-base sm:text-lg font-bold text-foreground">
+										Address Information
+									</CardTitle>
+								</div>
 							</CardHeader>
-							<CardContent>
-								<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+							<CardContent className="pt-5 p-4 sm:p-6">
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 									<FormField
 										control={form.control}
 										name="addressCountry"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Country</FormLabel>
+												<FormLabel className="text-foreground font-semibold">Country</FormLabel>
 												<Select
 													defaultValue={field.value}
 													onValueChange={field.onChange}
 												>
 													<FormControl>
-														<SelectTrigger className="border-slate-800 bg-slate-950">
+														<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground">
 															<SelectValue placeholder="Select Country" />
 														</SelectTrigger>
 													</FormControl>
-													<SelectContent className="max-h-[300px] border-slate-800 bg-slate-900 text-white">
+													<SelectContent className="max-h-[300px] bg-popover text-popover-foreground border-border">
 														{countries.map((c) => (
 															<SelectItem key={c.isoCode} value={c.isoCode}>
 																{c.name}
@@ -621,18 +717,18 @@ export default function NewContactFullPage() {
 										name="addressState"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>State / Province</FormLabel>
+												<FormLabel className="text-foreground font-semibold">State / Province</FormLabel>
 												<Select
 													defaultValue={field.value}
 													disabled={!addressCountry}
 													onValueChange={field.onChange}
 												>
 													<FormControl>
-														<SelectTrigger className="border-slate-800 bg-slate-950">
+														<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground disabled:opacity-50">
 															<SelectValue placeholder="Select State" />
 														</SelectTrigger>
 													</FormControl>
-													<SelectContent className="max-h-[200px] border-slate-800 bg-slate-900 text-white">
+													<SelectContent className="max-h-[200px] bg-popover text-popover-foreground border-border">
 														{states.map((s) => (
 															<SelectItem key={s.isoCode} value={s.isoCode}>
 																{s.name}
@@ -649,10 +745,11 @@ export default function NewContactFullPage() {
 										name="addressDistrict"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>District (Optional)</FormLabel>
+												<FormLabel className="text-foreground font-semibold">District (Optional)</FormLabel>
 												<FormControl>
 													<Input
-														className="border-slate-800 bg-slate-950"
+														className="min-h-[44px] bg-background border-border text-foreground"
+														placeholder="County or District"
 														{...field}
 													/>
 												</FormControl>
@@ -665,18 +762,18 @@ export default function NewContactFullPage() {
 										name="addressCity"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>City</FormLabel>
+												<FormLabel className="text-foreground font-semibold">City</FormLabel>
 												<Select
 													defaultValue={field.value}
 													disabled={!addressState}
 													onValueChange={field.onChange}
 												>
 													<FormControl>
-														<SelectTrigger className="border-slate-800 bg-slate-950">
+														<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground disabled:opacity-50">
 															<SelectValue placeholder="Select City" />
 														</SelectTrigger>
 													</FormControl>
-													<SelectContent className="max-h-[200px] border-slate-800 bg-slate-900 text-white">
+													<SelectContent className="max-h-[200px] bg-popover text-popover-foreground border-border">
 														{cities.map((c) => (
 															<SelectItem key={c.name} value={c.name}>
 																{c.name}
@@ -693,10 +790,11 @@ export default function NewContactFullPage() {
 										name="addressBuilding"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Building / Suite</FormLabel>
+												<FormLabel className="text-foreground font-semibold">Building / Suite</FormLabel>
 												<FormControl>
 													<Input
-														className="border-slate-800 bg-slate-950"
+														className="min-h-[44px] bg-background border-border text-foreground"
+														placeholder="Apartment, Floor, Suite"
 														{...field}
 													/>
 												</FormControl>
@@ -709,10 +807,11 @@ export default function NewContactFullPage() {
 										name="addressZip"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Zip / Pincode</FormLabel>
+												<FormLabel className="text-foreground font-semibold">Postal / Zip Code</FormLabel>
 												<FormControl>
 													<Input
-														className="border-slate-800 bg-slate-950"
+														className="min-h-[44px] bg-background border-border text-foreground"
+														placeholder="e.g. 10001"
 														{...field}
 													/>
 												</FormControl>
@@ -727,11 +826,11 @@ export default function NewContactFullPage() {
 										name="addressStreet"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Street Address</FormLabel>
+												<FormLabel className="text-foreground font-semibold">Street Address</FormLabel>
 												<FormControl>
 													<Input
-														className="border-slate-800 bg-slate-950"
-														placeholder="e.g. 123 Main St"
+														className="min-h-[44px] bg-background border-border text-foreground"
+														placeholder="e.g. 123 Main Street"
 														{...field}
 													/>
 												</FormControl>
@@ -743,19 +842,24 @@ export default function NewContactFullPage() {
 							</CardContent>
 						</Card>
 
-						<div className="flex justify-end gap-4">
-							<Button asChild type="button" variant="outline">
+						{/* Action Buttons */}
+						<div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-2">
+							<Button asChild type="button" variant="outline" className="min-h-[44px] px-6 order-2 sm:order-1">
 								<Link href="/clients">Cancel</Link>
 							</Button>
 							<Button
-								className="w-40 bg-blue-600 hover:bg-blue-700"
+								className="min-h-[44px] sm:min-w-[180px] font-semibold order-1 sm:order-2 shadow-sm"
 								disabled={isSubmitting}
 								type="submit"
 							>
-								{isSubmitting && (
-									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								{isSubmitting ? (
+									<>
+										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+										Saving Contact...
+									</>
+								) : (
+									"Save Contact"
 								)}
-								Save Contact
 							</Button>
 						</div>
 					</form>

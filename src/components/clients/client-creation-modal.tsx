@@ -42,17 +42,16 @@ export function ClientCreationModal({
 		<Dialog onOpenChange={setOpen} open={isOpen}>
 			<DialogTrigger asChild>
 				{trigger || (
-					<Button className="flex h-8 gap-1" size="sm" variant="outline">
-						<Plus className="h-4 w-4" /> Add New Client
+					<Button className="flex min-h-[40px] gap-1.5" size="sm" variant="outline">
+						<Plus className="h-4 w-4 text-primary" /> Add New Client
 					</Button>
 				)}
 			</DialogTrigger>
-			<DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto border-slate-800 bg-slate-950 text-white">
-				<DialogHeader className="mb-0">
-					<DialogTitle className="sr-only">Add New Client</DialogTitle>
+			<DialogContent className="max-h-[92vh] max-w-4xl overflow-y-auto border border-border bg-popover text-popover-foreground p-4 sm:p-6 shadow-2xl rounded-2xl sm:rounded-3xl">
+				<DialogHeader className="mb-0 sr-only">
+					<DialogTitle>Add New Client Profile</DialogTitle>
 				</DialogHeader>
-				<div className="mt-[-24px]">
-					{/* We hide the title above since the form has its own header, or we can let the form render it */}
+				<div>
 					<ClientCreationForm isModal onSuccess={handleSuccess} />
 				</div>
 			</DialogContent>

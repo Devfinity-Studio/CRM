@@ -3,12 +3,22 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { City, Country, State } from "country-state-city";
 import {
+	ArrowLeft,
+	ArrowRight,
+	Building2,
+	CheckCircle2,
 	Download,
+	FileText,
 	Info,
 	Link as LinkIcon,
 	Loader2,
+	MapPin,
 	Plus,
+	ShieldCheck,
 	Trash2,
+	UploadCloud,
+	UserCheck,
+	Users,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,7 +27,6 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
 import * as z from "zod";
-import { DashboardLayout } from "~/components/layout/dashboard-layout";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
@@ -118,9 +127,6 @@ const contactSchema = z.object({
 		)
 		.default([]),
 
-	// Section 5: Linked Contact
-	// blank for now
-
 	// Section 6: Additional Details
 	alias: z.string().optional(),
 	uid: z.string().optional(),
@@ -174,7 +180,18 @@ const contactSchema = z.object({
 		)
 		.default([]),
 });
+
 type ContactFormValues = z.infer<typeof contactSchema>;
+
+const TAB_CONFIG = [
+	{ id: "basic", label: "Basic Info", icon: Building2 },
+	{ id: "tax", label: "Tax Info", icon: ShieldCheck },
+	{ id: "address", label: "Addresses", icon: MapPin },
+	{ id: "details", label: "Details", icon: FileText },
+	{ id: "contacts", label: "Contacts", icon: Users },
+	{ id: "attachments", label: "Attachments", icon: LinkIcon },
+	{ id: "account", label: "Account", icon: UserCheck },
+];
 
 export function ClientCreationForm({
 	onSuccess,
@@ -231,7 +248,6 @@ export function ClientCreationForm({
 	const attachmentsArray = useFieldArray({ control, name: "attachments" });
 	const pocsArray = useFieldArray({ control, name: "newPocs" });
 
-	const currentCountry = watch("country");
 	const addressCountry = watch("addressCountry");
 	const addressState = watch("addressState");
 	const hasGst = watch("hasGst");
@@ -271,14 +287,12 @@ export function ClientCreationForm({
 				name: data.name,
 				industry: data.industry,
 				country: data.country,
-				// Tax Info Mapping
 				hasGst: data.hasGst,
 				gstin: data.gstin || undefined,
 				businessPan: data.businessPan || undefined,
 				clientType: data.clientType,
 				taxTreatment: data.taxTreatment,
 				extraIds: data.extraIds,
-				// Billing Address Mapping
 				addressCountry: data.addressCountry,
 				addressState: data.addressState,
 				addressCity: data.addressCity,
@@ -323,91 +337,87 @@ export function ClientCreationForm({
 	};
 
 	return (
-		<div className={isModal ? "" : "mx-auto max-w-5xl pb-12"}>
-			<div className="mb-6 flex items-center justify-between border-slate-800 border-b pb-4">
+		<div className={isModal ? "space-y-4" : "mx-auto max-w-5xl pb-12 space-y-6"}>
+			<div className="flex items-center justify-between border-b border-border pb-4">
 				<div>
-					<h2 className="font-bold text-2xl text-white tracking-tight">
-						Add New Client
+					<h2 className="font-bold text-xl sm:text-2xl text-foreground tracking-tight">
+						Add New Client Profile
 					</h2>
-					<p className="mt-1 text-slate-400 text-sm">
-						Fill out the detailed profile for your new client or organization.
+					<p className="text-xs sm:text-sm text-muted-foreground">
+						Complete the organization details, regulatory tax ID, and billing settings.
 					</p>
 				</div>
-				<Button asChild variant="outline">
-					<Link href="/clients">Cancel</Link>
-				</Button>
+				{!isModal && (
+					<Button asChild variant="outline" className="min-h-[40px]">
+						<Link href="/clients">Cancel</Link>
+					</Button>
+				)}
 			</div>
 
 			<Form {...form}>
 				<form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
 					<Tabs
-						className="w-full"
+						className="w-full space-y-5"
 						onValueChange={setActiveTab}
 						value={activeTab}
 					>
-						<TabsList className="mb-6 grid h-auto grid-cols-6 rounded-lg border border-slate-800 bg-slate-900 p-1">
-							<TabsTrigger className="py-2.5" value="basic">
-								Basic Info
-							</TabsTrigger>
-							<TabsTrigger className="py-2.5" value="tax">
-								Tax Info
-							</TabsTrigger>
-							<TabsTrigger className="py-2.5" value="address">
-								Addresses
-							</TabsTrigger>
-							<TabsTrigger className="py-2.5" value="details">
-								Details
-							</TabsTrigger>
-							<TabsTrigger className="py-2.5" value="contacts">
-								Contacts
-							</TabsTrigger>
-							<TabsTrigger className="py-2.5" value="attachments">
-								Attachments
-							</TabsTrigger>
-							<TabsTrigger className="py-2.5" value="account">
-								Account
-							</TabsTrigger>
-						</TabsList>
+						<div className="overflow-x-auto pb-1 no-scrollbar">
+							<TabsList className="inline-flex w-auto min-w-full justify-start rounded-xl border border-border bg-muted/40 p-1.5 gap-1">
+								{TAB_CONFIG.map((t) => {
+									const Icon = t.icon;
+									return (
+										<TabsTrigger
+											key={t.id}
+											value={t.id}
+											className="min-h-[38px] px-3 py-1.5 text-xs sm:text-sm font-medium whitespace-nowrap data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs rounded-lg flex items-center gap-1.5"
+										>
+											<Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+											<span>{t.label}</span>
+										</TabsTrigger>
+									);
+								})}
+							</TabsList>
+						</div>
 
 						{/* TAB 1: BASIC INFO */}
-						<TabsContent className="space-y-6" value="basic">
-							<Card className="border-slate-800 bg-slate-900">
-								<CardContent className="space-y-6 p-6">
+						<TabsContent className="space-y-5 focus-visible:outline-none" value="basic">
+							<Card className="border border-border bg-card shadow-sm">
+								<CardContent className="space-y-5 p-4 sm:p-6">
 									<FormField
 										control={form.control}
 										name="logo"
 										render={() => (
 											<FormItem>
-												<FormLabel>Client Logo</FormLabel>
-												<div className="flex h-32 w-full max-w-sm cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-slate-700 border-dashed bg-slate-950 text-slate-400 transition hover:border-slate-500 hover:bg-slate-800">
-													<Plus className="mb-2 h-8 w-8 text-slate-500" />
-													<span className="text-sm">Drag & drop logo here</span>
-													<span className="mt-1 text-slate-500 text-xs">
-														or click to browse
-													</span>
+												<FormLabel className="text-foreground font-semibold">Client Logo</FormLabel>
+												<div className="flex h-28 w-full max-w-xs cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/20 text-muted-foreground transition hover:border-primary/50 hover:bg-muted/40 p-3">
+													<UploadCloud className="mb-1.5 h-6 w-6 text-muted-foreground" />
+													<span className="text-xs font-medium text-foreground">Drag & drop logo</span>
+													<span className="text-[10px] text-muted-foreground">or click to browse</span>
 												</div>
 												<FormMessage />
 											</FormItem>
 										)}
 									/>
 
-									<div className="grid grid-cols-2 gap-6">
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 										<FormField
 											control={form.control}
 											name="country"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Country *</FormLabel>
+													<FormLabel className="text-foreground font-semibold">
+														Country <span className="text-destructive">*</span>
+													</FormLabel>
 													<Select
 														defaultValue={field.value}
 														onValueChange={field.onChange}
 													>
 														<FormControl>
-															<SelectTrigger className="border-slate-800 bg-slate-950">
+															<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground">
 																<SelectValue placeholder="Select Country" />
 															</SelectTrigger>
 														</FormControl>
-														<SelectContent className="max-h-[300px] border-slate-800 bg-slate-900 text-white">
+														<SelectContent className="max-h-[260px] bg-popover text-popover-foreground border-border">
 															{countries.map((c) => (
 																<SelectItem key={c.isoCode} value={c.isoCode}>
 																	{c.name}
@@ -424,10 +434,11 @@ export function ClientCreationForm({
 											name="city"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>City / Town</FormLabel>
+													<FormLabel className="text-foreground font-semibold">City / Town</FormLabel>
 													<FormControl>
 														<Input
-															className="border-slate-800 bg-slate-950"
+															className="min-h-[44px] bg-background border-border text-foreground"
+															placeholder="e.g. Chicago"
 															{...field}
 														/>
 													</FormControl>
@@ -437,37 +448,27 @@ export function ClientCreationForm({
 										/>
 									</div>
 
-									<div className="grid grid-cols-2 gap-6">
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 										<FormField
 											control={form.control}
 											name="name"
 											render={({ field }) => (
 												<FormItem className="flex flex-col">
-													<FormLabel>Business Name *</FormLabel>
+													<FormLabel className="text-foreground font-semibold">
+														Business Name <span className="text-destructive">*</span>
+													</FormLabel>
 													<FormControl>
 														<Input
-															className="border-slate-800 bg-slate-950"
+															className="min-h-[44px] bg-background border-border text-foreground"
 															placeholder="Acme Corp"
 															{...field}
 														/>
 													</FormControl>
 													{duplicateCompany && (
-														<div className="mt-1 flex items-center gap-2 rounded border border-amber-500/20 bg-amber-500/10 p-2 text-amber-500 text-sm">
-															<Info className="h-4 w-4 shrink-0" />
+														<div className="mt-2 flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-2.5 text-amber-700 dark:text-amber-400 text-xs">
+															<Info className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
 															<span>
-																The company with name{" "}
-																<span className="font-semibold">
-																	{duplicateCompany.name}
-																</span>{" "}
-																already exists.{" "}
-																<a
-																	className="underline hover:text-amber-400"
-																	href={`/clients/${duplicateCompany.id}`}
-																	rel="noreferrer"
-																	target="_blank"
-																>
-																	View profile
-																</a>
+																A company named <strong>{duplicateCompany.name}</strong> exists.
 															</span>
 														</div>
 													)}
@@ -480,24 +481,21 @@ export function ClientCreationForm({
 											name="industry"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Industry</FormLabel>
+													<FormLabel className="text-foreground font-semibold">Industry</FormLabel>
 													<Select
 														defaultValue={field.value}
 														onValueChange={field.onChange}
 													>
 														<FormControl>
-															<SelectTrigger className="border-slate-800 bg-slate-950">
+															<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground">
 																<SelectValue placeholder="Select Industry" />
 															</SelectTrigger>
 														</FormControl>
-														<SelectContent className="border-slate-800 bg-slate-900 text-white">
-															<SelectItem value="software">
-																Software / IT
-															</SelectItem>
+														<SelectContent className="bg-popover text-popover-foreground border-border">
+															<SelectItem value="software">Software / IT</SelectItem>
 															<SelectItem value="finance">Finance</SelectItem>
-															<SelectItem value="retail">
-																Retail / E-Commerce
-															</SelectItem>
+															<SelectItem value="retail">Retail / E-Commerce</SelectItem>
+															<SelectItem value="healthcare">Healthcare / Pharma</SelectItem>
 															<SelectItem value="other">Other</SelectItem>
 														</SelectContent>
 													</Select>
@@ -509,25 +507,32 @@ export function ClientCreationForm({
 								</CardContent>
 							</Card>
 							<div className="flex justify-end">
-								<Button onClick={() => setActiveTab("tax")} type="button">
-									Next Step
+								<Button
+									onClick={() => setActiveTab("tax")}
+									type="button"
+									className="min-h-[44px] px-6 gap-2"
+								>
+									Next <ArrowRight className="h-4 w-4" />
 								</Button>
 							</div>
 						</TabsContent>
 
 						{/* TAB 2: TAX INFO */}
-						<TabsContent className="space-y-6" value="tax">
-							<Card className="border-slate-800 bg-slate-900">
-								<CardContent className="space-y-6 p-6">
+						<TabsContent className="space-y-5 focus-visible:outline-none" value="tax">
+							<Card className="border border-border bg-card shadow-sm">
+								<CardContent className="space-y-5 p-4 sm:p-6">
 									<FormField
 										control={form.control}
 										name="hasGst"
 										render={({ field }) => (
-											<FormItem className="flex flex-row items-center justify-between rounded-lg border border-slate-800 bg-slate-950 p-4">
+											<FormItem className="flex flex-row items-center justify-between rounded-xl border border-border bg-muted/20 p-4">
 												<div className="space-y-0.5">
-													<FormLabel className="font-semibold text-base">
+													<FormLabel className="font-semibold text-foreground text-sm cursor-pointer">
 														Registered for Tax (GST/VAT)?
 													</FormLabel>
+													<p className="text-xs text-muted-foreground">
+														Enable for registered B2B tax credits and invoice headers.
+													</p>
 												</div>
 												<FormControl>
 													<Switch
@@ -540,16 +545,16 @@ export function ClientCreationForm({
 									/>
 
 									{hasGst && (
-										<div className="grid grid-cols-2 gap-6 rounded-lg border border-slate-800 bg-slate-950 p-4">
+										<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-xl border border-border bg-muted/10 p-4">
 											<FormField
 												control={form.control}
 												name="gstin"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>GST / Tax Number</FormLabel>
+														<FormLabel className="text-foreground font-semibold">GST / Tax Number</FormLabel>
 														<FormControl>
 															<Input
-																className="border-slate-800 bg-slate-900 uppercase"
+																className="min-h-[44px] bg-background border-border text-foreground uppercase"
 																placeholder="22AAAAA0000A1Z5"
 																{...field}
 																onChange={(e) =>
@@ -566,10 +571,10 @@ export function ClientCreationForm({
 												name="businessPan"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel>PAN / Legal ID</FormLabel>
+														<FormLabel className="text-foreground font-semibold">PAN / Legal ID</FormLabel>
 														<FormControl>
 															<Input
-																className="border-slate-800 bg-slate-900 uppercase"
+																className="min-h-[44px] bg-background border-border text-foreground uppercase"
 																placeholder="AAAAA0000A"
 																{...field}
 																onChange={(e) =>
@@ -584,12 +589,26 @@ export function ClientCreationForm({
 										</div>
 									)}
 
-									<div className="border-slate-800 border-t pt-4">
-										<FormLabel className="mb-2 block">
-											Additional Tax IDs
-										</FormLabel>
+									<div className="border-t border-border pt-4">
+										<div className="flex items-center justify-between mb-3">
+											<FormLabel className="text-foreground font-semibold text-xs sm:text-sm">
+												Additional Tax Identifiers
+											</FormLabel>
+											<Button
+												onClick={() =>
+													extraIdsArray.append({ idType: "", idValue: "" })
+												}
+												size="sm"
+												type="button"
+												variant="outline"
+												className="min-h-[36px] gap-1.5"
+											>
+												<Plus className="h-3.5 w-3.5" /> Add ID
+											</Button>
+										</div>
+
 										{extraIdsArray.fields.map((field, index) => (
-											<div className="mb-4 flex gap-4" key={field.id}>
+											<div className="mb-2.5 flex items-center gap-2" key={field.id}>
 												<FormField
 													control={form.control}
 													name={`extraIds.${index}.idType`}
@@ -597,8 +616,8 @@ export function ClientCreationForm({
 														<FormItem className="flex-1">
 															<FormControl>
 																<Input
-																	className="border-slate-800 bg-slate-950"
-																	placeholder="ID Type (e.g. CIN)"
+																	className="min-h-[42px] bg-background border-border text-foreground text-xs"
+																	placeholder="Type (e.g. CIN)"
 																	{...field}
 																/>
 															</FormControl>
@@ -612,8 +631,8 @@ export function ClientCreationForm({
 														<FormItem className="flex-[2]">
 															<FormControl>
 																<Input
-																	className="border-slate-800 bg-slate-950"
-																	placeholder="Value"
+																	className="min-h-[42px] bg-background border-border text-foreground text-xs"
+																	placeholder="Registration Number"
 																	{...field}
 																/>
 															</FormControl>
@@ -624,45 +643,39 @@ export function ClientCreationForm({
 													onClick={() => extraIdsArray.remove(index)}
 													size="icon"
 													type="button"
-													variant="destructive"
+													variant="ghost"
+													className="h-10 w-10 text-destructive hover:bg-destructive/10 shrink-0"
 												>
 													<Trash2 className="h-4 w-4" />
 												</Button>
 											</div>
 										))}
-										<Button
-											className="mt-2"
-											onClick={() =>
-												extraIdsArray.append({ idType: "", idValue: "" })
-											}
-											size="sm"
-											type="button"
-											variant="outline"
-										>
-											<Plus className="mr-2 h-4 w-4" /> Add Tax ID
-										</Button>
 									</div>
 
-									<div className="grid grid-cols-2 gap-6 border-slate-800 border-t pt-4">
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-border pt-4">
 										<FormField
 											control={form.control}
 											name="clientType"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Client Type</FormLabel>
+													<FormLabel className="text-foreground font-semibold">Client Type</FormLabel>
 													<FormControl>
 														<RadioGroup
-															className="flex space-x-4"
+															className="flex gap-4 pt-1"
 															defaultValue={field.value}
 															onValueChange={field.onChange}
 														>
 															<div className="flex items-center space-x-2">
-																<RadioGroupItem id="r1" value="individual" />
-																<Label htmlFor="r1">Individual</Label>
+																<RadioGroupItem id="modal-r1" value="individual" />
+																<Label htmlFor="modal-r1" className="cursor-pointer text-foreground text-xs sm:text-sm">
+																	Individual
+																</Label>
 															</div>
 															<div className="flex items-center space-x-2">
-																<RadioGroupItem id="r2" value="org" />
-																<Label htmlFor="r2">Organization</Label>
+																<RadioGroupItem id="modal-r2" value="org" />
+																<Label htmlFor="modal-r2" className="cursor-pointer text-foreground text-xs sm:text-sm">
+																	Organization
+																</Label>
 															</div>
 														</RadioGroup>
 													</FormControl>
@@ -674,23 +687,19 @@ export function ClientCreationForm({
 											name="taxTreatment"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Tax Treatment</FormLabel>
+													<FormLabel className="text-foreground font-semibold">Tax Treatment</FormLabel>
 													<Select
 														defaultValue={field.value}
 														onValueChange={field.onChange}
 													>
 														<FormControl>
-															<SelectTrigger className="border-slate-800 bg-slate-950">
+															<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground">
 																<SelectValue placeholder="Select..." />
 															</SelectTrigger>
 														</FormControl>
-														<SelectContent className="border-slate-800 bg-slate-900 text-white">
-															<SelectItem value="consumer">
-																Consumer (B2C)
-															</SelectItem>
-															<SelectItem value="b2b">
-																Business (B2B)
-															</SelectItem>
+														<SelectContent className="bg-popover text-popover-foreground border-border">
+															<SelectItem value="consumer">Consumer (B2C)</SelectItem>
+															<SelectItem value="b2b">Business (B2B)</SelectItem>
 														</SelectContent>
 													</Select>
 													<FormMessage />
@@ -700,34 +709,39 @@ export function ClientCreationForm({
 									</div>
 								</CardContent>
 							</Card>
-							<div className="flex justify-between">
+							<div className="flex justify-between items-center gap-2">
 								<Button
 									onClick={() => setActiveTab("basic")}
 									type="button"
 									variant="outline"
+									className="min-h-[44px] px-4 gap-1.5"
 								>
-									Previous
+									<ArrowLeft className="h-4 w-4" /> Prev
 								</Button>
-								<Button onClick={() => setActiveTab("address")} type="button">
-									Next Step
+								<Button
+									onClick={() => setActiveTab("address")}
+									type="button"
+									className="min-h-[44px] px-6 gap-2"
+								>
+									Next <ArrowRight className="h-4 w-4" />
 								</Button>
 							</div>
 						</TabsContent>
 
-						{/* TAB 3: ADDRESS & SHIPPING */}
-						<TabsContent className="space-y-6" value="address">
-							<Card className="border-slate-800 bg-slate-900">
-								<CardContent className="space-y-6 p-6">
-									<h3 className="font-semibold text-lg text-white">
+						{/* TAB 3: ADDRESS */}
+						<TabsContent className="space-y-5 focus-visible:outline-none" value="address">
+							<Card className="border border-border bg-card shadow-sm">
+								<CardContent className="space-y-5 p-4 sm:p-6">
+									<h3 className="font-semibold text-base text-foreground">
 										Billing Address
 									</h3>
-									<div className="grid grid-cols-2 gap-6">
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 										<FormField
 											control={form.control}
 											name="addressCountry"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Country</FormLabel>
+													<FormLabel className="text-foreground font-semibold">Country</FormLabel>
 													<Select
 														defaultValue={field.value}
 														onValueChange={(v) => {
@@ -737,11 +751,11 @@ export function ClientCreationForm({
 														}}
 													>
 														<FormControl>
-															<SelectTrigger className="border-slate-800 bg-slate-950">
+															<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground">
 																<SelectValue placeholder="Select Country" />
 															</SelectTrigger>
 														</FormControl>
-														<SelectContent className="max-h-[300px] border-slate-800 bg-slate-900 text-white">
+														<SelectContent className="max-h-[260px] bg-popover text-popover-foreground border-border">
 															{countries.map((c) => (
 																<SelectItem key={c.isoCode} value={c.isoCode}>
 																	{c.name}
@@ -758,7 +772,7 @@ export function ClientCreationForm({
 											name="addressState"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>State / Province</FormLabel>
+													<FormLabel className="text-foreground font-semibold">State / Province</FormLabel>
 													<Select
 														defaultValue={field.value}
 														disabled={!addressCountry}
@@ -768,11 +782,11 @@ export function ClientCreationForm({
 														}}
 													>
 														<FormControl>
-															<SelectTrigger className="border-slate-800 bg-slate-950">
+															<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground disabled:opacity-50">
 																<SelectValue placeholder="Select State" />
 															</SelectTrigger>
 														</FormControl>
-														<SelectContent className="max-h-[200px] border-slate-800 bg-slate-900 text-white">
+														<SelectContent className="max-h-[200px] bg-popover text-popover-foreground border-border">
 															{addressStatesList.map((s) => (
 																<SelectItem key={s.isoCode} value={s.isoCode}>
 																	{s.name}
@@ -789,18 +803,18 @@ export function ClientCreationForm({
 											name="addressCity"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>City / Town</FormLabel>
+													<FormLabel className="text-foreground font-semibold">City / Town</FormLabel>
 													<Select
 														defaultValue={field.value}
 														disabled={!addressState}
 														onValueChange={field.onChange}
 													>
 														<FormControl>
-															<SelectTrigger className="border-slate-800 bg-slate-950">
+															<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground disabled:opacity-50">
 																<SelectValue placeholder="Select City" />
 															</SelectTrigger>
 														</FormControl>
-														<SelectContent className="max-h-[200px] border-slate-800 bg-slate-900 text-white">
+														<SelectContent className="max-h-[200px] bg-popover text-popover-foreground border-border">
 															{addressCitiesList.map((c) => (
 																<SelectItem key={c.name} value={c.name}>
 																	{c.name}
@@ -817,10 +831,10 @@ export function ClientCreationForm({
 											name="addressPincode"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Pincode</FormLabel>
+													<FormLabel className="text-foreground font-semibold">Pincode</FormLabel>
 													<FormControl>
 														<Input
-															className="border-slate-800 bg-slate-950"
+															className="min-h-[44px] bg-background border-border text-foreground"
 															{...field}
 															onChange={(e) => {
 																e.target.value = e.target.value.replace(
@@ -836,16 +850,17 @@ export function ClientCreationForm({
 											)}
 										/>
 									</div>
+
 									<FormField
 										control={form.control}
 										name="addressStreet"
 										render={({ field }) => (
-											<FormItem className="mt-4">
-												<FormLabel>Street Address</FormLabel>
+											<FormItem>
+												<FormLabel className="text-foreground font-semibold">Street Address</FormLabel>
 												<FormControl>
 													<Input
-														className="border-slate-800 bg-slate-950"
-														placeholder="123 Business Rd, Floor 4"
+														className="min-h-[44px] bg-background border-border text-foreground"
+														placeholder="123 Corporate Blvd, Suite 200"
 														{...field}
 													/>
 												</FormControl>
@@ -854,100 +869,66 @@ export function ClientCreationForm({
 										)}
 									/>
 
-									<div className="border-slate-800 border-t pt-8">
-										<div className="mb-4 flex items-center justify-between">
-											<h3 className="font-semibold text-lg text-white">
-												Shipping Details
-											</h3>
+									<div className="border-t border-border pt-4">
+										<div className="flex items-center justify-between mb-3">
+											<span className="font-semibold text-sm text-foreground">
+												Shipping Destinations
+											</span>
 											<Button
 												onClick={copyBillingToShipping}
 												size="sm"
 												type="button"
 												variant="secondary"
+												className="min-h-[36px] gap-1.5"
 											>
-												<Download className="mr-2 h-4 w-4" /> Copy Billing
-												Address
+												<Download className="h-3.5 w-3.5" /> Copy Billing Address
 											</Button>
 										</div>
 
 										{shippingArray.fields.map((field, index) => (
 											<div
-												className="group relative mb-4 rounded-lg border border-slate-800 bg-slate-950 p-4"
+												className="mb-3 rounded-xl border border-border bg-muted/20 p-3 space-y-3"
 												key={field.id}
 											>
-												<Button
-													className="absolute top-2 right-2 text-red-400 opacity-0 hover:bg-red-900/20 group-hover:opacity-100"
-													onClick={() => shippingArray.remove(index)}
-													size="icon"
-													type="button"
-													variant="ghost"
-												>
-													<Trash2 className="h-4 w-4" />
-												</Button>
-												<div className="grid grid-cols-2 gap-4">
-													<FormField
-														control={form.control}
-														name={`shippingAddresses.${index}.country`}
-														render={({ field }) => (
-															<FormItem>
-																<FormLabel>Country</FormLabel>
-																<FormControl>
-																	<Input
-																		className="border-slate-800 bg-slate-900"
-																		{...field}
-																	/>
-																</FormControl>
-															</FormItem>
-														)}
+												<div className="flex justify-between items-center">
+													<span className="text-xs font-semibold text-muted-foreground uppercase">
+														Shipping Address #{index + 1}
+													</span>
+													<Button
+														className="h-8 w-8 text-destructive hover:bg-destructive/10"
+														onClick={() => shippingArray.remove(index)}
+														size="icon"
+														type="button"
+														variant="ghost"
+													>
+														<Trash2 className="h-4 w-4" />
+													</Button>
+												</div>
+												<div className="grid grid-cols-2 gap-2">
+													<Input
+														className="min-h-[38px] bg-background border-border text-xs"
+														placeholder="Country"
+														{...form.register(`shippingAddresses.${index}.country`)}
 													/>
-													<FormField
-														control={form.control}
-														name={`shippingAddresses.${index}.state`}
-														render={({ field }) => (
-															<FormItem>
-																<FormLabel>State</FormLabel>
-																<FormControl>
-																	<Input
-																		className="border-slate-800 bg-slate-900"
-																		{...field}
-																	/>
-																</FormControl>
-															</FormItem>
-														)}
+													<Input
+														className="min-h-[38px] bg-background border-border text-xs"
+														placeholder="State"
+														{...form.register(`shippingAddresses.${index}.state`)}
 													/>
-													<FormField
-														control={form.control}
-														name={`shippingAddresses.${index}.city`}
-														render={({ field }) => (
-															<FormItem>
-																<FormLabel>City</FormLabel>
-																<FormControl>
-																	<Input
-																		className="border-slate-800 bg-slate-900"
-																		{...field}
-																	/>
-																</FormControl>
-															</FormItem>
-														)}
+													<Input
+														className="min-h-[38px] bg-background border-border text-xs"
+														placeholder="City"
+														{...form.register(`shippingAddresses.${index}.city`)}
 													/>
-													<FormField
-														control={form.control}
-														name={`shippingAddresses.${index}.pincode`}
-														render={({ field }) => (
-															<FormItem>
-																<FormLabel>Pincode</FormLabel>
-																<FormControl>
-																	<Input
-																		className="border-slate-800 bg-slate-900"
-																		{...field}
-																	/>
-																</FormControl>
-															</FormItem>
-														)}
+													<Input
+														className="min-h-[38px] bg-background border-border text-xs"
+														placeholder="Pincode"
+														{...form.register(`shippingAddresses.${index}.pincode`)}
 													/>
 												</div>
 											</div>
 										))}
+
 										<Button
 											onClick={() =>
 												shippingArray.append({
@@ -960,77 +941,64 @@ export function ClientCreationForm({
 											size="sm"
 											type="button"
 											variant="outline"
+											className="min-h-[36px] gap-1.5"
 										>
-											<Plus className="mr-2 h-4 w-4" /> Have Multiple Shipping
-											Addresses? Add Here
+											<Plus className="h-3.5 w-3.5" /> Add Shipping Destination
 										</Button>
 									</div>
 								</CardContent>
 							</Card>
-							<div className="flex justify-between">
+							<div className="flex justify-between items-center gap-2">
 								<Button
 									onClick={() => setActiveTab("tax")}
 									type="button"
 									variant="outline"
+									className="min-h-[44px] px-4 gap-1.5"
 								>
-									Previous
+									<ArrowLeft className="h-4 w-4" /> Prev
 								</Button>
-								<Button onClick={() => setActiveTab("details")} type="button">
-									Next Step
+								<Button
+									onClick={() => setActiveTab("details")}
+									type="button"
+									className="min-h-[44px] px-6 gap-2"
+								>
+									Next <ArrowRight className="h-4 w-4" />
 								</Button>
 							</div>
 						</TabsContent>
 
-						{/* TAB 4: ADDITIONAL DETAILS */}
-						<TabsContent className="space-y-6" value="details">
-							<Card className="border-slate-800 bg-slate-900">
-								<CardContent className="space-y-6 p-6">
-									<div className="grid grid-cols-2 gap-6">
+						{/* TAB 4: DETAILS */}
+						<TabsContent className="space-y-5 focus-visible:outline-none" value="details">
+							<Card className="border border-border bg-card shadow-sm">
+								<CardContent className="space-y-5 p-4 sm:p-6">
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 										<FormField
 											control={form.control}
 											name="alias"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Alias / Nickname</FormLabel>
+													<FormLabel className="text-foreground font-semibold">Alias / Brand Name</FormLabel>
 													<FormControl>
 														<Input
-															className="border-slate-800 bg-slate-950"
+															className="min-h-[44px] bg-background border-border text-foreground"
+															placeholder="e.g. Acme HQ"
 															{...field}
 														/>
 													</FormControl>
 												</FormItem>
 											)}
 										/>
-										<FormField
-											control={form.control}
-											name="uid"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>UID (Auto-generated)</FormLabel>
-													<FormControl>
-														<Input
-															className="border-slate-800 bg-slate-950 text-slate-500"
-															disabled
-															placeholder="Will be assigned upon save"
-															{...field}
-														/>
-													</FormControl>
-												</FormItem>
-											)}
-										/>
-									</div>
-
-									<div className="grid grid-cols-2 items-end gap-6">
 										<FormField
 											control={form.control}
 											name="email"
 											render={({ field }) => (
-												<FormItem className="flex-1">
-													<FormLabel>Email Address</FormLabel>
+												<FormItem>
+													<FormLabel className="text-foreground font-semibold">Billing Email</FormLabel>
 													<FormControl>
 														<Input
-															className="border-slate-800 bg-slate-950"
+															className="min-h-[44px] bg-background border-border text-foreground"
 															type="email"
+															placeholder="finance@acme.com"
 															{...field}
 														/>
 													</FormControl>
@@ -1038,35 +1006,18 @@ export function ClientCreationForm({
 												</FormItem>
 											)}
 										/>
-										<FormField
-											control={form.control}
-											name="showEmailInInvoice"
-											render={({ field }) => (
-												<FormItem className="mb-1 flex flex-row items-center space-x-3 space-y-0 rounded-lg border border-slate-800 bg-slate-950 p-3">
-													<FormControl>
-														<Checkbox
-															checked={field.value}
-															onCheckedChange={field.onChange}
-														/>
-													</FormControl>
-													<FormLabel className="cursor-pointer font-normal text-slate-300">
-														Show Email in Invoice
-													</FormLabel>
-												</FormItem>
-											)}
-										/>
 									</div>
 
-									<div className="grid grid-cols-2 items-end gap-6">
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 										<FormField
 											control={form.control}
 											name="phone"
 											render={({ field }) => (
-												<FormItem className="flex-1">
-													<FormLabel>Phone Number</FormLabel>
+												<FormItem>
+													<FormLabel className="text-foreground font-semibold">Billing Phone</FormLabel>
 													<div className="PhoneInputWrapper">
 														<PhoneInput
-															className="w-full border-slate-800 bg-slate-950"
+															className="w-full min-h-[44px] rounded-md border border-border bg-background px-3 py-2 text-foreground"
 															defaultCountry="US"
 															onChange={(v) => field.onChange(v || "")}
 															value={field.value}
@@ -1078,176 +1029,51 @@ export function ClientCreationForm({
 										/>
 										<FormField
 											control={form.control}
-											name="showPhoneInInvoice"
-											render={({ field }) => (
-												<FormItem className="mb-1 flex flex-row items-center space-x-3 space-y-0 rounded-lg border border-slate-800 bg-slate-950 p-3">
-													<FormControl>
-														<Checkbox
-															checked={field.value}
-															onCheckedChange={field.onChange}
-														/>
-													</FormControl>
-													<FormLabel className="cursor-pointer font-normal text-slate-300">
-														Show Phone in Invoice
-													</FormLabel>
-												</FormItem>
-											)}
-										/>
-									</div>
-
-									<div className="grid grid-cols-3 gap-6 border-slate-800 border-t pt-4">
-										<FormField
-											control={form.control}
 											name="paymentDueDays"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Default Payment Due (Days)</FormLabel>
+													<FormLabel className="text-foreground font-semibold">Payment Due (Days)</FormLabel>
 													<FormControl>
 														<Input
-															className="border-slate-800 bg-slate-950"
+															className="min-h-[44px] bg-background border-border text-foreground"
 															type="number"
+															placeholder="30"
 															{...field}
 														/>
 													</FormControl>
 												</FormItem>
 											)}
 										/>
-										<FormField
-											control={form.control}
-											name="paymentAccount"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Payment Account</FormLabel>
-													<Select
-														defaultValue={field.value}
-														disabled
-														onValueChange={field.onChange}
-													>
-														<FormControl>
-															<SelectTrigger className="border-slate-800 bg-slate-950 opacity-50">
-																<SelectValue placeholder="Coming Soon" />
-															</SelectTrigger>
-														</FormControl>
-														<SelectContent>
-															<SelectItem value="none">None</SelectItem>
-														</SelectContent>
-													</Select>
-												</FormItem>
-											)}
-										/>
-										<FormField
-											control={form.control}
-											name="upiId"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>UPI ID</FormLabel>
-													<Select
-														defaultValue={field.value}
-														disabled
-														onValueChange={field.onChange}
-													>
-														<FormControl>
-															<SelectTrigger className="border-slate-800 bg-slate-950 opacity-50">
-																<SelectValue placeholder="Coming Soon" />
-															</SelectTrigger>
-														</FormControl>
-														<SelectContent>
-															<SelectItem value="none">None</SelectItem>
-														</SelectContent>
-													</Select>
-												</FormItem>
-											)}
-										/>
-									</div>
-
-									<div className="border-slate-800 border-t pt-4">
-										<FormLabel className="mb-2 block">Custom Fields</FormLabel>
-										{customFieldsArray.fields.map((field, index) => (
-											<div className="mb-4 flex gap-4" key={field.id}>
-												<FormField
-													control={form.control}
-													name={`customFields.${index}.fieldName`}
-													render={({ field }) => (
-														<FormItem className="flex-1">
-															<FormControl>
-																<Input
-																	className="border-slate-800 bg-slate-950"
-																	placeholder="Field Name (e.g. Birthday)"
-																	{...field}
-																/>
-															</FormControl>
-														</FormItem>
-													)}
-												/>
-												<FormField
-													control={form.control}
-													name={`customFields.${index}.fieldValue`}
-													render={({ field }) => (
-														<FormItem className="flex-[2]">
-															<FormControl>
-																<Input
-																	className="border-slate-800 bg-slate-950"
-																	placeholder="Value"
-																	{...field}
-																/>
-															</FormControl>
-														</FormItem>
-													)}
-												/>
-												<Button
-													onClick={() => customFieldsArray.remove(index)}
-													size="icon"
-													type="button"
-													variant="destructive"
-												>
-													<Trash2 className="h-4 w-4" />
-												</Button>
-											</div>
-										))}
-										<Button
-											className="mt-2"
-											onClick={() =>
-												customFieldsArray.append({
-													fieldName: "",
-													fieldValue: "",
-												})
-											}
-											size="sm"
-											type="button"
-											variant="outline"
-										>
-											<Plus className="mr-2 h-4 w-4" /> Add Custom Field
-										</Button>
 									</div>
 								</CardContent>
 							</Card>
-							<div className="flex justify-between">
+							<div className="flex justify-between items-center gap-2">
 								<Button
 									onClick={() => setActiveTab("address")}
 									type="button"
 									variant="outline"
+									className="min-h-[44px] px-4 gap-1.5"
 								>
-									Previous
+									<ArrowLeft className="h-4 w-4" /> Prev
 								</Button>
-								<Button onClick={() => setActiveTab("contacts")} type="button">
-									Next Step
+								<Button
+									onClick={() => setActiveTab("contacts")}
+									type="button"
+									className="min-h-[44px] px-6 gap-2"
+								>
+									Next <ArrowRight className="h-4 w-4" />
 								</Button>
 							</div>
 						</TabsContent>
 
-						{/* TAB 4.5: CONTACTS */}
-						<TabsContent className="space-y-6" value="contacts">
-							<Card className="border-slate-800 bg-slate-900">
-								<CardContent className="p-6">
-									<div className="mb-4 flex items-center justify-between">
-										<div>
-											<h4 className="font-semibold text-lg text-white">
-												Linked Contacts (POCs)
-											</h4>
-											<p className="text-slate-400 text-sm">
-												Add individuals associated with this client.
-											</p>
-										</div>
+						{/* TAB 5: CONTACTS */}
+						<TabsContent className="space-y-5 focus-visible:outline-none" value="contacts">
+							<Card className="border border-border bg-card shadow-sm">
+								<CardContent className="space-y-4 p-4 sm:p-6">
+									<div className="flex items-center justify-between">
+										<span className="font-semibold text-base text-foreground">
+											Key Contact Stakeholders
+										</span>
 										<Button
 											onClick={() =>
 												pocsArray.append({
@@ -1260,24 +1086,24 @@ export function ClientCreationForm({
 											size="sm"
 											type="button"
 											variant="outline"
+											className="min-h-[36px] gap-1.5"
 										>
-											<Plus className="mr-2 h-4 w-4" />
-											Add Contact
+											<Plus className="h-3.5 w-3.5" /> Add Contact
 										</Button>
 									</div>
 
-									<div className="space-y-4">
+									<div className="space-y-3">
 										{pocsArray.fields.map((field, index) => (
 											<div
-												className="space-y-4 rounded-md border border-slate-800 bg-slate-950/50 p-4"
+												className="rounded-xl border border-border bg-muted/20 p-3 space-y-3"
 												key={field.id}
 											>
 												<div className="flex items-center justify-between">
-													<h5 className="font-medium text-sm text-white">
-														Contact #{index + 1}
-													</h5>
+													<span className="text-xs font-semibold text-muted-foreground uppercase">
+														Stakeholder #{index + 1}
+													</span>
 													<Button
-														className="h-8 w-8 text-red-400 hover:bg-red-950/30 hover:text-red-300"
+														className="h-8 w-8 text-destructive hover:bg-destructive/10"
 														onClick={() => pocsArray.remove(index)}
 														size="icon"
 														type="button"
@@ -1286,204 +1112,159 @@ export function ClientCreationForm({
 														<Trash2 className="h-4 w-4" />
 													</Button>
 												</div>
-												<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-													<FormField
-														control={form.control}
-														name={`newPocs.${index}.firstName`}
-														render={({ field }) => (
-															<FormItem>
-																<FormLabel>
-																	First Name{" "}
-																	<span className="text-red-500">*</span>
-																</FormLabel>
-																<FormControl>
-																	<Input
-																		className="border-slate-800 bg-slate-900"
-																		{...field}
-																	/>
-																</FormControl>
-																<FormMessage />
-															</FormItem>
-														)}
+												<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+													<Input
+														className="min-h-[40px] bg-background border-border text-xs"
+														placeholder="First Name *"
+														{...form.register(`newPocs.${index}.firstName`)}
 													/>
-													<FormField
-														control={form.control}
-														name={`newPocs.${index}.lastName`}
-														render={({ field }) => (
-															<FormItem>
-																<FormLabel>Last Name</FormLabel>
-																<FormControl>
-																	<Input
-																		className="border-slate-800 bg-slate-900"
-																		{...field}
-																	/>
-																</FormControl>
-																<FormMessage />
-															</FormItem>
-														)}
+													<Input
+														className="min-h-[40px] bg-background border-border text-xs"
+														placeholder="Last Name"
+														{...form.register(`newPocs.${index}.lastName`)}
 													/>
-													<FormField
-														control={form.control}
-														name={`newPocs.${index}.email`}
-														render={({ field }) => (
-															<FormItem>
-																<FormLabel>Email</FormLabel>
-																<FormControl>
-																	<Input
-																		className="border-slate-800 bg-slate-900"
-																		type="email"
-																		{...field}
-																	/>
-																</FormControl>
-																<FormMessage />
-															</FormItem>
-														)}
+													<Input
+														className="min-h-[40px] bg-background border-border text-xs"
+														placeholder="Email"
+														type="email"
+														{...form.register(`newPocs.${index}.email`)}
 													/>
-													<FormField
-														control={form.control}
-														name={`newPocs.${index}.phone`}
-														render={({ field }) => (
-															<FormItem>
-																<FormLabel>Phone</FormLabel>
-																<FormControl>
-																	<Input
-																		className="border-slate-800 bg-slate-900"
-																		{...field}
-																	/>
-																</FormControl>
-																<FormMessage />
-															</FormItem>
-														)}
+													<Input
+														className="min-h-[40px] bg-background border-border text-xs"
+														placeholder="Phone"
+														{...form.register(`newPocs.${index}.phone`)}
 													/>
 												</div>
 											</div>
 										))}
 										{pocsArray.fields.length === 0 && (
-											<div className="rounded-md border border-slate-800 border-dashed p-8 text-center text-slate-500 text-sm">
-												No contacts added yet. Click "Add Contact" to link
-												someone to this company.
+											<div className="rounded-xl border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
+												No contacts attached yet. Click &ldquo;Add Contact&rdquo; to attach stakeholders.
 											</div>
 										)}
 									</div>
 								</CardContent>
 							</Card>
-							<div className="flex justify-between">
+							<div className="flex justify-between items-center gap-2">
 								<Button
 									onClick={() => setActiveTab("details")}
 									type="button"
 									variant="outline"
+									className="min-h-[44px] px-4 gap-1.5"
 								>
-									Previous
+									<ArrowLeft className="h-4 w-4" /> Prev
 								</Button>
 								<Button
 									onClick={() => setActiveTab("attachments")}
 									type="button"
+									className="min-h-[44px] px-6 gap-2"
 								>
-									Next Step
+									Next <ArrowRight className="h-4 w-4" />
 								</Button>
 							</div>
 						</TabsContent>
 
-						{/* TAB 5: ATTACHMENTS */}
-						<TabsContent className="space-y-6" value="attachments">
-							<Card className="border-slate-800 bg-slate-900">
-								<CardContent className="space-y-6 p-6">
-									<FormLabel className="mb-2 block">
-										Client Attachments & Documents
-									</FormLabel>
-									<p className="mb-4 text-slate-400 text-sm">
-										Attach relevant documentation like NDAs, contracts, or tax
-										exemption forms.
-									</p>
+						{/* TAB 6: ATTACHMENTS */}
+						<TabsContent className="space-y-5 focus-visible:outline-none" value="attachments">
+							<Card className="border border-border bg-card shadow-sm">
+								<CardContent className="space-y-4 p-4 sm:p-6">
+									<div className="flex items-center justify-between">
+										<span className="font-semibold text-base text-foreground">
+											Contracts & Documents
+										</span>
+										<Button
+											onClick={() =>
+												attachmentsArray.append({ name: "", url: "" })
+											}
+											size="sm"
+											type="button"
+											variant="outline"
+											className="min-h-[36px] gap-1.5"
+										>
+											<Plus className="h-3.5 w-3.5" /> Add Document
+										</Button>
+									</div>
+
 									{attachmentsArray.fields.map((field, index) => (
 										<div
-											className="mb-4 flex items-center gap-4 rounded-lg border border-slate-800 bg-slate-950 p-4"
+											className="flex items-center gap-2 rounded-xl border border-border bg-muted/20 p-3"
 											key={field.id}
 										>
-											<LinkIcon className="h-5 w-5 text-slate-500" />
-											<FormField
-												control={form.control}
-												name={`attachments.${index}.name`}
-												render={({ field }) => (
-													<FormItem className="flex-1">
-														<FormControl>
-															<Input
-																className="border-slate-800 bg-slate-900"
-																placeholder="Document Name"
-																{...field}
-															/>
-														</FormControl>
-													</FormItem>
-												)}
+											<Input
+												className="min-h-[40px] bg-background border-border text-xs flex-1"
+												placeholder="Document Title (e.g. Master Service Agreement)"
+												{...form.register(`attachments.${index}.name`)}
 											/>
-											<div className="flex flex-[2] cursor-pointer items-center justify-center rounded-lg border-2 border-slate-700 border-dashed bg-slate-900 p-2 transition hover:border-slate-500 hover:bg-slate-800">
-												<span className="flex items-center text-slate-400 text-xs">
-													<Plus className="mr-1 h-3 w-3" /> Drop file here
-												</span>
-											</div>
 											<Button
 												onClick={() => attachmentsArray.remove(index)}
 												size="icon"
 												type="button"
-												variant="destructive"
+												variant="ghost"
+												className="h-10 w-10 text-destructive hover:bg-destructive/10 shrink-0"
 											>
 												<Trash2 className="h-4 w-4" />
 											</Button>
 										</div>
 									))}
-									<Button
-										onClick={() =>
-											attachmentsArray.append({ name: "", url: "" })
-										}
-										size="sm"
-										type="button"
-										variant="outline"
-									>
-										<Plus className="mr-2 h-4 w-4" /> Add Attachment Field
-									</Button>
 								</CardContent>
 							</Card>
-							<div className="flex justify-between">
+							<div className="flex justify-between items-center gap-2">
 								<Button
-									onClick={() => setActiveTab("details")}
+									onClick={() => setActiveTab("contacts")}
 									type="button"
 									variant="outline"
+									className="min-h-[44px] px-4 gap-1.5"
 								>
-									Previous
+									<ArrowLeft className="h-4 w-4" /> Prev
 								</Button>
-								<Button onClick={() => setActiveTab("account")} type="button">
-									Next Step
+								<Button
+									onClick={() => setActiveTab("account")}
+									type="button"
+									className="min-h-[44px] px-6 gap-2"
+								>
+									Review <ArrowRight className="h-4 w-4" />
 								</Button>
 							</div>
 						</TabsContent>
 
-						{/* TAB 6: ACCOUNT DETAILS */}
-						<TabsContent className="space-y-6" value="account">
-							<Card className="border-slate-800 bg-slate-900">
-								<CardContent className="p-6 py-12 text-center">
-									<p className="text-slate-400">
-										Linked Account Details will appear here after creation.
+						{/* TAB 7: ACCOUNT */}
+						<TabsContent className="space-y-5 focus-visible:outline-none" value="account">
+							<Card className="border border-border bg-card shadow-sm">
+								<CardContent className="p-6 py-10 text-center space-y-3">
+									<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+										<CheckCircle2 className="h-7 w-7" />
+									</div>
+									<h4 className="font-bold text-base text-foreground">
+										Ready to Create Client Profile
+									</h4>
+									<p className="text-xs sm:text-sm text-muted-foreground max-w-sm mx-auto">
+										All details are validated. Save to register the organization and sync accounting records.
 									</p>
 								</CardContent>
 							</Card>
-							<div className="flex items-center justify-between">
+
+							<div className="flex justify-between items-center gap-2">
 								<Button
 									onClick={() => setActiveTab("attachments")}
 									type="button"
 									variant="outline"
+									className="min-h-[44px] px-4 gap-1.5"
 								>
-									Previous
+									<ArrowLeft className="h-4 w-4" /> Prev
 								</Button>
 								<Button
-									className="min-w-[200px] bg-blue-600 hover:bg-blue-700"
+									className="min-h-[44px] px-6 font-semibold shadow-xs"
 									disabled={isSubmitting}
-									size="lg"
 									type="submit"
 								>
-									{isSubmitting && (
-										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+									{isSubmitting ? (
+										<>
+											<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+											Saving Profile...
+										</>
+									) : (
+										"Save Client Profile"
 									)}
-									Save Full Profile
 								</Button>
 							</div>
 						</TabsContent>

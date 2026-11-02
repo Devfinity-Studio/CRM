@@ -1,6 +1,6 @@
 "use client";
 
-import { DollarSign, Loader2 } from "lucide-react";
+import { DollarSign, Loader2, Sparkles } from "lucide-react";
 import { useSession } from "next-auth/react";
 import type React from "react";
 import { useEffect, useState } from "react";
@@ -30,6 +30,7 @@ interface DealDialogProps {
 	onOpenChange: (open: boolean) => void;
 	dealId?: string;
 	defaultPipelineId?: string;
+	defaultCompanyId?: string;
 }
 
 export function DealDialog({
@@ -37,6 +38,7 @@ export function DealDialog({
 	onOpenChange,
 	dealId: _dealId,
 	defaultPipelineId,
+	defaultCompanyId,
 }: DealDialogProps) {
 	const session = useSession()?.data;
 	const orgId = session?.user?.organizationId as string;
@@ -45,7 +47,7 @@ export function DealDialog({
 	const [value, setValue] = useState("");
 	const [stageId, setStageId] = useState("");
 	const [pipelineId, setPipelineId] = useState(defaultPipelineId || "");
-	const [companyId, setCompanyId] = useState<string>("");
+	const [companyId, setCompanyId] = useState<string>(defaultCompanyId || "");
 	const [contactId, setContactId] = useState<string>("");
 	const [closeDate, setCloseDate] = useState<string>("");
 
@@ -61,6 +63,12 @@ export function DealDialog({
 			setPipelineId(pipelines[0]?.id ?? "");
 		}
 	}, [defaultPipelineId, pipelines, pipelineId]);
+
+	useEffect(() => {
+		if (defaultCompanyId && !companyId) {
+			setCompanyId(defaultCompanyId);
+		}
+	}, [defaultCompanyId, companyId]);
 
 	const { data: stages } = api.deals.getStages.useQuery(
 		{ pipelineId: pipelineId },
@@ -88,6 +96,9 @@ export function DealDialog({
 			toast.success("Deal created successfully");
 			trpcContext.deals.getDeals.invalidate();
 			trpcContext.deals.getMetricsSummary.invalidate();
+			if (companyId) {
+				trpcContext.deals.getDealsByCompanyId.invalidate({ companyId });
+			}
 			onOpenChange(false);
 			resetForm();
 		},
@@ -99,7 +110,7 @@ export function DealDialog({
 	const resetForm = () => {
 		setTitle("");
 		setValue("");
-		setCompanyId("");
+		setCompanyId(defaultCompanyId || "");
 		setContactId("");
 		setCloseDate("");
 	};
@@ -114,48 +125,51 @@ export function DealDialog({
 			value: Math.round(parseFloat(value || "0") * 100), // convert to cents
 			pipelineId,
 			stageId,
-			companyId: companyId || undefined,
-			contactId: contactId || undefined,
+			companyId: companyId && companyId !== "none" ? companyId : undefined,
+			contactId: contactId && contactId !== "none" ? contactId : undefined,
 			expectedCloseDate: closeDate ? new Date(closeDate) : undefined,
 		});
 	};
 
 	return (
 		<Dialog onOpenChange={onOpenChange} open={open}>
-			<DialogContent className="max-w-[500px] rounded-3xl border border-border/80 bg-background/95 p-6 backdrop-blur-xl">
+			<DialogContent className="max-w-[540px] rounded-2xl sm:rounded-3xl border border-border bg-popover text-popover-foreground p-5 sm:p-6 shadow-xl">
 				<DialogHeader className="space-y-1">
-					<DialogTitle className="font-bold text-foreground text-xl tracking-tight">
-						Create New Deal
-					</DialogTitle>
-					<DialogDescription className="text-muted-foreground text-xs">
-						Add an opportunity to your sales pipeline with stage targets.
+					<div className="flex items-center gap-2">
+						<Sparkles className="h-5 w-5 text-primary" />
+						<DialogTitle className="font-bold text-foreground text-xl tracking-tight">
+							Create New Opportunity
+						</DialogTitle>
+					</div>
+					<DialogDescription className="text-muted-foreground text-xs sm:text-sm">
+						Add a sales deal to your pipeline and configure targeted close projections.
 					</DialogDescription>
 				</DialogHeader>
 
 				<form className="space-y-4 pt-2" onSubmit={handleSubmit}>
 					<div className="space-y-1.5">
-						<Label className="text-xs" htmlFor="deal-title">
+						<Label className="text-xs font-semibold text-foreground" htmlFor="deal-title">
 							Deal Title <span className="text-destructive">*</span>
 						</Label>
 						<Input
-							className="h-9 rounded-xl border-border/80 bg-background text-xs"
+							className="min-h-[44px] bg-background border-border text-foreground"
 							id="deal-title"
 							onChange={(e) => setTitle(e.target.value)}
-							placeholder="e.g. Acme Corp Enterprise Platform"
+							placeholder="e.g. Acme Corp Enterprise Platform Expansion"
 							required
 							value={title}
 						/>
 					</div>
 
-					<div className="grid grid-cols-2 gap-3">
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
 						<div className="space-y-1.5">
-							<Label className="text-xs" htmlFor="deal-value">
-								Value ($)
+							<Label className="text-xs font-semibold text-foreground" htmlFor="deal-value">
+								Estimated Value ($)
 							</Label>
 							<div className="relative">
-								<DollarSign className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
+								<DollarSign className="absolute top-3.5 left-3 h-4 w-4 text-muted-foreground" />
 								<Input
-									className="h-9 rounded-xl border-border/80 bg-background pl-8 text-xs"
+									className="min-h-[44px] pl-9 bg-background border-border text-foreground tabular-nums"
 									id="deal-value"
 									min="0"
 									onChange={(e) => setValue(e.target.value)}
@@ -168,33 +182,31 @@ export function DealDialog({
 						</div>
 
 						<div className="space-y-1.5">
-							<Label className="text-xs" htmlFor="close-date">
-								Expected Close Date
+							<Label className="text-xs font-semibold text-foreground" htmlFor="close-date">
+								Target Close Date
 							</Label>
-							<div className="relative">
-								<Input
-									className="h-9 rounded-xl border-border/80 bg-background text-xs"
-									id="close-date"
-									onChange={(e) => setCloseDate(e.target.value)}
-									type="date"
-									value={closeDate}
-								/>
-							</div>
+							<Input
+								className="min-h-[44px] bg-background border-border text-foreground"
+								id="close-date"
+								onChange={(e) => setCloseDate(e.target.value)}
+								type="date"
+								value={closeDate}
+							/>
 						</div>
 					</div>
 
-					<div className="grid grid-cols-2 gap-3">
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
 						<div className="space-y-1.5">
-							<Label className="text-xs">Pipeline</Label>
+							<Label className="text-xs font-semibold text-foreground">Pipeline <span className="text-destructive">*</span></Label>
 							<Select
 								disabled={!pipelines || pipelines.length === 0}
 								onValueChange={setPipelineId}
 								value={pipelineId}
 							>
-								<SelectTrigger className="h-9 rounded-xl border-border/80 bg-background text-xs">
+								<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground">
 									<SelectValue placeholder="Select pipeline" />
 								</SelectTrigger>
-								<SelectContent>
+								<SelectContent className="bg-popover text-popover-foreground border-border">
 									{pipelines?.map((pipe) => (
 										<SelectItem key={pipe.id} value={pipe.id}>
 											{pipe.name}
@@ -205,16 +217,16 @@ export function DealDialog({
 						</div>
 
 						<div className="space-y-1.5">
-							<Label className="text-xs">Stage</Label>
+							<Label className="text-xs font-semibold text-foreground">Initial Stage <span className="text-destructive">*</span></Label>
 							<Select
 								disabled={!stages || stages.length === 0}
 								onValueChange={setStageId}
 								value={stageId}
 							>
-								<SelectTrigger className="h-9 rounded-xl border-border/80 bg-background text-xs">
+								<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground">
 									<SelectValue placeholder="Select stage" />
 								</SelectTrigger>
-								<SelectContent>
+								<SelectContent className="bg-popover text-popover-foreground border-border">
 									{stages?.map((stage) => (
 										<SelectItem key={stage.id} value={stage.id}>
 											{stage.name} ({stage.winProbability}%)
@@ -225,14 +237,15 @@ export function DealDialog({
 						</div>
 					</div>
 
-					<div className="grid grid-cols-2 gap-3">
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
 						<div className="space-y-1.5">
-							<Label className="text-xs">Client Company</Label>
+							<Label className="text-xs font-semibold text-foreground">Client Organization</Label>
 							<Select onValueChange={setCompanyId} value={companyId}>
-								<SelectTrigger className="h-9 rounded-xl border-border/80 bg-background text-xs">
+								<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground">
 									<SelectValue placeholder="Link company (optional)" />
 								</SelectTrigger>
-								<SelectContent>
+								<SelectContent className="max-h-[220px] bg-popover text-popover-foreground border-border">
+									<SelectItem value="none">None (Individual Deal)</SelectItem>
 									{companies?.map((comp) => (
 										<SelectItem key={comp.id} value={comp.id}>
 											{comp.name}
@@ -243,12 +256,13 @@ export function DealDialog({
 						</div>
 
 						<div className="space-y-1.5">
-							<Label className="text-xs">Primary Contact</Label>
+							<Label className="text-xs font-semibold text-foreground">Designated Contact</Label>
 							<Select onValueChange={setContactId} value={contactId}>
-								<SelectTrigger className="h-9 rounded-xl border-border/80 bg-background text-xs">
+								<SelectTrigger className="min-h-[44px] bg-background border-border text-foreground">
 									<SelectValue placeholder="Link contact (optional)" />
 								</SelectTrigger>
-								<SelectContent>
+								<SelectContent className="max-h-[220px] bg-popover text-popover-foreground border-border">
+									<SelectItem value="none">None (No primary contact)</SelectItem>
 									{contacts?.map((c) => (
 										<SelectItem key={c.id} value={c.id}>
 											{c.firstName} {c.lastName}
@@ -259,9 +273,9 @@ export function DealDialog({
 						</div>
 					</div>
 
-					<DialogFooter className="pt-3">
+					<DialogFooter className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
 						<Button
-							className="h-9 rounded-xl text-xs"
+							className="min-h-[44px] px-4"
 							onClick={() => onOpenChange(false)}
 							type="button"
 							variant="outline"
@@ -269,14 +283,14 @@ export function DealDialog({
 							Cancel
 						</Button>
 						<Button
-							className="h-9 rounded-xl bg-primary px-4 font-semibold text-primary-foreground text-xs shadow-xs hover:bg-primary/90"
+							className="min-h-[44px] px-6 font-semibold shadow-xs"
 							disabled={createDeal.isPending || !title || !stageId}
 							type="submit"
 						>
 							{createDeal.isPending ? (
 								<>
 									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-									Creating...
+									Creating Opportunity...
 								</>
 							) : (
 								"Create Opportunity"
