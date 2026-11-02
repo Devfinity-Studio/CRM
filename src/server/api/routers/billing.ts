@@ -1,27 +1,36 @@
-import { and, desc, eq, gte, inArray, like, lt, lte } from "drizzle-orm";
+import { and, count, desc, eq, gte, inArray, like, lt, lte } from "drizzle-orm";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import {
-	invoices,
-	organizationMembers,
-	payments,
-	products,
-	quotes,
-	statements,
-	stockMovements,
-	userSettings,
-} from "~/server/db/schema";
 import {
 	fulfillInvoiceStock,
 	issueInvoiceCreditNote,
 	isValidInvoiceTransition,
 } from "~/server/api/services/invoice-state-machine";
-import { dispatchWebhook } from "~/server/webhooks/dispatch";
+import {
+	createPlatformCheckoutSession,
+	createPlatformCustomerPortalSession,
+} from "~/server/api/services/platform-billing";
 import {
 	calculateRegionalTax,
 	listStatesForCountry,
 	listSupportedCountries,
 } from "~/server/api/services/tax-engine";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import {
+	automationLogs,
+	contacts,
+	invoices,
+	organizationMembers,
+	organizations,
+	payments,
+	products,
+	quotes,
+	statements,
+	stockMovements,
+	subscriptionPlans,
+	subscriptions,
+	userSettings,
+} from "~/server/db/schema";
+import { dispatchWebhook } from "~/server/webhooks/dispatch";
 
 async function saveDocumentPattern(
 	ctx: any,
@@ -1308,7 +1317,9 @@ export const billingRouter = createTRPCRouter({
 			});
 			if (!invoice) throw new Error("Invoice not found");
 
-			if (!isValidInvoiceTransition(invoice.status as any, input.status as any)) {
+			if (
+				!isValidInvoiceTransition(invoice.status as any, input.status as any)
+			) {
 				throw new Error(
 					`Invalid invoice transition from ${invoice.status} to ${input.status}`,
 				);
@@ -1384,7 +1395,9 @@ export const billingRouter = createTRPCRouter({
 			});
 			if (!member?.organizationId) throw new Error("Unauthorized");
 
-			const conditions = [eq(stockMovements.organizationId, member.organizationId)];
+			const conditions = [
+				eq(stockMovements.organizationId, member.organizationId),
+			];
 			if (input?.productId) {
 				conditions.push(eq(stockMovements.productId, input.productId));
 			}
@@ -1407,5 +1420,156 @@ export const billingRouter = createTRPCRouter({
 				.leftJoin(products, eq(stockMovements.productId, products.id))
 				.where(and(...conditions))
 				.orderBy(desc(stockMovements.createdAt));
+		}),
+
+	getPlatformSubscription: protectedProcedure.query(async ({ ctx }) => {
+		const member = await ctx.db.query.organizationMembers.findFirst({
+			where: eq(organizationMembers.userId, ctx.session.user.id),
+		});
+		if (!member?.organizationId) throw new Error("Unauthorized");
+
+		const org = await ctx.db.query.organizations.findFirst({
+			where: eq(organizations.id, member.organizationId),
+		});
+		if (!org) throw new Error("Organization not found");
+
+		const activePlan = org.planId
+			? await ctx.db.query.subscriptionPlans.findFirst({
+					where: eq(subscriptionPlans.id, org.planId),
+				})
+			: null;
+
+		const sub = await ctx.db.query.subscriptions.findFirst({
+			where: eq(subscriptions.organizationId, member.organizationId),
+		});
+
+		const [contactsResult] = await ctx.db
+			.select({ val: count() })
+			.from(contacts)
+			.where(eq(contacts.organizationId, member.organizationId));
+
+		const [invoicesResult] = await ctx.db
+			.select({ val: count() })
+			.from(invoices)
+			.where(eq(invoices.organizationId, member.organizationId));
+
+		const [membersResult] = await ctx.db
+			.select({ val: count() })
+			.from(organizationMembers)
+			.where(eq(organizationMembers.organizationId, member.organizationId));
+
+		const monthStart = new Date();
+		monthStart.setDate(1);
+		monthStart.setHours(0, 0, 0, 0);
+
+		const [automationsResult] = await ctx.db
+			.select({ val: count() })
+			.from(automationLogs)
+			.where(
+				and(
+					eq(automationLogs.organizationId, member.organizationId),
+					gte(automationLogs.executedAt, monthStart),
+				),
+			);
+
+		return {
+			organization: {
+				id: org.id,
+				name: org.name,
+				slug: org.slug,
+				plan: org.plan || "Free",
+				status: org.status || "ACTIVE",
+				dodoCustomerId: org.dodoCustomerId,
+			},
+			plan: activePlan
+				? {
+						id: activePlan.id,
+						name: activePlan.name,
+						slug: activePlan.slug,
+						description: activePlan.description,
+						priceMonthly: activePlan.priceMonthly,
+						priceYearly: activePlan.priceYearly,
+						featureFlags: activePlan.featureFlags,
+					}
+				: null,
+			subscription: sub
+				? {
+						id: sub.id,
+						status: sub.status,
+						currentPeriodEnd: sub.currentPeriodEnd,
+						billingCycle: sub.billingCycle,
+						dodoSubscriptionId: sub.dodoSubscriptionId,
+					}
+				: null,
+			usage: {
+				contacts: {
+					used: Number(contactsResult?.val ?? 0),
+					max: org.maxContacts ?? 100,
+				},
+				invoices: {
+					used: Number(invoicesResult?.val ?? 0),
+					max: org.maxInvoices ?? 50,
+				},
+				teamSeats: {
+					used: Number(membersResult?.val ?? 1),
+					max: org.maxTeamSeats ?? 3,
+				},
+				automations: {
+					used: Number(automationsResult?.val ?? 0),
+					max: org.maxAutomationsMonthly ?? 500,
+				},
+			},
+		};
+	}),
+
+	getAvailablePlans: protectedProcedure.query(async ({ ctx }) => {
+		const plans = await ctx.db.query.subscriptionPlans.findMany({
+			where: eq(subscriptionPlans.isActive, true),
+			orderBy: [subscriptionPlans.sortOrder],
+		});
+		return plans;
+	}),
+
+	createPlatformCheckoutSession: protectedProcedure
+		.input(
+			z.object({
+				planId: z.string(),
+				billingCycle: z.enum(["monthly", "yearly"]).default("monthly"),
+				returnUrl: z.string().url(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const member = await ctx.db.query.organizationMembers.findFirst({
+				where: eq(organizationMembers.userId, ctx.session.user.id),
+			});
+			if (!member?.organizationId) throw new Error("Unauthorized");
+
+			return createPlatformCheckoutSession(ctx.db, {
+				organizationId: member.organizationId,
+				planId: input.planId,
+				billingCycle: input.billingCycle,
+				customerEmail: ctx.session.user.email ?? "billing@devfinity.net",
+				customerName: ctx.session.user.name ?? "Tenant Admin",
+				returnUrl: input.returnUrl,
+			});
+		}),
+
+	createCustomerPortalSession: protectedProcedure
+		.input(
+			z.object({
+				returnUrl: z.string().url(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const member = await ctx.db.query.organizationMembers.findFirst({
+				where: eq(organizationMembers.userId, ctx.session.user.id),
+			});
+			if (!member?.organizationId) throw new Error("Unauthorized");
+
+			return createPlatformCustomerPortalSession(
+				ctx.db,
+				member.organizationId,
+				input.returnUrl,
+			);
 		}),
 });

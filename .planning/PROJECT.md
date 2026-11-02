@@ -18,16 +18,17 @@ Businesses, B2B companies, and sales/ops teams needing an all-in-one CRM suite f
 - **Testing**: Vitest (23 unit & integration test suites)
 
 ## Current State
-DevCRM has completed **Milestone 17: Enterprise Multi-Tenant SaaS Platform & Deep Module Interconnection** (Phases 49-53).
-- **Multi-Tenancy & Edge Host Routing**: Fully dynamic host-header resolution for custom domains and subdomains (`crm.devfinity.net`, `{slug}.devfinity.net`), injecting `x-tenant-id` and `x-tenant-slug` headers with edge caching.
-- **Tenant RBAC & Entitlement Quota Engine**: 6 tenant roles (`TENANT_OWNER`, `ADMIN`, `SALES_REP`, `ACCOUNTANT`, `INVENTORY_MANAGER`, `CUSTOM_ROLE`) with modular JSON permissions matrix and centralized entitlement procedure guards.
-- **Super Admin Control Plane & SaaS Billing**: Superadmin console at `/super-admin` with plan builder, tenant quotas/overrides, secure impersonation banner, and platform SaaS billing via Dodo Payments / Razorpay.
-- **Regional Dynamic Tax Engine**: Country- and state-aware tax calculation supporting India GST (CGST/SGST/IGST + reverse charge), UK/EU VAT, and US Sales Tax.
-- **Deal Line Items & Soft Inventory Reservations**: Automated reservations preventing overselling, proposal digital e-signatures (`react-signature-canvas`), and 360° unified timeline with LTV telemetry.
-- **Compliant Invoicing State Machine & Ledger**: 8-state invoice transition engine, hard stock deductions into immutable `stockMovements` ledger, and recurring subscription billing cycles.
-- **Domain Event Bus & Outbound Webhooks**: Internal event dispatcher with multi-condition rules, audit logging in `automationLogs`, and Svix outbound webhook delivery.
-- **Global Command Palette (`cmdk`)**: Keyboard-first `⌘K`/`Ctrl+K` cross-module search querying Deals, Companies, Contacts, Invoices, Quotes, and Products.
-- **Testing & Staged Release**: 57/57 Vitest tests passing, 47/47 Next.js routes compiled cleanly, deployed to production.
+DevCRM has completed **Milestone 18: Platform SaaS Payment & Subscription Gateway Integration** (Phases 54-55).
+- **Dodo Payments Official SDK Integration**: Integrated `dodopayments` (Merchant of Record) with dual-environment support (`test_mode` and `live_mode`), secure credential management, and customer portal session generation.
+- **Cryptographic Standard Webhooks Gateway**: Route handler at `/api/webhooks/dodo` verifying Standard Webhooks HMAC-SHA256 signatures over raw body bytes with idempotency caching.
+- **Automated Entitlement & Quota Synchronization**: Real-time provisioning of tenant quotas (`maxContacts`, `maxInvoices`, `maxAutomationsMonthly`, `maxTeamSeats`, `maxStorageMb`) and active subscription statuses upon `subscription.active` and `subscription.renewed` events.
+- **Tenant Subscription Billing Center (`/settings/billing`)**: Dedicated self-service portal displaying active plan, next renewal date, live resource quota meters, monthly vs annual pricing switcher (~20% discount), 1-click Upgrade hosted checkout triggers, and direct Customer Portal link.
+- **Automated Testing & Production Compilation**: 18 test files (65/65 tests passing) and all 49 Next.js static/dynamic routes compiled cleanly.
+
+<details>
+<summary>Previous State (Milestone 17)</summary>
+DevCRM completed **Milestone 17: Enterprise Multi-Tenant SaaS Platform & Deep Module Interconnection** (Phases 49-53) with dynamic host-header resolution for custom domains, 6-role tenant RBAC, regional dynamic tax engine (GST/VAT/Sales Tax), deal line-item inventory reservations, digital e-signatures, compliant invoicing state machine, domain event bus, and global `⌘K` command palette.
+</details>
 
 <details>
 <summary>Previous State (Milestone 16)</summary>

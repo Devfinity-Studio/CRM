@@ -12,8 +12,7 @@ Integrate a production-grade Platform SaaS Payment & Subscription Gateway using 
 - [x] **REQ-54-04**: Build comprehensive Vitest test suite for webhook signature validation, idempotency guards, event dispatching, and quota state synchronization.
 
 ### Phase 55: Tenant Subscription Billing Center, Checkout Sessions & Customer Portal
-- [ ] **REQ-55-01**: Implement tRPC `billing.createPlatformCheckoutSession` generating hosted Dodo checkout URLs with tenant metadata (`organizationId`, `planId`, `billingCycle`).
-- [ ] **REQ-55-02**: Implement tRPC `billing.createCustomerPortalSession` generating time-bound hosted Dodo customer portal URLs for payment method management and tax invoices.
-- [ ] **REQ-55-03**: Create the `/settings/billing` page with current plan details, renewal status, live quota meters (contacts, invoices, seats, automations), monthly/yearly pricing cards, and 1-click Upgrade / Customer Portal triggers.
-- [ ] **REQ-55-04**: Verify full test suite passing (Vitest), Biome check, and clean production build (`pnpm build`).
-
+- [x] **REQ-55-01**: Implement tRPC `billing.createPlatformCheckoutSession` generating hosted Dodo checkout URLs with tenant metadata (`organizationId`, `planId`, `billingCycle`).
+- [x] **REQ-55-02**: Implement tRPC `billing.createCustomerPortalSession` generating time-bound hosted Dodo customer portal URLs for payment method management and tax invoices.
+- [x] **REQ-55-03**: Create the `/settings/billing` page with current plan details, renewal status, live quota meters (contacts, invoices, seats, automations), monthly/yearly pricing cards, and 1-click Upgrade / Customer Portal triggers.
+- [x] **REQ-55-04**: Verify full test suite passing (Vitest), Biome check, and clean production build (`pnpm build`).

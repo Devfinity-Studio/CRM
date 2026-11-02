@@ -12,6 +12,10 @@ const sidebarNavItems = [
 		href: "/settings/profile",
 	},
 	{
+		title: "Subscription & Plans",
+		href: "/settings/billing",
+	},
+	{
 		title: "Security",
 		href: "/settings/security",
 	},
