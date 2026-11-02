@@ -2,14 +2,14 @@
 
 ## Milestones & Phases
 
-### Milestone 16: Test Expansion, Dev/Prod DB Segregation & Staged Deployment (In Progress)
+### Milestone 16: Test Expansion, Dev/Prod DB Segregation & Staged Deployment (Completed)
 - [x] **Phase 47: Test Expansion, Neon Dev/Prod Environment Segregation, & Staged Vercel Deployment**
   - **Goal:** Expand automated Vitest suite (API routers, CRM, billing, storage integration), verify and synchronize Drizzle schemas across both Neon `Dev` and `production` database branches, configure Vercel environment variables with segregated Preview (Dev DB) and Production (Prod DB) connection strings, push to `dev` for Vercel preview deployment verification, and upon passing, merge to `prod` and deploy to production with live verification.
   - **Plans:** 1/1 completed
-- [ ] **Phase 48: UI and UX Redesign**
-  - **Goal:** Comprehensive route-by-route UI/UX overhaul, zero-defect contrast remediation, responsive mobile ergonomics, and Stitch MCP design system across all 44 routes and surfaces.
+- [x] **Phase 48: UI and UX Redesign**
+  - **Goal:** Comprehensive route-by-route UI/UX overhaul, zero-defect contrast remediation, responsive mobile ergonomics, and Stitch MCP design system across all 45 routes and surfaces.
   - **Depends on:** Phase 47
-  - **Plans:** 0/4 planned
+  - **Plans:** 4/4 completed
     * Plan 48-01: Global Design Tokens, Navigation Shells & Shared UI Primitives
     * Plan 48-02: Operations, Sales Pipeline & CRM Views
     * Plan 48-03: Billing, Catalog, Inventory, Marketing & Automations
@@ -48,4 +48,3 @@
 - [x] [Archived in v6-ROADMAP.md](./milestones/v6-ROADMAP.md)
 
 ### Milestone 5: Public API & Webhooks (Completed)
-- [x] [Archived in v5-ROADMAP.md](./milestones/v5-ROADMAP.md)

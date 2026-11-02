@@ -10,6 +10,7 @@ import {
 	LayoutDashboard,
 	LogOut,
 	Menu,
+	MoreHorizontal,
 	Package,
 	Plus,
 	Repeat,
@@ -104,6 +105,14 @@ export function DashboardLayout({
 		{ label: "Settings", href: "/settings/profile", icon: Settings },
 	];
 
+	// Primary 4 tabs for mobile bottom navigation bar
+	const mobileBottomTabs = [
+		{ label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+		{ label: "Deals", href: "/deals", icon: Building2 },
+		{ label: "Contacts", href: "/clients", icon: Users },
+		{ label: "Invoices", href: "/billing/invoices", icon: CreditCard },
+	];
+
 	const sidebarContent = (collapsed: boolean) => (
 		<div className="flex h-full flex-col justify-between p-3">
 			<div className="flex flex-col gap-4">
@@ -113,7 +122,7 @@ export function DashboardLayout({
 						<DropdownMenuTrigger asChild>
 							<button
 								className={cn(
-									"flex w-full items-center gap-3 rounded-xl p-2 text-left transition-all hover:bg-accent/60",
+									"flex w-full items-center gap-3 rounded-xl p-2 text-left transition-all hover:bg-accent/60 focus:outline-none focus:ring-2 focus:ring-primary/40",
 									collapsed && "justify-center p-1.5",
 								)}
 								type="button"
@@ -167,7 +176,7 @@ export function DashboardLayout({
 				{!collapsed ? (
 					<Link className="w-full" href="/deals">
 						<Button
-							className="w-full justify-start gap-2 border-primary/20 bg-primary/5 font-medium text-primary hover:bg-primary/10 hover:text-primary"
+							className="w-full justify-start gap-2 border-primary/25 bg-primary/10 font-semibold text-primary hover:bg-primary/15"
 							size="sm"
 							variant="outline"
 						>
@@ -180,7 +189,7 @@ export function DashboardLayout({
 						<TooltipTrigger asChild>
 							<Link className="mx-auto" href="/deals">
 								<Button
-									className="h-9 w-9 border-primary/20 bg-primary/5 text-primary hover:bg-primary/10"
+									className="h-9 w-9 border-primary/25 bg-primary/10 text-primary hover:bg-primary/15"
 									size="icon"
 									variant="outline"
 								>
@@ -224,13 +233,14 @@ export function DashboardLayout({
 						return (
 							<Link
 								className={cn(
-									"flex items-center gap-3 rounded-xl px-3 py-2 font-medium text-sm transition-all",
+									"flex items-center gap-3 rounded-xl px-3 py-2.5 font-medium text-sm transition-all",
 									isActive
-										? "bg-primary/10 font-semibold text-primary shadow-xs"
+										? "bg-primary/15 font-semibold text-primary shadow-2xs"
 										: "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
 								)}
 								href={item.href}
 								key={item.href}
+								onClick={() => setMobileOpen(false)}
 							>
 								<Icon
 									className={cn(
@@ -248,20 +258,20 @@ export function DashboardLayout({
 			{/* Footer / System Status & Collapse Toggle */}
 			<div className="flex flex-col gap-2 border-border/60 border-t pt-3">
 				{!collapsed ? (
-					<div className="rounded-xl border border-border/60 bg-accent/40 p-3">
+					<div className="rounded-xl border border-border/70 bg-card/60 p-3 backdrop-blur-xs">
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-2">
 								<span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
 								<span className="font-semibold text-foreground text-xs">
-									API Cluster
+									Production Engine
 								</span>
 							</div>
-							<Badge className="font-mono text-[10px]" variant="outline">
-								Live
+							<Badge className="font-mono text-[10px]" variant="success">
+								Active
 							</Badge>
 						</div>
 						<p className="mt-1 text-[11px] text-muted-foreground">
-							99.98% uptime
+							Dual-region isolated DB
 						</p>
 					</div>
 				) : null}
@@ -286,18 +296,16 @@ export function DashboardLayout({
 					</Button>
 
 					{!collapsed && (
-						<div className="flex items-center gap-1">
-							<Button
-								className="text-muted-foreground hover:text-destructive"
-								onClick={() => signOut({ callbackUrl: "/login" })}
-								size="icon"
-								title="Sign out"
-								type="button"
-								variant="ghost"
-							>
-								<LogOut className="h-4 w-4" />
-							</Button>
-						</div>
+						<Button
+							className="text-muted-foreground hover:text-destructive"
+							onClick={() => signOut({ callbackUrl: "/login" })}
+							size="icon"
+							title="Sign out"
+							type="button"
+							variant="ghost"
+						>
+							<LogOut className="h-4 w-4" />
+						</Button>
 					)}
 				</div>
 			</div>
@@ -306,11 +314,11 @@ export function DashboardLayout({
 
 	return (
 		<TooltipProvider delayDuration={150}>
-			<div className="flex h-screen overflow-hidden bg-background text-foreground selection:bg-primary/20 selection:text-primary">
+			<div className="flex min-h-dvh flex-col md:flex-row bg-background text-foreground selection:bg-primary/20 selection:text-primary">
 				{/* Desktop Sidebar */}
 				<aside
 					className={cn(
-						"z-40 hidden flex-col border-border/70 border-r bg-card/75 backdrop-blur-md transition-all duration-300 md:flex",
+						"z-40 hidden flex-col border-border/70 border-r bg-card/85 backdrop-blur-md transition-all duration-300 md:flex md:sticky md:top-0 md:h-dvh",
 						isCollapsed ? "w-16" : "w-64",
 					)}
 				>
@@ -318,15 +326,20 @@ export function DashboardLayout({
 				</aside>
 
 				{/* Main Content Area */}
-				<div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+				<div className="flex min-w-0 flex-1 flex-col">
 					{/* Top Sticky Header */}
-					<header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-border/70 border-b bg-background/80 px-4 backdrop-blur-md md:px-6">
+					<header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-border/70 border-b bg-background/85 px-4 backdrop-blur-md md:px-6">
 						<div className="flex items-center gap-3">
-							{/* Mobile Drawer Trigger */}
+							{/* Mobile Drawer Trigger (min 44px tap target) */}
 							<Sheet onOpenChange={setMobileOpen} open={mobileOpen}>
 								<SheetTrigger asChild>
-									<Button className="md:hidden" size="icon" variant="ghost">
+									<Button
+										className="h-11 w-11 p-0 md:hidden"
+										size="icon"
+										variant="ghost"
+									>
 										<Menu className="h-5 w-5" />
+										<span className="sr-only">Toggle navigation drawer</span>
 									</Button>
 								</SheetTrigger>
 								<SheetContent className="w-72 p-0" side="left">
@@ -338,14 +351,14 @@ export function DashboardLayout({
 							</Sheet>
 
 							{/* Quick Search */}
-							<div className="relative w-64 max-w-md sm:w-80">
+							<div className="relative w-52 max-w-md sm:w-80">
 								<Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 								<Input
-									className="h-9 rounded-lg border-border/60 bg-card/60 pr-12 pl-9 text-xs focus:bg-card sm:text-sm"
-									placeholder="Search deals, contacts, invoices..."
+									className="h-10 rounded-xl border-border/70 bg-card/70 pr-12 pl-9 text-xs focus:bg-card sm:text-sm"
+									placeholder="Search deals, contacts..."
 									type="text"
 								/>
-								<kbd className="absolute top-1/2 right-2.5 hidden -translate-y-1/2 items-center gap-0.5 rounded border border-border/70 bg-accent px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:inline-flex">
+								<kbd className="absolute top-1/2 right-2.5 hidden -translate-y-1/2 items-center gap-0.5 rounded border border-border/80 bg-accent px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:inline-flex">
 									⌘K
 								</kbd>
 							</div>
@@ -355,7 +368,7 @@ export function DashboardLayout({
 						<div className="flex items-center gap-2 sm:gap-3">
 							<Link href="/deals">
 								<Button
-									className="hidden gap-1.5 bg-primary font-semibold text-white text-xs shadow-sm hover:bg-primary/90 sm:inline-flex"
+									className="hidden gap-1.5 bg-primary font-semibold text-primary-foreground text-xs shadow-xs hover:bg-primary/90 sm:inline-flex"
 									size="sm"
 								>
 									<Plus className="h-3.5 w-3.5" />
@@ -369,10 +382,10 @@ export function DashboardLayout({
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
 									<button
-										className="flex items-center gap-2 rounded-full p-0.5 ring-2 ring-primary/20 transition-all hover:ring-primary/40 focus:outline-none"
+										className="flex h-11 w-11 sm:h-9 sm:w-9 items-center justify-center rounded-full p-0.5 ring-2 ring-primary/20 transition-all hover:ring-primary/40 focus:outline-none"
 										type="button"
 									>
-										<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 font-bold text-primary text-xs">
+										<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 font-bold text-primary text-xs">
 											{displayUserName.slice(0, 2).toUpperCase()}
 										</div>
 									</button>
@@ -432,10 +445,10 @@ export function DashboardLayout({
 						</div>
 					</header>
 
-					{/* Main View Canvas */}
-					<main className="flex-1 overflow-auto bg-background p-4 sm:p-6 md:p-8">
+					{/* Main View Canvas (Bottom padded on mobile for bottom bar) */}
+					<main className="flex-1 overflow-x-hidden bg-background p-4 pb-24 sm:p-6 sm:pb-24 md:p-8 md:pb-8">
 						{isOnboardingIncomplete ? (
-							<div className="absolute inset-0 z-50 flex items-center justify-center bg-background/60 p-6 backdrop-blur-md">
+							<div className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 p-6 backdrop-blur-md">
 								<div className="flex w-full max-w-md flex-col items-center rounded-2xl border border-border bg-card p-8 text-center shadow-2xl">
 									<ShieldAlert className="mb-4 h-12 w-12 text-destructive" />
 									<h2 className="mb-2 font-bold text-foreground text-xl">
@@ -463,6 +476,41 @@ export function DashboardLayout({
 							{children}
 						</div>
 					</main>
+
+					{/* Mobile Fixed Bottom Navigation Bar */}
+					<nav className="fixed bottom-0 inset-x-0 z-30 flex h-16 items-center justify-around border-t border-border/80 bg-background/95 px-2 backdrop-blur-lg pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] md:hidden shadow-lg">
+						{mobileBottomTabs.map((tab) => {
+							const Icon = tab.icon;
+							const isActive =
+								pathname === tab.href ||
+								(tab.href !== "/dashboard" && pathname.startsWith(tab.href));
+
+							return (
+								<Link
+									className={cn(
+										"flex flex-1 flex-col items-center justify-center py-1 text-xs transition-colors min-h-[44px]",
+										isActive
+											? "font-semibold text-primary"
+											: "text-muted-foreground hover:text-foreground",
+									)}
+									href={tab.href}
+									key={tab.href}
+								>
+									<Icon className={cn("h-5 w-5 mb-0.5", isActive ? "text-primary" : "text-muted-foreground")} />
+									<span className="text-[10px] tracking-tight">{tab.label}</span>
+								</Link>
+							);
+						})}
+						{/* More button to open drawer */}
+						<button
+							className="flex flex-1 flex-col items-center justify-center py-1 text-xs text-muted-foreground hover:text-foreground min-h-[44px]"
+							onClick={() => setMobileOpen(true)}
+							type="button"
+						>
+							<MoreHorizontal className="h-5 w-5 mb-0.5" />
+							<span className="text-[10px] tracking-tight">More</span>
+						</button>
+					</nav>
 				</div>
 			</div>
 		</TooltipProvider>

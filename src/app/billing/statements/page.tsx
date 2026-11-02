@@ -94,114 +94,100 @@ export default function StatementsListPage() {
 
 	return (
 		<DashboardLayout>
-			<div className="space-y-6">
+			<div className="mx-auto flex max-w-[1700px] flex-col gap-6 pb-12">
 				{/* Header Section */}
-				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-					<div className="space-y-1">
-						<div className="flex items-center gap-2">
-							<h1 className="font-semibold text-2xl tracking-tight">
+				<section className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/75 p-6 shadow-sm backdrop-blur-md">
+					<div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+						<div className="space-y-1">
+							<div className="flex items-center gap-2">
+								<span className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 font-semibold text-primary text-xs">
+									Ledger Snapshots
+								</span>
+								<span className="text-muted-foreground text-xs">
+									Billing History & Reconciliations
+								</span>
+							</div>
+							<h1 className="font-bold text-2xl text-foreground tracking-tight sm:text-3xl">
 								Account Statements
 							</h1>
-							<Badge
-								className="border-indigo-500/20 bg-indigo-500/10 font-normal text-indigo-500 text-xs"
-								variant="outline"
-							>
-								Ledger Records
-							</Badge>
+							<p className="text-muted-foreground text-xs sm:text-sm">
+								Generate, review, and share client balance statements and frozen transaction ledgers.
+							</p>
 						</div>
-						<p className="text-muted-foreground text-sm">
-							Generate, review, and share client balance statements and frozen
-							transaction ledgers.
-						</p>
+						<div className="flex items-center gap-2">
+							<Button
+								className="gap-2 rounded-xl min-h-[44px] sm:min-h-0"
+								onClick={() => setDialogOpen(true)}
+							>
+								<Plus className="h-4 w-4" />
+								<span>Generate Statement</span>
+							</Button>
+						</div>
 					</div>
-					<div className="flex items-center gap-2">
-						<Button
-							className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-indigo-500/20 shadow-sm hover:from-indigo-600 hover:to-indigo-700"
-							onClick={() => setDialogOpen(true)}
-						>
-							<Plus className="mr-1.5 h-4 w-4" /> Generate Statement
-						</Button>
-					</div>
-				</div>
 
-				{/* Scorecard Metrics */}
-				<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-					<Card className="border border-border/60 bg-card/60 shadow-sm backdrop-blur-sm transition-all hover:border-indigo-500/30">
-						<CardHeader className="flex flex-row items-center justify-between pb-2">
-							<CardTitle className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+					{/* Scorecard Metrics */}
+					<div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+						<div className="flex flex-col rounded-2xl border border-border/60 bg-background/50 p-3.5 shadow-2xs backdrop-blur-xs">
+							<span className="font-medium text-muted-foreground text-xs">
 								Statements Generated
-							</CardTitle>
-							<div className="flex h-8 w-8 items-center justify-center rounded-lg border border-indigo-500/20 bg-indigo-500/10 text-indigo-500">
-								<BookOpen className="h-4 w-4" />
+							</span>
+							<div className="mt-1 flex items-baseline gap-1.5">
+								<span className="font-bold text-foreground text-xl tabular-nums tracking-tight sm:text-2xl">
+									{isLoading ? "—" : metrics.totalCount}
+								</span>
+								<span className="text-[11px] text-muted-foreground">
+									snapshots
+								</span>
 							</div>
-						</CardHeader>
-						<CardContent className="space-y-1">
-							<div className="font-bold font-mono text-2xl tracking-tight">
-								{isLoading ? "—" : metrics.totalCount}
-							</div>
-							<p className="text-muted-foreground text-xs">
-								Historical billing snapshots created
-							</p>
-						</CardContent>
-					</Card>
+						</div>
 
-					<Card className="border border-border/60 bg-card/60 shadow-sm backdrop-blur-sm transition-all hover:border-sky-500/30">
-						<CardHeader className="flex flex-row items-center justify-between pb-2">
-							<CardTitle className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+						<div className="flex flex-col rounded-2xl border border-border/60 bg-background/50 p-3.5 shadow-2xs backdrop-blur-xs">
+							<span className="font-medium text-muted-foreground text-xs">
 								Clients Covered
-							</CardTitle>
-							<div className="flex h-8 w-8 items-center justify-center rounded-lg border border-sky-500/20 bg-sky-500/10 text-sky-500">
-								<Users className="h-4 w-4" />
+							</span>
+							<div className="mt-1 flex items-baseline gap-1.5">
+								<span className="font-bold text-sky-500 text-xl tabular-nums tracking-tight sm:text-2xl">
+									{isLoading ? "—" : metrics.uniqueClients}
+								</span>
+								<span className="text-[11px] text-muted-foreground">
+									enterprises
+								</span>
 							</div>
-						</CardHeader>
-						<CardContent className="space-y-1">
-							<div className="font-bold font-mono text-2xl text-sky-500 tracking-tight">
-								{isLoading ? "—" : metrics.uniqueClients}
-							</div>
-							<p className="text-muted-foreground text-xs">
-								Companies with formal statements
-							</p>
-						</CardContent>
-					</Card>
+						</div>
 
-					<Card className="border border-border/60 bg-card/60 shadow-sm backdrop-blur-sm transition-all hover:border-emerald-500/30">
-						<CardHeader className="flex flex-row items-center justify-between pb-2">
-							<CardTitle className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+						<div className="flex flex-col rounded-2xl border border-border/60 bg-background/50 p-3.5 shadow-2xs backdrop-blur-xs">
+							<span className="font-medium text-muted-foreground text-xs">
 								Total Statement Balances
-							</CardTitle>
-							<div className="flex h-8 w-8 items-center justify-center rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-emerald-500">
-								<Wallet className="h-4 w-4" />
+							</span>
+							<div className="mt-1 flex items-baseline gap-1.5">
+								<span className="font-bold text-emerald-500 text-xl tabular-nums tracking-tight sm:text-2xl">
+									{isLoading ? "—" : formatCurrency(metrics.totalBalance)}
+								</span>
+								<span className="text-[11px] text-emerald-500 font-medium">
+									combined
+								</span>
 							</div>
-						</CardHeader>
-						<CardContent className="space-y-1">
-							<div className="font-bold font-mono text-2xl text-emerald-500 tracking-tight">
-								{isLoading ? "—" : formatCurrency(metrics.totalBalance)}
-							</div>
-							<p className="text-muted-foreground text-xs">
-								Combined closing balances across snapshots
-							</p>
-						</CardContent>
-					</Card>
-				</div>
-
-				{/* Search Bar */}
-				<div className="flex items-center justify-between">
-					<div className="relative w-full max-w-sm">
-						<Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-						<Input
-							className="h-8 rounded-lg pl-8 text-xs"
-							onChange={(e) => setSearchQuery(e.target.value)}
-							placeholder="Search by statement # or client..."
-							value={searchQuery}
-						/>
+						</div>
 					</div>
-				</div>
+				</section>
 
-				{/* Table Container */}
-				<div className="overflow-hidden rounded-2xl border border-border/60 bg-card/60 shadow-sm backdrop-blur-sm">
+				{/* Search Bar & Table Container */}
+				<div className="rounded-3xl border border-border/70 bg-card/75 p-4 sm:p-6 shadow-sm backdrop-blur-md">
+					<div className="mb-4 flex items-center justify-between">
+						<div className="relative w-full max-w-sm">
+							<Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+							<Input
+								className="h-10 rounded-xl pl-9 text-xs sm:text-sm"
+								onChange={(e) => setSearchQuery(e.target.value)}
+								placeholder="Search by statement # or client..."
+								value={searchQuery}
+							/>
+						</div>
+					</div>
+
 					{isLoading ? (
 						<div className="p-12 text-center text-muted-foreground text-sm">
-							<div className="mx-auto mb-3 h-6 w-6 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+							<div className="mx-auto mb-3 h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
 							Loading statements...
 						</div>
 					) : filteredStatements.length === 0 ? (
@@ -219,7 +205,7 @@ export default function StatementsListPage() {
 							</p>
 							{searchQuery ? (
 								<Button
-									className="mt-4 h-8 text-xs"
+									className="mt-4 min-h-[44px] sm:min-h-0 text-xs"
 									onClick={() => setSearchQuery("")}
 									size="sm"
 									variant="outline"
@@ -228,7 +214,7 @@ export default function StatementsListPage() {
 								</Button>
 							) : (
 								<Button
-									className="mt-4 h-8 bg-indigo-600 text-white text-xs hover:bg-indigo-700"
+									className="mt-4 min-h-[44px] sm:min-h-0 text-xs"
 									onClick={() => setDialogOpen(true)}
 									size="sm"
 								>
@@ -240,24 +226,24 @@ export default function StatementsListPage() {
 					) : (
 						<div className="overflow-x-auto">
 							<Table>
-								<TableHeader className="bg-muted/30">
+								<TableHeader>
 									<TableRow className="border-border/60 hover:bg-transparent">
-										<TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
+										<TableHead className="font-semibold text-foreground text-xs uppercase tracking-wider">
 											Statement #
 										</TableHead>
-										<TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
+										<TableHead className="font-semibold text-foreground text-xs uppercase tracking-wider">
 											Client
 										</TableHead>
-										<TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
+										<TableHead className="font-semibold text-foreground text-xs uppercase tracking-wider">
 											Statement Period
 										</TableHead>
-										<TableHead className="text-right font-semibold text-muted-foreground text-xs uppercase tracking-wider">
+										<TableHead className="text-right font-semibold text-foreground text-xs uppercase tracking-wider">
 											Closing Balance
 										</TableHead>
-										<TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
+										<TableHead className="font-semibold text-foreground text-xs uppercase tracking-wider">
 											Generated On
 										</TableHead>
-										<TableHead className="w-[120px] text-right font-semibold text-muted-foreground text-xs uppercase tracking-wider">
+										<TableHead className="w-[120px] text-right font-semibold text-foreground text-xs uppercase tracking-wider">
 											Actions
 										</TableHead>
 									</TableRow>
@@ -265,13 +251,13 @@ export default function StatementsListPage() {
 								<TableBody>
 									{filteredStatements.map((stmt) => (
 										<TableRow
-											className="border-border/40 transition-colors hover:bg-muted/20"
+											className="border-border/60 transition-colors hover:bg-accent/40"
 											key={stmt.id}
 										>
-											<TableCell className="font-medium font-mono text-foreground text-sm">
+											<TableCell className="font-semibold font-mono text-foreground text-xs">
 												{stmt.statementNumber}
 											</TableCell>
-											<TableCell className="font-medium text-foreground text-sm">
+											<TableCell className="font-medium text-foreground text-xs">
 												{stmt.company?.name || "Unknown Client"}
 											</TableCell>
 											<TableCell className="text-muted-foreground text-xs">
@@ -283,7 +269,7 @@ export default function StatementsListPage() {
 													? format(new Date(stmt.endDate), "MMM d, yyyy")
 													: "—"}
 											</TableCell>
-											<TableCell className="text-right font-mono font-semibold text-foreground text-sm">
+											<TableCell className="text-right font-mono font-semibold text-foreground text-xs tabular-nums">
 												{new Intl.NumberFormat("en-US", {
 													style: "currency",
 													currency: "USD",
@@ -297,28 +283,28 @@ export default function StatementsListPage() {
 											<TableCell className="text-right">
 												<div className="flex items-center justify-end gap-1">
 													<Button
-														className="h-8 px-2 text-muted-foreground hover:text-foreground"
+														className="h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground"
 														onClick={() => copyPublicLink(stmt.id)}
-														size="sm"
+														size="icon"
 														title="Copy public link"
 														variant="ghost"
 													>
-														<Copy className="h-3.5 w-3.5" />
+														<Copy className="h-4 w-4" />
 														<span className="sr-only">Copy Link</span>
 													</Button>
 													<Button
-														className="h-8 px-2 text-indigo-500 hover:text-indigo-600"
+														className="h-9 w-9 rounded-lg text-primary hover:text-primary/80"
 														onClick={() =>
 															window.open(
 																`/public/statement/${stmt.id}`,
 																"_blank",
 															)
 														}
-														size="sm"
+														size="icon"
 														title="View public statement"
 														variant="ghost"
 													>
-														<ExternalLink className="h-3.5 w-3.5" />
+														<ExternalLink className="h-4 w-4" />
 														<span className="sr-only">View</span>
 													</Button>
 												</div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Save, Send, Upload } from "lucide-react";
+import { FileText, Save, Send } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { ClientDropdown } from "~/components/billing/shared/client-dropdown";
 import { PricingSummarySection } from "~/components/billing/shared/pricing-summary-section";
@@ -84,31 +84,31 @@ export default function NewInvoicePage() {
 
 	return (
 		<DashboardLayout>
-			<div className="mx-auto max-w-5xl pt-8 pb-24">
-				<div className="mb-8 flex items-center justify-between border-border border-b pb-4">
+			<div className="mx-auto max-w-5xl px-3 pt-6 pb-28 sm:px-6 sm:pt-8">
+				<div className="mb-6 flex flex-col gap-2 border-border/70 border-b pb-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
 					<div>
-						<h2 className="font-bold text-2xl tracking-tight">
+						<h2 className="font-bold text-2xl tracking-tight sm:text-3xl">
 							Create Invoice
 						</h2>
-						<p className="mt-1 text-muted-foreground text-sm">
+						<p className="mt-1 text-muted-foreground text-xs sm:text-sm">
 							Build a professional invoice and get paid.
 						</p>
 					</div>
 				</div>
 
-				<div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+				<div className="overflow-hidden rounded-2xl border border-border/70 bg-card/85 shadow-sm backdrop-blur-md">
 					{/* Header Section */}
-					<div className="border-border border-b p-8 pb-4">
-						<div className="flex items-start justify-between gap-8">
+					<div className="border-border/70 border-b p-4 sm:p-8 pb-6">
+						<div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
 							{/* Left Side: Title and Client */}
 							<div className="flex-1 space-y-6">
 								<Input
-									className="-ml-2 h-12 w-full max-w-sm border-dashed bg-transparent px-2 font-bold text-3xl uppercase hover:bg-slate-50"
+									className="-ml-1 h-12 w-full max-w-sm border-dashed bg-transparent px-2 font-bold text-2xl uppercase tracking-tight hover:bg-accent/40 sm:text-3xl"
 									onChange={(e) => setTitle(e.target.value)}
 									value={title}
 								/>
 
-								<div className="flex max-w-sm flex-col gap-1">
+								<div className="flex w-full max-w-md flex-col gap-1.5">
 									<Label className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
 										Invoice To
 									</Label>
@@ -118,13 +118,13 @@ export default function NewInvoicePage() {
 										}
 										value={invoiceData.companyId || ""}
 									/>
-									<div className="mt-2 flex gap-4">
-										<div className="flex-1 space-y-1">
+									<div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
+										<div className="space-y-1">
 											<Label className="text-muted-foreground text-xs">
 												Contact Email
 											</Label>
 											<Input
-												className="h-9"
+												className="h-10 text-sm"
 												onChange={(e) =>
 													setInvoiceData({
 														...invoiceData,
@@ -135,12 +135,12 @@ export default function NewInvoicePage() {
 												value={invoiceData.contactEmail || ""}
 											/>
 										</div>
-										<div className="flex-1 space-y-1">
+										<div className="space-y-1">
 											<Label className="text-muted-foreground text-xs">
 												Contact Phone
 											</Label>
 											<Input
-												className="h-9"
+												className="h-10 text-sm"
 												onChange={(e) =>
 													setInvoiceData({
 														...invoiceData,
@@ -154,13 +154,13 @@ export default function NewInvoicePage() {
 									</div>
 								</div>
 
-								<div className="flex gap-4">
-									<div className="flex w-48 flex-col gap-1">
+								<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:max-w-md">
+									<div className="flex flex-col gap-1">
 										<Label className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
 											PO Number
 										</Label>
 										<Input
-											className="h-9"
+											className="h-10 text-sm"
 											onChange={(e) =>
 												setInvoiceData({
 													...invoiceData,
@@ -171,7 +171,7 @@ export default function NewInvoicePage() {
 											value={invoiceData.poNumber || ""}
 										/>
 									</div>
-									<div className="flex w-48 flex-col gap-1">
+									<div className="flex flex-col gap-1">
 										<Label className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
 											Payment Terms
 										</Label>
@@ -181,7 +181,7 @@ export default function NewInvoicePage() {
 											}
 											value={invoiceData.paymentTerms || "Net 15"}
 										>
-											<SelectTrigger className="h-9">
+											<SelectTrigger className="h-10">
 												<SelectValue placeholder="Select terms" />
 											</SelectTrigger>
 											<SelectContent>
@@ -200,7 +200,7 @@ export default function NewInvoicePage() {
 							</div>
 
 							{/* Right Side: Meta Data & Logo */}
-							<div className="max-w-xs flex-1 space-y-4">
+							<div className="w-full lg:max-w-xs space-y-4">
 								{/* Logo Upload Dropzone */}
 								<FileUploadDropzone
 									className="h-24 w-full"
@@ -220,7 +220,7 @@ export default function NewInvoicePage() {
 									</Label>
 									<div className="space-y-1">
 										<Input
-											className="h-8 text-sm"
+											className="h-9 text-sm"
 											onChange={(e) => setInvoiceNumber(e.target.value)}
 											value={invoiceNumber}
 										/>
@@ -252,7 +252,7 @@ export default function NewInvoicePage() {
 					</div>
 
 					{/* Line Items Table */}
-					<div className="p-8 pb-4">
+					<div className="p-4 sm:p-8 pb-4">
 						<LineItemsTable
 							currencySymbol="₹"
 							items={items}
@@ -261,7 +261,7 @@ export default function NewInvoicePage() {
 					</div>
 
 					{/* Pricing Summary */}
-					<div className="px-8 pb-4">
+					<div className="p-4 sm:px-8 pb-4">
 						<PricingSummarySection
 							data={invoiceData}
 							onChange={setInvoiceData}
@@ -270,7 +270,7 @@ export default function NewInvoicePage() {
 					</div>
 
 					{/* T&C and Rich Text Blocks */}
-					<div className="px-8 pb-8">
+					<div className="p-4 sm:px-8 pb-8">
 						<TermsAndConditionsSection
 							data={invoiceData}
 							onChange={setInvoiceData}
@@ -278,15 +278,16 @@ export default function NewInvoicePage() {
 					</div>
 
 					{/* Signatures */}
-					<div className="mt-8 flex flex-col items-end border-border border-t px-8 pt-8 pb-8">
+					<div className="mt-8 flex flex-col items-end border-border/70 border-t p-4 sm:px-8 pt-8 pb-8">
 						{invoiceData.signatureUrl ? (
 							<div className="flex flex-col items-center gap-2">
 								<img
 									alt="Signature"
-									className="h-24 rounded border object-contain p-2"
+									className="h-24 rounded-lg border border-border/70 object-contain p-2"
 									src={invoiceData.signatureUrl}
 								/>
 								<Button
+									className="min-h-[44px] sm:min-h-0"
 									onClick={() =>
 										setInvoiceData({ ...invoiceData, signatureUrl: undefined })
 									}
@@ -298,6 +299,7 @@ export default function NewInvoicePage() {
 							</div>
 						) : (
 							<Button
+								className="min-h-[44px] sm:min-h-0"
 								onClick={() => setSignatureModalOpen(true)}
 								variant="outline"
 							>
@@ -308,14 +310,14 @@ export default function NewInvoicePage() {
 				</div>
 
 				{/* Action Buttons at Bottom */}
-				<div className="mt-8 flex justify-end gap-3">
-					<Button variant="outline">
+				<div className="mt-8 flex flex-col sm:flex-row justify-end gap-3">
+					<Button className="min-h-[44px] sm:min-h-0" variant="outline">
 						<Save className="mr-2 h-4 w-4" /> Save Draft
 					</Button>
-					<Button variant="secondary">
+					<Button className="min-h-[44px] sm:min-h-0" variant="secondary">
 						<FileText className="mr-2 h-4 w-4" /> Save as Proforma
 					</Button>
-					<Button>
+					<Button className="min-h-[44px] sm:min-h-0">
 						<Send className="mr-2 h-4 w-4" /> Save & Send
 					</Button>
 				</div>

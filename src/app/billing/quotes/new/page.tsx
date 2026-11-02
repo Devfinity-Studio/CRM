@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, FileText, Save, Send, Upload } from "lucide-react";
+import { Download, FileText, Save, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -144,29 +144,29 @@ export default function NewQuotePage() {
 
 	return (
 		<DashboardLayout>
-			<div className="mx-auto max-w-5xl pt-8 pb-24">
-				<div className="mb-8 flex items-center justify-between border-border border-b pb-4">
+			<div className="mx-auto max-w-5xl px-3 pt-6 pb-28 sm:px-6 sm:pt-8">
+				<div className="mb-6 flex flex-col gap-2 border-border/70 border-b pb-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
 					<div>
-						<h2 className="font-bold text-2xl tracking-tight">
+						<h2 className="font-bold text-2xl tracking-tight sm:text-3xl">
 							Create Quotation
 						</h2>
-						<p className="mt-1 text-muted-foreground text-sm">
+						<p className="mt-1 text-muted-foreground text-xs sm:text-sm">
 							Build a professional quotation or estimate.
 						</p>
 					</div>
 				</div>
 
-				<div className="overflow-hidden rounded-xl border bg-card shadow-sm">
-					<div className="border-border border-b p-8 pb-4">
-						<div className="flex items-start justify-between gap-8">
+				<div className="overflow-hidden rounded-2xl border border-border/70 bg-card/85 shadow-sm backdrop-blur-md">
+					<div className="border-border/70 border-b p-4 sm:p-8 pb-6">
+						<div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
 							<div className="flex-1 space-y-6">
 								<Input
-									className="-ml-2 h-12 w-full max-w-sm border-dashed bg-transparent px-2 font-bold text-3xl uppercase hover:bg-slate-50"
+									className="-ml-1 h-12 w-full max-w-sm border-dashed bg-transparent px-2 font-bold text-2xl uppercase tracking-tight hover:bg-accent/40 sm:text-3xl"
 									onChange={(e) => setTitle(e.target.value)}
 									value={title}
 								/>
 
-								<div className="flex max-w-sm flex-col gap-1">
+								<div className="flex w-full max-w-md flex-col gap-1.5">
 									<Label className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
 										Quote For
 									</Label>
@@ -176,17 +176,17 @@ export default function NewQuotePage() {
 										}
 										value={quoteData.companyId || ""}
 									/>
-									<div className="mt-2 flex gap-4">
-										<div className="flex-1 space-y-1">
+									<div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
+										<div className="space-y-1">
 											<Label className="text-muted-foreground text-xs">
 												Contact Email
 											</Label>
 											<Input
-												className={`h-9 ${emailError ? "border-red-500" : ""}`}
+												className={`h-10 text-sm ${emailError ? "border-destructive" : ""}`}
 												onBlur={(e) => {
 													const res = emailSchema.safeParse(e.target.value);
 													if (!res.success)
-														setEmailError(res.error.errors[0].message);
+														setEmailError(res.error.errors[0]?.message || "Invalid email");
 												}}
 												onChange={(e) => {
 													setQuoteData({
@@ -199,19 +199,19 @@ export default function NewQuotePage() {
 												value={quoteData.contactEmail || ""}
 											/>
 											{emailError && (
-												<p className="text-[10px] text-red-500">{emailError}</p>
+												<p className="text-[10px] text-destructive">{emailError}</p>
 											)}
 										</div>
-										<div className="flex-1 space-y-1">
+										<div className="space-y-1">
 											<Label className="text-muted-foreground text-xs">
 												Contact Phone
 											</Label>
 											<Input
-												className={`h-9 ${phoneError ? "border-red-500" : ""}`}
+												className={`h-10 text-sm ${phoneError ? "border-destructive" : ""}`}
 												onBlur={(e) => {
 													const res = phoneSchema.safeParse(e.target.value);
 													if (!res.success)
-														setPhoneError(res.error.errors[0].message);
+														setPhoneError(res.error.errors[0]?.message || "Invalid phone");
 												}}
 												onChange={(e) => {
 													setQuoteData({
@@ -224,14 +224,14 @@ export default function NewQuotePage() {
 												value={quoteData.contactPhone || ""}
 											/>
 											{phoneError && (
-												<p className="text-[10px] text-red-500">{phoneError}</p>
+												<p className="text-[10px] text-destructive">{phoneError}</p>
 											)}
 										</div>
 									</div>
 								</div>
 							</div>
 
-							<div className="max-w-xs flex-1 space-y-4">
+							<div className="w-full lg:max-w-xs space-y-4">
 								<FileUploadDropzone
 									className="h-24 w-full"
 									currentImageUrl={quoteData.logoUrl}
@@ -250,7 +250,7 @@ export default function NewQuotePage() {
 									</Label>
 									<div className="space-y-1">
 										<Input
-											className="h-8 text-sm"
+											className="h-9 text-sm"
 											onChange={(e) => setQuoteNumber(e.target.value)}
 											value={quoteNumber}
 										/>
@@ -273,7 +273,7 @@ export default function NewQuotePage() {
 								</div>
 								<div className="grid grid-cols-[100px_1fr] items-center gap-2">
 									<Label className="font-medium text-muted-foreground text-sm">
-										Due Date
+										Expiry Date
 									</Label>
 									<DatePicker date={dueDate} setDate={setDueDate} />
 								</div>
@@ -281,7 +281,7 @@ export default function NewQuotePage() {
 						</div>
 					</div>
 
-					<div className="p-8 pb-4">
+					<div className="p-4 sm:p-8 pb-4">
 						<LineItemsTable
 							currencySymbol="₹"
 							items={items}
@@ -289,7 +289,7 @@ export default function NewQuotePage() {
 						/>
 					</div>
 
-					<div className="px-8 pb-4">
+					<div className="p-4 sm:px-8 pb-4">
 						<PricingSummarySection
 							data={quoteData}
 							onChange={setQuoteData}
@@ -297,22 +297,23 @@ export default function NewQuotePage() {
 						/>
 					</div>
 
-					<div className="px-8 pb-8">
+					<div className="p-4 sm:px-8 pb-8">
 						<TermsAndConditionsSection
 							data={quoteData}
 							onChange={setQuoteData}
 						/>
 					</div>
 
-					<div className="mt-8 flex flex-col items-end border-border border-t px-8 pt-8 pb-8">
+					<div className="mt-8 flex flex-col items-end border-border/70 border-t p-4 sm:px-8 pt-8 pb-8">
 						{quoteData.signatureUrl ? (
 							<div className="flex flex-col items-center gap-2">
 								<img
 									alt="Signature"
-									className="h-24 rounded border object-contain p-2"
+									className="h-24 rounded-lg border border-border/70 object-contain p-2"
 									src={quoteData.signatureUrl}
 								/>
 								<Button
+									className="min-h-[44px] sm:min-h-0"
 									onClick={() =>
 										setQuoteData({ ...quoteData, signatureUrl: undefined })
 									}
@@ -324,6 +325,7 @@ export default function NewQuotePage() {
 							</div>
 						) : (
 							<Button
+								className="min-h-[44px] sm:min-h-0"
 								onClick={() => setSignatureModalOpen(true)}
 								variant="outline"
 							>
@@ -333,8 +335,9 @@ export default function NewQuotePage() {
 					</div>
 				</div>
 
-				<div className="mt-8 flex justify-end gap-3">
+				<div className="mt-8 flex flex-col sm:flex-row justify-end gap-3">
 					<Button
+						className="min-h-[44px] sm:min-h-0"
 						disabled={createQuote.isPending}
 						onClick={() => handleSave("draft")}
 						variant="outline"
@@ -342,6 +345,7 @@ export default function NewQuotePage() {
 						<Save className="mr-2 h-4 w-4" /> Save to Draft
 					</Button>
 					<Button
+						className="min-h-[44px] sm:min-h-0"
 						disabled={createQuote.isPending}
 						onClick={() => handleSave("new")}
 						variant="outline"
@@ -349,6 +353,7 @@ export default function NewQuotePage() {
 						<FileText className="mr-2 h-4 w-4" /> Save & Create New
 					</Button>
 					<Button
+						className="min-h-[44px] sm:min-h-0"
 						disabled={createQuote.isPending}
 						onClick={() => handleSave("continue")}
 					>

@@ -124,3 +124,4 @@ Execute a comprehensive, route-by-route UI/UX overhaul, zero-defect contrast rem
 - [ ] `pnpm biome check`: 0 errors.
 - [ ] `pnpm build`: 45/45 routes compile successfully.
 - [ ] Staged Vercel preview & production deployments verified live.
+

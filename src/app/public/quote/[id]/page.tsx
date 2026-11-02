@@ -24,19 +24,19 @@ export default function PublicQuotePage({
 
 	if (isLoading) {
 		return (
-			<div className="flex min-h-screen items-center justify-center bg-slate-50">
-				<div className="animate-pulse text-slate-500">Loading Document...</div>
+			<div className="flex min-h-dvh items-center justify-center bg-background">
+				<div className="animate-pulse text-xs font-medium text-muted-foreground">Loading Proposal Document...</div>
 			</div>
 		);
 	}
 
 	if (error || !data) {
 		return (
-			<div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
-				<Alert className="max-w-md" variant="destructive">
+			<div className="flex min-h-dvh items-center justify-center bg-background p-4">
+				<Alert className="max-w-md rounded-2xl border-destructive/20 bg-destructive/10" variant="destructive">
 					<AlertCircle className="h-4 w-4" />
-					<AlertTitle>Error</AlertTitle>
-					<AlertDescription>
+					<AlertTitle>Error Loading Quote</AlertTitle>
+					<AlertDescription className="text-xs">
 						{error?.message ||
 							"This quote could not be found or is not available for public viewing."}
 					</AlertDescription>
@@ -46,7 +46,7 @@ export default function PublicQuotePage({
 	}
 
 	return (
-		<div className="min-h-screen bg-slate-50 px-4 py-8">
+		<div className="min-h-dvh bg-background px-4 py-8">
 			<DocumentViewer data={data} type="quote" />
 		</div>
 	);

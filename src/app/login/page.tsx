@@ -7,6 +7,7 @@ import type * as React from "react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 
 export default function LoginPage() {
 	const router = useRouter();
@@ -27,7 +28,7 @@ export default function LoginPage() {
 		});
 
 		if (res?.error) {
-			setError("Invalid credentials. Please try again.");
+			setError("Invalid credentials. Please verify your email and password.");
 			setLoading(false);
 		} else {
 			router.push("/dashboard");
@@ -40,31 +41,34 @@ export default function LoginPage() {
 	};
 
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-zinc-950 p-4">
-			<div className="w-full max-w-md space-y-8 rounded-xl border border-zinc-800 bg-zinc-900 p-8 shadow-2xl">
-				<div className="text-center">
-					<h2 className="mt-6 font-bold text-3xl text-white tracking-tight">
-						Welcome back to DevCRM
+		<div className="flex min-h-dvh items-center justify-center bg-background px-4 py-12">
+			<div className="w-full max-w-md space-y-8 rounded-3xl border border-border/70 bg-card/85 p-6 sm:p-8 shadow-xl backdrop-blur-md">
+				<div className="text-center space-y-2">
+					<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary font-bold text-xl">
+						D
+					</div>
+					<h2 className="font-bold text-2xl text-foreground tracking-tight sm:text-3xl">
+						Welcome to DevCRM
 					</h2>
-					<p className="mt-2 text-sm text-zinc-400">
-						Sign in to your account to continue
+					<p className="text-xs sm:text-sm text-muted-foreground">
+						Sign in to your CRM and billing workspace.
 					</p>
 				</div>
 
 				{error && (
-					<div className="rounded-md border border-red-800 bg-red-900/50 p-4">
-						<p className="text-red-200 text-sm">{error}</p>
+					<div className="rounded-2xl border border-destructive/20 bg-destructive/10 p-3.5">
+						<p className="text-destructive text-xs font-medium">{error}</p>
 					</div>
 				)}
 
-				<form className="mt-8 space-y-6" onSubmit={handleCredentialsLogin}>
-					<div className="space-y-4 rounded-md shadow-sm">
-						<div>
-							<label className="font-medium text-sm text-zinc-300">
+				<form className="mt-6 space-y-4" onSubmit={handleCredentialsLogin}>
+					<div className="space-y-4">
+						<div className="space-y-1.5">
+							<Label className="text-xs">
 								Email Address
-							</label>
+							</Label>
 							<Input
-								className="mt-1 border-zinc-800 bg-zinc-950 text-white"
+								className="h-10 text-sm"
 								onChange={(e) => setEmail(e.target.value)}
 								placeholder="you@example.com"
 								required
@@ -72,12 +76,12 @@ export default function LoginPage() {
 								value={email}
 							/>
 						</div>
-						<div>
-							<label className="font-medium text-sm text-zinc-300">
+						<div className="space-y-1.5">
+							<Label className="text-xs">
 								Password
-							</label>
+							</Label>
 							<Input
-								className="mt-1 border-zinc-800 bg-zinc-950 text-white"
+								className="h-10 text-sm"
 								onChange={(e) => setPassword(e.target.value)}
 								placeholder="••••••••"
 								required
@@ -87,24 +91,22 @@ export default function LoginPage() {
 						</div>
 					</div>
 
-					<div>
-						<Button
-							className="w-full bg-blue-600 text-white hover:bg-blue-700"
-							disabled={loading}
-							type="submit"
-						>
-							{loading ? "Signing in..." : "Sign in"}
-						</Button>
-					</div>
+					<Button
+						className="w-full min-h-[44px] rounded-xl font-semibold mt-2"
+						disabled={loading}
+						type="submit"
+					>
+						{loading ? "Signing in..." : "Sign in to Workspace"}
+					</Button>
 				</form>
 
 				<div className="mt-6">
 					<div className="relative">
 						<div className="absolute inset-0 flex items-center">
-							<div className="w-full border-zinc-800 border-t" />
+							<div className="w-full border-border/70 border-t" />
 						</div>
-						<div className="relative flex justify-center text-sm">
-							<span className="bg-zinc-900 px-2 text-zinc-400">
+						<div className="relative flex justify-center text-xs">
+							<span className="bg-card px-2 text-muted-foreground">
 								Or continue with
 							</span>
 						</div>
@@ -112,7 +114,7 @@ export default function LoginPage() {
 
 					<div className="mt-6 grid grid-cols-2 gap-3">
 						<Button
-							className="border-zinc-800 bg-zinc-950 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+							className="rounded-xl min-h-[44px] text-xs"
 							onClick={() => handleOAuthLogin("github")}
 							variant="outline"
 						>
@@ -134,7 +136,7 @@ export default function LoginPage() {
 							GitHub
 						</Button>
 						<Button
-							className="border-zinc-800 bg-zinc-950 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+							className="rounded-xl min-h-[44px] text-xs"
 							onClick={() => handleOAuthLogin("google")}
 							variant="outline"
 						>
@@ -158,10 +160,10 @@ export default function LoginPage() {
 					</div>
 				</div>
 
-				<p className="mt-8 text-center text-sm text-zinc-400">
+				<p className="mt-8 text-center text-xs text-muted-foreground">
 					Don't have an account?{" "}
 					<Link
-						className="font-medium text-blue-400 hover:text-blue-300"
+						className="font-semibold text-primary hover:underline"
 						href="/register"
 					>
 						Sign up for free

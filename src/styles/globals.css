@@ -50,20 +50,44 @@
 		--card-foreground: 222.2 84% 4.9%;
 		--popover: 0 0% 100%;
 		--popover-foreground: 222.2 84% 4.9%;
-		--primary: 249 83% 58%;
+		--primary: 249 83% 56%;
 		--primary-foreground: 210 40% 98%;
 		--secondary: 210 40% 96.1%;
 		--secondary-foreground: 222.2 47.4% 11.2%;
 		--muted: 210 40% 96.1%;
-		--muted-foreground: 215.4 16.3% 46.9%;
+		--muted-foreground: 215.4 16.3% 40%;
 		--accent: 249 83% 96%;
-		--accent-foreground: 249 83% 58%;
+		--accent-foreground: 249 83% 50%;
 		--destructive: 0 84.2% 60.2%;
 		--destructive-foreground: 210 40% 98%;
-		--border: 214.3 31.8% 91.4%;
-		--input: 214.3 31.8% 91.4%;
-		--ring: 249 83% 58%;
+		--border: 214.3 31.8% 88%;
+		--input: 214.3 31.8% 88%;
+		--ring: 249 83% 56%;
 		--radius: 0.75rem;
+		--safe-bottom: env(safe-area-inset-bottom, 0px);
+		--safe-top: env(safe-area-inset-top, 0px);
+	}
+
+	.dark {
+		--background: 224 71% 4%;
+		--foreground: 210 40% 98%;
+		--card: 224 71% 7%;
+		--card-foreground: 210 40% 98%;
+		--popover: 224 71% 7%;
+		--popover-foreground: 210 40% 98%;
+		--primary: 249 83% 62%;
+		--primary-foreground: 210 40% 98%;
+		--secondary: 217 33% 14%;
+		--secondary-foreground: 210 40% 98%;
+		--muted: 217 33% 14%;
+		--muted-foreground: 215 20% 68%;
+		--accent: 249 83% 16%;
+		--accent-foreground: 249 83% 75%;
+		--destructive: 0 72% 51%;
+		--destructive-foreground: 210 40% 98%;
+		--border: 217 33% 18%;
+		--input: 217 33% 18%;
+		--ring: 249 83% 62%;
 	}
 }
 
@@ -72,8 +96,44 @@
 		@apply border-border;
 	}
 	body {
-		@apply bg-background text-foreground font-sans;
+		@apply bg-background text-foreground font-sans antialiased;
+		min-height: 100dvh;
 	}
+
+	/* Prevent iOS Safari font auto-zoom on input focus */
+	input, textarea, select {
+		font-size: 16px;
+	}
+	@media (min-width: 640px) {
+		input, textarea, select {
+			font-size: 0.875rem;
+		}
+	}
+
+	/* Zero hardcoded contrast collisions on webkit autofill */
+	input:-webkit-autofill,
+	input:-webkit-autofill:hover, 
+	input:-webkit-autofill:focus {
+		-webkit-text-fill-color: hsl(var(--foreground));
+		-webkit-box-shadow: 0 0 0px 1000px hsl(var(--card)) inset;
+		transition: background-color 5000s ease-in-out 0s;
+	}
+}
+
+/* Glassmorphism Surface Utility */
+.glass-panel {
+	background-color: hsl(var(--card) / 0.8);
+	backdrop-filter: blur(12px);
+	border: 1px solid hsl(var(--border) / 0.7);
+}
+
+/* Touch friendly mobile scrollbars */
+.no-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+.no-scrollbar {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
 }
 
 /* Driver.js Dark Theme Overrides */

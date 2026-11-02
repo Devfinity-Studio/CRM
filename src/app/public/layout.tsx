@@ -13,7 +13,7 @@ export default function PublicLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className={`min-h-screen bg-slate-50 font-sans ${inter.variable}`}>
+		<div className={`min-h-dvh bg-background text-foreground font-sans ${inter.variable}`}>
 			<TRPCReactProvider>{children}</TRPCReactProvider>
 		</div>
 	);
