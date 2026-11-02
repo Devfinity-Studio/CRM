@@ -26,3 +26,4 @@
 
 ## Next Steps
 Proceed to Plan 48-02: Operations, Sales Pipeline & CRM Views (`/dashboard`, `/deals`, `/pipeline`, `/clients`, `/tasks`).
+
