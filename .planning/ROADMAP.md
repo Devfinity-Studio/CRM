@@ -11,10 +11,10 @@
   - **Goal:** Super Admin Console at /super-admin with tenant discovery, status toggling, impersonation session switcher, SaaS Plan Builder (pricing, quotas, module flags), per-tenant overrides, and platform SaaS billing integration (Dodo Payments / Razorpay webhooks and checkout).
   - **Depends on:** Phase 49
   - **Plans:** 2/2 plans completed
-- [ ] **Phase 51: Dynamic Tax Engine, Interconnected Contacts, Deals, Quotes & Soft Inventory Holds**
+- [x] **Phase 51: Dynamic Tax Engine, Interconnected Contacts, Deals, Quotes & Soft Inventory Holds**
   - **Goal:** Country/state-aware tax engine (CGST/SGST/IGST, VAT, Sales Tax), deal line-item integration with soft inventory reservations to prevent overselling, quotation e-signatures (react-signature-canvas), and 360° contact/company activity timeline with automated LTV metrics.
   - **Depends on:** Phase 50
-  - **Plans:** 0/2 plans completed
+  - **Plans:** 2/2 plans completed
 - [ ] **Phase 52: Invoicing Lifecycle, Subscriptions Engine & Unified Telemetry Dashboard**
   - **Goal:** Compliant invoice lifecycle state machine, hard stock deductions with immutable stockMovements ledger, recurring subscription billing engine (daily to annual cycles, dunning alerts, auto renewal), and unified Executive Dashboard telemetry.
   - **Depends on:** Phase 51

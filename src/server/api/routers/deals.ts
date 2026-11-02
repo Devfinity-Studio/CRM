@@ -4,11 +4,14 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
 	companies,
 	contacts,
+	dealProducts,
 	deals,
 	pipelineStages,
 	pipelines,
+	products,
 	users,
 } from "~/server/db/schema";
+import { syncDealInventoryHolds } from "~/server/api/services/deal-inventory";
 
 export const dealsRouter = createTRPCRouter({
 	// Get all pipelines for tenant organization
@@ -178,6 +181,9 @@ export const dealsRouter = createTRPCRouter({
 				)
 				.returning();
 
+			if (updatedDeal) {
+				await syncDealInventoryHolds(ctx.db, ctx.session.user.organizationId);
+			}
 			return updatedDeal;
 		}),
 
@@ -206,6 +212,9 @@ export const dealsRouter = createTRPCRouter({
 				)
 				.returning();
 
+			if (updatedDeal) {
+				await syncDealInventoryHolds(ctx.db, ctx.session.user.organizationId);
+			}
 			return updatedDeal;
 		}),
 
@@ -290,7 +299,7 @@ export const dealsRouter = createTRPCRouter({
 			z.object({ dealId: z.string(), status: z.enum(["OPEN", "WON", "LOST"]) }),
 		)
 		.mutation(async ({ ctx, input }) => {
-			return ctx.db
+			const [updated] = await ctx.db
 				.update(deals)
 				.set({ status: input.status, updatedAt: new Date() })
 				.where(
@@ -298,6 +307,97 @@ export const dealsRouter = createTRPCRouter({
 						eq(deals.id, input.dealId),
 						eq(deals.organizationId, ctx.session.user.organizationId),
 					),
+				)
+				.returning();
+
+			await syncDealInventoryHolds(ctx.db, ctx.session.user.organizationId);
+			return updated;
+		}),
+
+	// Get SKU line items attached to a deal
+	getDealProducts: protectedProcedure
+		.input(z.object({ dealId: z.string() }))
+		.query(async ({ ctx, input }) => {
+			const items = await ctx.db
+				.select({
+					id: dealProducts.id,
+					dealId: dealProducts.dealId,
+					productId: dealProducts.productId,
+					quantity: dealProducts.quantity,
+					unitPrice: dealProducts.unitPrice,
+					createdAt: dealProducts.createdAt,
+					productName: products.name,
+					sku: products.sku,
+					stockQuantity: products.stockQuantity,
+					reservedQuantity: products.reservedQuantity,
+				})
+				.from(dealProducts)
+				.innerJoin(products, eq(dealProducts.productId, products.id))
+				.where(
+					and(
+						eq(dealProducts.dealId, input.dealId),
+						eq(dealProducts.organizationId, ctx.session.user.organizationId),
+					),
 				);
+
+			return items.map((i) => ({
+				...i,
+				availableStock: Math.max(0, i.stockQuantity - i.reservedQuantity),
+			}));
+		}),
+
+	// Set SKU line items for a deal and update soft inventory holds
+	setDealProducts: protectedProcedure
+		.input(
+			z.object({
+				dealId: z.string(),
+				items: z.array(
+					z.object({
+						productId: z.string(),
+						quantity: z.number().min(1),
+						unitPrice: z.number().min(0),
+					}),
+				),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const orgId = ctx.session.user.organizationId;
+			const deal = await ctx.db.query.deals.findFirst({
+				where: and(eq(deals.id, input.dealId), eq(deals.organizationId, orgId)),
+			});
+			if (!deal) throw new Error("Deal not found");
+
+			await ctx.db
+				.delete(dealProducts)
+				.where(eq(dealProducts.dealId, input.dealId));
+
+			if (input.items.length > 0) {
+				await ctx.db.insert(dealProducts).values(
+					input.items.map((it) => ({
+						organizationId: orgId,
+						dealId: input.dealId,
+						productId: it.productId,
+						quantity: it.quantity,
+						unitPrice: it.unitPrice,
+					})),
+				);
+			}
+
+			const totalValue = input.items.reduce(
+				(sum, it) => sum + it.quantity * it.unitPrice,
+				0,
+			);
+			await ctx.db
+				.update(deals)
+				.set({ value: totalValue, updatedAt: new Date() })
+				.where(eq(deals.id, input.dealId));
+
+			await syncDealInventoryHolds(
+				ctx.db,
+				orgId,
+				input.items.map((it) => it.productId),
+			);
+
+			return { success: true, totalValue };
 		}),
 });

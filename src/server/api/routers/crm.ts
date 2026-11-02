@@ -6,7 +6,10 @@ import {
 	assignmentHistory,
 	companies,
 	contacts,
+	deals,
+	invoices,
 	organizationMembers,
+	quotes,
 	tags,
 } from "~/server/db/schema";
 import { dispatchWebhook } from "~/server/webhooks/dispatch";
@@ -280,5 +283,117 @@ export const crmRouter = createTRPCRouter({
 				})
 				.returning();
 			return note;
+		}),
+
+	// 360° Unified Chronological Timeline across Notes, Deals, Quotes & Invoices with LTV calculation
+	getUnifiedTimeline: protectedProcedure
+		.input(
+			z.object({
+				companyId: z.string().optional(),
+				contactId: z.string().optional(),
+			}),
+		)
+		.query(async ({ ctx, input }) => {
+			const member = await ctx.db.query.organizationMembers.findFirst({
+				where: eq(organizationMembers.userId, ctx.session.user.id),
+			});
+			if (!member?.organizationId) throw new Error("Unauthorized");
+			const orgId = member.organizationId;
+
+			// 1. Fetch Notes
+			const noteConditions = [eq(activityNotes.organizationId, orgId)];
+			if (input.companyId) noteConditions.push(eq(activityNotes.companyId, input.companyId));
+			if (input.contactId) noteConditions.push(eq(activityNotes.contactId, input.contactId));
+			const notes = await ctx.db.select().from(activityNotes).where(and(...noteConditions));
+
+			// 2. Fetch Deals
+			const dealConditions = [eq(deals.organizationId, orgId)];
+			if (input.companyId) dealConditions.push(eq(deals.companyId, input.companyId));
+			if (input.contactId) dealConditions.push(eq(deals.contactId, input.contactId));
+			const companyDeals = await ctx.db.select().from(deals).where(and(...dealConditions));
+
+			// 3. Fetch Quotes
+			let companyQuotes: any[] = [];
+			if (input.companyId) {
+				companyQuotes = await ctx.db
+					.select()
+					.from(quotes)
+					.where(and(eq(quotes.organizationId, orgId), eq(quotes.companyId, input.companyId)));
+			}
+
+			// 4. Fetch Invoices
+			let companyInvoices: any[] = [];
+			if (input.companyId) {
+				companyInvoices = await ctx.db
+					.select()
+					.from(invoices)
+					.where(and(eq(invoices.organizationId, orgId), eq(invoices.companyId, input.companyId)));
+			}
+
+			// Calculate Real-Time LTV & Metrics
+			const totalPaidRevenue = companyInvoices
+				.filter((inv) => inv.status === "PAID" || inv.amountPaid > 0)
+				.reduce((acc, inv) => acc + (inv.amountPaid || inv.totalAmount || 0), 0);
+
+			const wonDealsValue = companyDeals
+				.filter((d) => d.status === "WON")
+				.reduce((acc, d) => acc + (d.value || 0), 0);
+
+			const openPipelineValue = companyDeals
+				.filter((d) => d.status === "OPEN")
+				.reduce((acc, d) => acc + (d.value || 0), 0);
+
+			// Assemble unified chronological events
+			const events = [
+				...notes.map((n) => ({
+					id: `note-${n.id}`,
+					category: "NOTE" as const,
+					subtype: n.type,
+					title: `${n.type.charAt(0).toUpperCase() + n.type.slice(1).toLowerCase()} Logged`,
+					content: n.content,
+					createdAt: n.createdAt,
+				})),
+				...companyDeals.map((d) => ({
+					id: `deal-${d.id}`,
+					category: "DEAL" as const,
+					subtype: d.status,
+					title: `Deal: ${d.title}`,
+					content: `Status: ${d.status} • Value: ${(d.value / 100).toLocaleString()}`,
+					amount: d.value,
+					createdAt: d.createdAt,
+				})),
+				...companyQuotes.map((q) => ({
+					id: `quote-${q.id}`,
+					category: "QUOTE" as const,
+					subtype: q.status,
+					title: `Proposal #${q.quoteNumber}`,
+					content: q.signedAt
+						? `Digitally signed by ${q.signatureName || "Client"} on ${new Date(q.signedAt).toLocaleDateString()}`
+						: `Status: ${q.status} • Total: ${(q.totalAmount / 100).toLocaleString()}`,
+					amount: q.totalAmount,
+					createdAt: q.createdAt,
+				})),
+				...companyInvoices.map((inv) => ({
+					id: `invoice-${inv.id}`,
+					category: "INVOICE" as const,
+					subtype: inv.status,
+					title: `Invoice #${inv.invoiceNumber}`,
+					content: `Status: ${inv.status} • Total: ${(inv.totalAmount / 100).toLocaleString()} (Paid: ${(inv.amountPaid / 100).toLocaleString()})`,
+					amount: inv.totalAmount,
+					createdAt: inv.createdAt,
+				})),
+			].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+			return {
+				events,
+				ltv: {
+					totalPaidRevenue,
+					wonDealsValue,
+					openPipelineValue,
+					totalInvoicesCount: companyInvoices.length,
+					totalDealsCount: companyDeals.length,
+					totalQuotesCount: companyQuotes.length,
+				},
+			};
 		}),
 });

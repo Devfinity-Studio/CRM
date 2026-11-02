@@ -544,7 +544,34 @@ export const products = createTable("product", (d) => ({
 	unitPrice: d.integer().notNull(), // in cents
 	unit: d.varchar({ length: 50 }),
 	stockQuantity: d.integer().default(0).notNull(),
+	reservedQuantity: d.integer().default(0).notNull(),
 	isPublic: d.boolean().default(false).notNull(),
+	createdAt: d
+		.timestamp({ withTimezone: true })
+		.$defaultFn(() => new Date())
+		.notNull(),
+}));
+
+export const dealProducts = createTable("deal_product", (d) => ({
+	id: d
+		.varchar({ length: 255 })
+		.notNull()
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	organizationId: d
+		.varchar({ length: 255 })
+		.notNull()
+		.references(() => organizations.id, { onDelete: "cascade" }),
+	dealId: d
+		.varchar({ length: 255 })
+		.notNull()
+		.references(() => deals.id, { onDelete: "cascade" }),
+	productId: d
+		.varchar({ length: 255 })
+		.notNull()
+		.references(() => products.id, { onDelete: "cascade" }),
+	quantity: d.integer().default(1).notNull(),
+	unitPrice: d.integer().notNull(),
 	createdAt: d
 		.timestamp({ withTimezone: true })
 		.$defaultFn(() => new Date())
@@ -596,6 +623,9 @@ export const quotes = createTable("quote", (d) => ({
 		.notNull()
 		.references(() => organizations.id, { onDelete: "cascade" }),
 	companyId: d.varchar({ length: 255 }).references(() => companies.id),
+	dealId: d
+		.varchar({ length: 255 })
+		.references(() => deals.id, { onDelete: "set null" }),
 	quoteNumber: d.varchar({ length: 100 }).notNull(),
 	version: d.integer().default(1).notNull(),
 	title: d.varchar({ length: 255 }),
@@ -627,6 +657,10 @@ export const quotes = createTable("quote", (d) => ({
 	contactPhone: d.varchar({ length: 50 }),
 
 	status: d.varchar({ length: 50 }).default("DRAFT").notNull(),
+	signedAt: d.timestamp({ withTimezone: true }),
+	signerIp: d.varchar({ length: 100 }),
+	signerEmail: d.varchar({ length: 255 }),
+	taxDetails: d.jsonb(),
 	createdAt: d
 		.timestamp({ withTimezone: true })
 		.$defaultFn(() => new Date())
@@ -687,6 +721,21 @@ export const quoteRelations = relations(quotes, ({ one }) => ({
 	company: one(companies, {
 		fields: [quotes.companyId],
 		references: [companies.id],
+	}),
+	deal: one(deals, {
+		fields: [quotes.dealId],
+		references: [deals.id],
+	}),
+}));
+
+export const dealProductsRelations = relations(dealProducts, ({ one }) => ({
+	deal: one(deals, {
+		fields: [dealProducts.dealId],
+		references: [deals.id],
+	}),
+	product: one(products, {
+		fields: [dealProducts.productId],
+		references: [products.id],
 	}),
 }));
 

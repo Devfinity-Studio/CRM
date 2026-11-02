@@ -18,10 +18,10 @@ Upgrade DevCRM from a functional MVP into an enterprise-grade multi-tenant SaaS 
 - [x] **REQ-50-04**: Platform SaaS billing integration with Dodo Payments (and Razorpay) for checkout sessions, recurring subscription lifecycle, and webhook synchronization.
 
 ### Phase 51: Dynamic Tax Engine, Interconnected Contacts, Deals, Quotes & Soft Inventory Holds
-- [ ] **REQ-51-01**: Country- and state-aware Dynamic Tax Engine using `country-state-city` (India GST with CGST/SGST/IGST + reverse charge, UK/EU VAT, US Sales Tax).
-- [ ] **REQ-51-02**: SKU line-item integration on Deals with automated soft inventory reservations (`reservedQuantity`) in negotiation/won stages to prevent overselling.
-- [ ] **REQ-51-03**: Quotation builder with digital e-signatures (`react-signature-canvas`) and public approval/signing view.
-- [ ] **REQ-51-04**: 360° unified chronological timeline on Contacts and Companies showing deals, rich-text notes (`@tiptap/react`), signed quotes, invoices, and LTV calculation.
+- [x] **REQ-51-01**: Country- and state-aware Dynamic Tax Engine using `country-state-city` (India GST with CGST/SGST/IGST + reverse charge, UK/EU VAT, US Sales Tax).
+- [x] **REQ-51-02**: SKU line-item integration on Deals with automated soft inventory reservations (`reservedQuantity`) in negotiation/won stages to prevent overselling.
+- [x] **REQ-51-03**: Quotation builder with digital e-signatures (`react-signature-canvas`) and public approval/signing view.
+- [x] **REQ-51-04**: 360° unified chronological timeline on Contacts and Companies showing deals, rich-text notes (`@tiptap/react`), signed quotes, invoices, and LTV calculation.
 
 ### Phase 52: Invoicing Lifecycle, Subscriptions Engine & Unified Telemetry Dashboard
 - [ ] **REQ-52-01**: Invoicing full state machine (`Draft` -> `Sent` -> `Viewed` -> `Partially Paid` -> `Paid` -> `Overdue` -> `Void` / `Credit Note Issued`) with print-ready PDF generation (`react-to-print`) and hosted customer payment link.

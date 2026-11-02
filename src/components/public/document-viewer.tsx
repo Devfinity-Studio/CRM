@@ -2,7 +2,10 @@
 
 import { format } from "date-fns";
 import { Printer } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { CheckCircle2 } from "lucide-react";
+import { QuoteSignDialog } from "~/components/public/quote-sign-dialog";
+import { Badge } from "~/components/ui/badge";
 import { useReactToPrint } from "react-to-print";
 import { Button } from "~/components/ui/button";
 
@@ -23,6 +26,8 @@ interface DocumentPayment {
 }
 
 interface DocumentData {
+	id?: string;
+	signedAt?: Date | string;
 	quoteNumber?: string;
 	invoiceNumber?: string;
 	version?: number;
@@ -82,13 +87,52 @@ export function DocumentViewer({ type, data }: DocumentViewerProps) {
 
 	const items = Array.isArray(data.lineItems) ? data.lineItems : [];
 
+	const [signedState, setSignedState] = useState<{
+		signatureData: string;
+		signatureName: string;
+	} | null>(null);
+
+	const isSigned =
+		data.status === "ACCEPTED" ||
+		data.status === "SIGNED" ||
+		!!signedState ||
+		!!data.signedAt;
+
+	const effectiveSignature =
+		signedState?.signatureData || data.signatureData;
+	const effectiveSignerName =
+		signedState?.signatureName || data.signatureName;
+
+	const totalFormatted = new Intl.NumberFormat("en-US", {
+		style: "currency",
+		currency: "USD",
+	}).format((data.totalAmount || 0) / 100);
+
 	return (
 		<div className="mx-auto my-8 max-w-4xl">
-			<div className="mb-6 flex justify-end gap-4">
-				<Button onClick={handlePrint} variant="outline">
-					<Printer className="mr-2 h-4 w-4" />
-					Print / Save PDF
-				</Button>
+			<div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+				<div>
+					{isSigned && (
+						<Badge className="gap-1.5 bg-emerald-600 px-3 py-1 text-white hover:bg-emerald-700 text-xs font-semibold">
+							<CheckCircle2 className="h-3.5 w-3.5" />
+							Proposal Accepted & Digitally Signed
+						</Badge>
+					)}
+				</div>
+				<div className="flex items-center gap-3">
+					{type === "quote" && !isSigned && data.id && (
+						<QuoteSignDialog
+							quoteId={data.id}
+							quoteNumber={data.quoteNumber}
+							totalAmountFormatted={totalFormatted}
+							onSigned={(sig, name) => setSignedState({ signatureData: sig, signatureName: name })}
+						/>
+					)}
+					<Button onClick={handlePrint} variant="outline">
+						<Printer className="mr-2 h-4 w-4" />
+						Print / Save PDF
+					</Button>
+				</div>
 			</div>
 
 			<div
@@ -342,17 +386,22 @@ export function DocumentViewer({ type, data }: DocumentViewerProps) {
 					</div>
 				)}
 
-				{data.signatureData && (
+				{effectiveSignature && (
 					<div className="mt-16 inline-block border-t pt-8 pr-16">
 						{/* biome-ignore lint/performance/noImgElement: dynamic user-uploaded signature */}
 						<img
 							alt="Signature"
 							className="mb-2 h-16 object-contain"
-							src={data.signatureData}
+							src={effectiveSignature}
 						/>
 						<div className="font-medium text-sm">
-							{data.signatureName || "Authorized Signature"}
+							{effectiveSignerName || "Authorized Signature"}
 						</div>
+						{isSigned && (
+							<div className="mt-1 text-xs text-muted-foreground">
+								Digitally Signed & Verified
+							</div>
+						)}
 					</div>
 				)}
 			</div>

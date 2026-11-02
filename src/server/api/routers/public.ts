@@ -2,9 +2,58 @@ import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { invoices, payments, quotes, statements } from "~/server/db/schema";
+import { deals, invoices, payments, quotes, statements } from "~/server/db/schema";
 
 export const publicRouter = createTRPCRouter({
+	signQuote: publicProcedure
+		.input(
+			z.object({
+				id: z.string(),
+				signatureData: z.string().min(1),
+				signatureName: z.string().min(1),
+				signerEmail: z.string().email().optional(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const quote = await ctx.db.query.quotes.findFirst({
+				where: eq(quotes.id, input.id),
+			});
+
+			if (!quote) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Quote not found",
+				});
+			}
+
+			if (quote.status === "ACCEPTED" || quote.status === "SIGNED") {
+				return { success: true, message: "Quote already signed", quote };
+			}
+
+			const now = new Date();
+			const [signed] = await ctx.db
+				.update(quotes)
+				.set({
+					status: "ACCEPTED",
+					signatureType: "DIGITAL_CANVAS",
+					signatureData: input.signatureData,
+					signatureName: input.signatureName,
+					signerEmail: input.signerEmail,
+					signedAt: now,
+				})
+				.where(eq(quotes.id, input.id))
+				.returning();
+
+			if (quote.dealId) {
+				await ctx.db
+					.update(deals)
+					.set({ status: "WON", updatedAt: now })
+					.where(eq(deals.id, quote.dealId));
+			}
+
+			return { success: true, quote: signed };
+		}),
+
 	getPublicQuote: publicProcedure
 		.input(z.object({ id: z.string() }))
 		.query(async ({ ctx, input }) => {

@@ -11,6 +11,11 @@ import {
 	userSettings,
 } from "~/server/db/schema";
 import { dispatchWebhook } from "~/server/webhooks/dispatch";
+import {
+	calculateRegionalTax,
+	listStatesForCountry,
+	listSupportedCountries,
+} from "~/server/api/services/tax-engine";
 
 async function saveDocumentPattern(
 	ctx: any,
@@ -53,6 +58,35 @@ async function saveDocumentPattern(
 }
 
 export const billingRouter = createTRPCRouter({
+	// --- REGIONAL TAX ENGINE ---
+	calculateTax: protectedProcedure
+		.input(
+			z.object({
+				sellerCountry: z.string().default("IN"),
+				sellerState: z.string().optional(),
+				buyerCountry: z.string().default("IN"),
+				buyerState: z.string().optional(),
+				subtotal: z.number().min(0),
+				customRatePercent: z.number().optional(),
+				isB2B: z.boolean().optional(),
+				isReverseCharge: z.boolean().optional(),
+				taxNumber: z.string().optional(),
+			}),
+		)
+		.query(({ input }) => {
+			return calculateRegionalTax(input);
+		}),
+
+	getCountries: protectedProcedure.query(() => {
+		return listSupportedCountries();
+	}),
+
+	getStates: protectedProcedure
+		.input(z.object({ countryCode: z.string() }))
+		.query(({ input }) => {
+			return listStatesForCountry(input.countryCode);
+		}),
+
 	// --- USER SETTINGS ---
 	getUserSettings: protectedProcedure.query(async ({ ctx }) => {
 		const member = await ctx.db.query.organizationMembers.findFirst({
