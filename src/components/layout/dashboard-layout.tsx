@@ -79,6 +79,16 @@ export function DashboardLayout({
 		layoutData?.tenantRole === "OWNER" || layoutData?.tenantRole === "ADMIN";
 	const isOnboardingIncomplete =
 		!isLoading && layoutData && !layoutData.onboardingComplete && !isSuperAdmin;
+	const isAllowedUnonboardedRoute =
+		pathname === "/dashboard" ||
+		pathname === "/settings/profile" ||
+		pathname.startsWith("/settings/profile");
+
+	const shouldBlockWholePage =
+		isOnboardingIncomplete && !isAllowedUnonboardedRoute;
+	const shouldShowTopWarning =
+		isOnboardingIncomplete && isAllowedUnonboardedRoute;
+
 
 	const displayUserName = layoutData?.user?.name || userName || "Alex Vance";
 	const displayUserEmail =
@@ -447,29 +457,78 @@ export function DashboardLayout({
 
 					{/* Main View Canvas (Bottom padded on mobile for bottom bar) */}
 					<main className="flex-1 overflow-x-hidden bg-background p-4 pb-24 sm:p-6 sm:pb-24 md:p-8 md:pb-8">
-						{isOnboardingIncomplete ? (
-							<div className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 p-6 backdrop-blur-md">
-								<div className="flex w-full max-w-md flex-col items-center rounded-2xl border border-border bg-card p-8 text-center shadow-2xl">
-									<ShieldAlert className="mb-4 h-12 w-12 text-destructive" />
-									<h2 className="mb-2 font-bold text-foreground text-xl">
+						{/* Top Warning Banner for Dashboard & Profile when onboarding is incomplete */}
+						{shouldShowTopWarning && (
+							<div
+								role="alert"
+								className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl border border-destructive/40 bg-destructive/10 p-4 sm:p-5 text-foreground shadow-sm ring-1 ring-destructive/20"
+							>
+								<div className="flex items-start sm:items-center gap-3">
+									<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-destructive text-destructive-foreground shadow-xs">
+										<ShieldAlert className="h-5 w-5" />
+									</div>
+									<div>
+										<h3 className="font-semibold text-destructive text-sm tracking-tight sm:text-base">
+											Onboarding Incomplete — Features Restricted
+										</h3>
+										<p className="text-muted-foreground text-xs sm:text-sm">
+											Please complete your organization onboarding to unlock full access to deals, clients, billing, inventory, and automations.
+										</p>
+									</div>
+								</div>
+								<Link href="/onboarding" className="w-full sm:w-auto shrink-0">
+									<Button
+										variant="destructive"
+										size="sm"
+										className="w-full sm:w-auto min-h-[44px] sm:min-h-[38px] px-5 font-semibold shadow-xs"
+									>
+										Complete Onboarding
+									</Button>
+								</Link>
+							</div>
+						)}
+
+						{/* Full-Page Blocker Overlay for All Other Routes */}
+						{shouldBlockWholePage ? (
+							<div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-md">
+								<div className="flex w-full max-w-md flex-col items-center rounded-2xl border border-destructive/40 bg-card p-6 sm:p-8 text-center shadow-2xl">
+									<div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive/15 text-destructive ring-8 ring-destructive/10">
+										<ShieldAlert className="h-7 w-7" />
+									</div>
+									<h2 className="mb-2 font-bold text-foreground text-xl tracking-tight">
 										Feature Blocked
 									</h2>
 									<p className="mb-6 text-muted-foreground text-sm">
-										You need to complete the onboarding process to access your
-										CRM workspace and features.
+										This feature is locked. You need to complete your organization onboarding before accessing this section.
 									</p>
-									<Link href="/onboarding">
-										<Button className="w-full" size="lg">
-											Complete Onboarding
-										</Button>
-									</Link>
+									<div className="flex w-full flex-col gap-3">
+										<Link href="/onboarding" className="w-full">
+											<Button
+												variant="destructive"
+												className="w-full min-h-[44px] font-semibold"
+												size="lg"
+											>
+												Complete Onboarding
+											</Button>
+										</Link>
+										<Link href="/dashboard" className="w-full">
+											<Button
+												variant="outline"
+												className="w-full min-h-[44px]"
+												size="lg"
+											>
+												Back to Dashboard
+											</Button>
+										</Link>
+									</div>
 								</div>
 							</div>
 						) : null}
+
 						<div
 							className={
-								isOnboardingIncomplete
-									? "pointer-events-none select-none opacity-20"
+								shouldBlockWholePage
+									? "pointer-events-none select-none opacity-15"
 									: ""
 							}
 						>

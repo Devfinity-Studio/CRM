@@ -12,7 +12,11 @@ import {
 } from "~/components/ui/dialog";
 import { api } from "~/trpc/react";
 
-export function WelcomeModal() {
+interface WelcomeModalProps {
+	onStartTour?: () => void;
+}
+
+export function WelcomeModal({ onStartTour }: WelcomeModalProps = {}) {
 	const [isOpen, setIsOpen] = useState(false);
 	const { data: status, refetch } = api.onboarding.getStatus.useQuery();
 	const markSeen = api.onboarding.markWelcomeSeen.useMutation({
@@ -20,7 +24,8 @@ export function WelcomeModal() {
 	});
 
 	useEffect(() => {
-		if (status && !status.hasSeenWelcome) {
+		// Only display welcome modal when user has completed onboarding and has not seen the welcome modal yet
+		if (status && status.onboardingComplete && !status.hasSeenWelcome) {
 			setIsOpen(true);
 		}
 	}, [status]);
@@ -28,6 +33,9 @@ export function WelcomeModal() {
 	const handleClose = () => {
 		setIsOpen(false);
 		markSeen.mutate();
+		if (onStartTour) {
+			onStartTour();
+		}
 	};
 
 	return (
@@ -48,7 +56,9 @@ export function WelcomeModal() {
 					</p>
 				</div>
 				<DialogFooter>
-					<Button onClick={handleClose}>Let's go!</Button>
+					<Button className="min-h-[44px] w-full sm:w-auto font-medium" onClick={handleClose}>
+						Let's go!
+					</Button>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>

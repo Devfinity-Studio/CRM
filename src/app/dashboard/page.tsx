@@ -101,7 +101,7 @@ export default function DashboardPage() {
 	return (
 		<DashboardLayout>
 			<div className="mx-auto flex max-w-[1600px] flex-col gap-6 pb-10">
-				<WelcomeModal />
+				<WelcomeModal onStartTour={() => setTimeout(() => forceStartTour(), 300)} />
 
 				<div id="tour-checklist">
 					<SetupChecklist />

@@ -30,8 +30,8 @@ export function SetupChecklist() {
 			label: "Complete your profile",
 			description: "Add your name and phone number in settings.",
 			isComplete: progress.steps.profile,
-			actionLink: "/dashboard/settings",
-			actionText: "Go to Settings",
+			actionLink: "/settings/profile",
+			actionText: "Go to Profile",
 		},
 		{
 			key: "products",
@@ -39,7 +39,7 @@ export function SetupChecklist() {
 			description:
 				"Create a product or service in your catalog to start quoting.",
 			isComplete: progress.steps.products,
-			actionLink: "/dashboard/catalog",
+			actionLink: "/inventory/products",
 			actionText: "Add Product",
 		},
 		{
@@ -47,7 +47,7 @@ export function SetupChecklist() {
 			label: "Create a lead",
 			description: "Add a prospective client to your CRM.",
 			isComplete: progress.steps.leads,
-			actionLink: "/dashboard/crm",
+			actionLink: "/clients",
 			actionText: "Create Lead",
 		},
 	];
@@ -55,7 +55,7 @@ export function SetupChecklist() {
 	const completedCount = steps.filter((s) => s.isComplete).length;
 
 	return (
-		<Card className="mb-8 border-primary/20 bg-primary/5">
+		<Card className="mb-8 border-primary/20 bg-primary/5 shadow-xs">
 			<CardHeader className="pb-4">
 				<CardTitle className="text-xl">Getting Started</CardTitle>
 				<CardDescription>
@@ -67,14 +67,14 @@ export function SetupChecklist() {
 				<div className="flex flex-col space-y-4">
 					{steps.map((step) => (
 						<div
-							className="flex items-start justify-between rounded-lg border bg-card p-4 shadow-sm"
+							className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-border/70 bg-card p-4 shadow-xs"
 							key={step.key}
 						>
 							<div className="flex items-start space-x-3">
 								{step.isComplete ? (
-									<CheckCircle2 className="mt-0.5 h-5 w-5 text-green-500" />
+									<CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-500 shrink-0" />
 								) : (
-									<Circle className="mt-0.5 h-5 w-5 text-muted-foreground" />
+									<Circle className="mt-0.5 h-5 w-5 text-muted-foreground shrink-0" />
 								)}
 								<div>
 									<h4
@@ -88,7 +88,7 @@ export function SetupChecklist() {
 								</div>
 							</div>
 							{!step.isComplete && (
-								<Button asChild size="sm" variant="outline">
+								<Button asChild size="sm" variant="outline" className="min-h-[44px] sm:min-h-[36px] w-full sm:w-auto font-medium">
 									<Link href={step.actionLink}>{step.actionText}</Link>
 								</Button>
 							)}
