@@ -3,9 +3,9 @@
 ## Milestones & Phases
 
 ### Milestone 16: Test Expansion, Dev/Prod DB Segregation & Staged Deployment (In Progress)
-- [ ] **Phase 47: Test Expansion, Neon Dev/Prod Environment Segregation, & Staged Vercel Deployment**
+- [x] **Phase 47: Test Expansion, Neon Dev/Prod Environment Segregation, & Staged Vercel Deployment**
   - **Goal:** Expand automated Vitest suite (API routers, CRM, billing, storage integration), verify and synchronize Drizzle schemas across both Neon `Dev` and `production` database branches, configure Vercel environment variables with segregated Preview (Dev DB) and Production (Prod DB) connection strings, push to `dev` for Vercel preview deployment verification, and upon passing, merge to `prod` and deploy to production with live verification.
-  - **Plans:** 1 plan
+  - **Plans:** 1/1 completed
 
 ### Milestone 15: Production Sync & Neon Object Storage Migration (Completed)
 - [x] [Archived in v15-ROADMAP.md](./milestones/v15-ROADMAP.md)
