@@ -7,9 +7,13 @@
   - **Goal:** Expand automated Vitest suite (API routers, CRM, billing, storage integration), verify and synchronize Drizzle schemas across both Neon `Dev` and `production` database branches, configure Vercel environment variables with segregated Preview (Dev DB) and Production (Prod DB) connection strings, push to `dev` for Vercel preview deployment verification, and upon passing, merge to `prod` and deploy to production with live verification.
   - **Plans:** 1/1 completed
 - [ ] **Phase 48: UI and UX Redesign**
-  - **Goal:** Comprehensive UI and UX redesign across the DevCRM platform, modernizing visual hierarchy, typography, responsiveness, and interaction polish.
+  - **Goal:** Comprehensive route-by-route UI/UX overhaul, zero-defect contrast remediation, responsive mobile ergonomics, and Stitch MCP design system across all 44 routes and surfaces.
   - **Depends on:** Phase 47
-  - **Plans:** 0/1 planned
+  - **Plans:** 0/4 planned
+    * Plan 48-01: Global Design Tokens, Navigation Shells & Shared UI Primitives
+    * Plan 48-02: Operations, Sales Pipeline & CRM Views
+    * Plan 48-03: Billing, Catalog, Inventory, Marketing & Automations
+    * Plan 48-04: Administration, Auth, Portals, System Views & Staged Verification
 
 ### Milestone 15: Production Sync & Neon Object Storage Migration (Completed)
 - [x] [Archived in v15-ROADMAP.md](./milestones/v15-ROADMAP.md)
