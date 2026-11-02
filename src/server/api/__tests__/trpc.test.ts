@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import crypto from "node:crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { db } from "~/server/db";
 import { createTRPCContext } from "../trpc";
@@ -50,6 +50,7 @@ describe("TRPC Context - API Key Authentication", () => {
 			.update("mock-key")
 			.digest("hex");
 		expect(db.query.apiKeys.findFirst).toHaveBeenCalled();
+		expect(expectedHash).toBeDefined();
 	});
 
 	it("should mock a session if a valid API Key is provided", async () => {
@@ -74,6 +75,8 @@ describe("TRPC Context - API Key Authentication", () => {
 		expect(ctx.session?.user.id).toBe("u-api");
 		expect(ctx.session?.user.email).toBe("api@test.com");
 		// The organization ID injected into the mock session
-		expect((ctx.session?.user as any).organizationId).toBe("org-123");
+		expect(ctx.session?.user && (ctx.session.user as any).organizationId).toBe(
+			"org-123",
+		);
 	});
 });
