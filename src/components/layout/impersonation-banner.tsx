@@ -7,34 +7,36 @@ import { api } from "~/trpc/react";
 
 export function ImpersonationBanner({
 	impersonatedOrgId,
+	impersonatedOrgName,
 }: {
 	impersonatedOrgId: string;
+	impersonatedOrgName?: string | null;
 }) {
 	const router = useRouter();
 	const stopImpersonation = api.superadmin.stopImpersonation.useMutation({
 		onSuccess: () => {
-			router.push("/admin/organizations");
+			router.push("/superadmin/tenants");
 			router.refresh();
 		},
 	});
 
 	return (
-		<div className="relative z-50 flex items-center justify-between bg-red-600 px-4 py-2 font-medium text-sm text-white shadow-md">
+		<div className="relative z-50 flex flex-wrap items-center justify-between gap-2 bg-amber-600 px-4 py-2 font-medium text-sm text-white shadow-md">
 			<div className="flex items-center gap-2">
-				<ShieldAlert className="h-4 w-4" />
+				<ShieldAlert className="h-4 w-4 shrink-0" />
 				<span>
-					You are currently impersonating an organization ({impersonatedOrgId}).
-					All actions are being performed as this organization.
+					Viewing workspace as Super Admin impersonator:{" "}
+					<strong>{impersonatedOrgName || impersonatedOrgId}</strong>. All tenant mutations and telemetry reflect this workspace.
 				</span>
 			</div>
 			<Button
-				className="border-0 bg-white text-red-600 shadow-sm hover:bg-zinc-100 hover:text-red-700"
+				className="border-0 bg-white text-amber-700 shadow-sm hover:bg-zinc-100 hover:text-amber-800"
 				disabled={stopImpersonation.isPending}
 				onClick={() => stopImpersonation.mutate()}
 				size="sm"
 				variant="outline"
 			>
-				{stopImpersonation.isPending ? "Stopping..." : "Stop Impersonating"}
+				{stopImpersonation.isPending ? "Exiting..." : "Exit Impersonation"}
 			</Button>
 		</div>
 	);

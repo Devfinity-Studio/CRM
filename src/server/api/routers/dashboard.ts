@@ -31,15 +31,40 @@ export const dashboardRouter = createTRPCRouter({
 			)
 			.where(eq(organizationMembers.userId, ctx.session.user.id));
 
+		const userDb = await ctx.db.query.users.findFirst({
+			where: eq(users.id, ctx.session.user.id),
+		});
+
+		let impersonatedOrg = null;
+		if (ctx.impersonatedOrgId) {
+			impersonatedOrg = await ctx.db.query.organizations.findFirst({
+				where: eq(organizations.id, ctx.impersonatedOrgId),
+			});
+		}
+
 		const activeOrgId =
-			ctx.session.user.organizationId || userMemberships[0]?.organizationId;
+			ctx.impersonatedOrgId ||
+			ctx.session.user.organizationId ||
+			userMemberships[0]?.organizationId;
 		const activeMembership =
 			userMemberships.find((m) => m.organizationId === activeOrgId) ||
 			userMemberships[0];
 
-		const userDb = await ctx.db.query.users.findFirst({
-			where: eq(users.id, ctx.session.user.id),
-		});
+		const activeOrganization = impersonatedOrg
+			? {
+					id: impersonatedOrg.id,
+					name: impersonatedOrg.name,
+					logoUrl: impersonatedOrg.logoUrl,
+					slug: impersonatedOrg.slug,
+					role: "SUPER_ADMIN",
+				}
+			: {
+					id: activeMembership?.organizationId || "",
+					name: activeMembership?.name || "My Workspace",
+					logoUrl: activeMembership?.logoUrl || null,
+					slug: activeMembership?.slug || "",
+					role: activeMembership?.role || "MEMBER",
+				};
 
 		return {
 			user: {
@@ -48,13 +73,9 @@ export const dashboardRouter = createTRPCRouter({
 				email: userDb?.email || ctx.session.user.email,
 				image: userDb?.image || ctx.session.user.image,
 			},
-			activeOrganization: {
-				id: activeMembership?.organizationId || "",
-				name: activeMembership?.name || "My Workspace",
-				logoUrl: activeMembership?.logoUrl || null,
-				slug: activeMembership?.slug || "",
-				role: activeMembership?.role || "MEMBER",
-			},
+			activeOrganization,
+			impersonatedOrgId: ctx.impersonatedOrgId ?? null,
+			impersonatedOrgName: impersonatedOrg?.name ?? null,
 			organizations: userMemberships.map((m) => ({
 				id: m.organizationId,
 				name: m.name,
@@ -62,7 +83,9 @@ export const dashboardRouter = createTRPCRouter({
 				slug: m.slug,
 				role: m.role,
 			})),
-			tenantRole: activeMembership?.role ?? "MEMBER",
+			tenantRole: impersonatedOrg
+				? "SUPER_ADMIN"
+				: (activeMembership?.role ?? "MEMBER"),
 			onboardingComplete: userDb?.onboardingComplete ?? false,
 		};
 	}),

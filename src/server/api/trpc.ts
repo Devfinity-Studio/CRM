@@ -54,9 +54,24 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
 		}
 	}
 
+	let impersonatedOrgId: string | null = null;
+	if (session?.user && session.user.systemRole === "SUPER_ADMIN") {
+		try {
+			const cookieStore = await cookies();
+			const impCookie = cookieStore.get("devcrm_impersonate_org")?.value;
+			if (impCookie) {
+				impersonatedOrgId = impCookie;
+				session.user.organizationId = impCookie;
+			}
+		} catch {
+			// cookies() might not be available in non-request contexts
+		}
+	}
+
 	return {
 		db,
 		session,
+		impersonatedOrgId,
 		...opts,
 	};
 };

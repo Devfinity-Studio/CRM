@@ -25,6 +25,7 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import type React from "react";
 import { useState } from "react";
+import { ImpersonationBanner } from "~/components/layout/impersonation-banner";
 import { NotificationsBell } from "~/components/layout/notifications-bell";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -337,6 +338,12 @@ export function DashboardLayout({
 
 				{/* Main Content Area */}
 				<div className="flex min-w-0 flex-1 flex-col">
+					{layoutData?.impersonatedOrgId && (
+						<ImpersonationBanner
+							impersonatedOrgId={layoutData.impersonatedOrgId}
+							impersonatedOrgName={layoutData.impersonatedOrgName}
+						/>
+					)}
 					{/* Top Sticky Header */}
 					<header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-border/70 border-b bg-background/85 px-4 backdrop-blur-md md:px-6">
 						<div className="flex items-center gap-3">

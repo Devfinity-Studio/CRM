@@ -12,10 +12,10 @@ Upgrade DevCRM from a functional MVP into an enterprise-grade multi-tenant SaaS 
 - [x] **REQ-49-04**: tRPC `tenantProcedure` and `entitlementProcedure` enforcing automatic tenant isolation, role authorization, and feature/quota limits.
 
 ### Phase 50: Super Admin Control Plane, Plan Builder, Tenant Overrides & Platform Billing
-- [ ] **REQ-50-01**: Dedicated Super Admin Console at `/super-admin` with tenant discovery, status toggling, and secure impersonation session switcher with persistent banner.
-- [ ] **REQ-50-02**: SaaS Plan Builder allowing superadmins to create/edit subscription plans, price tiers, seat/contact quotas, and boolean module flags.
-- [ ] **REQ-50-03**: Per-tenant override management allowing custom quotas, beta module access, and billing waivers.
-- [ ] **REQ-50-04**: Platform SaaS billing integration with Dodo Payments (and Razorpay) for checkout sessions, recurring subscription lifecycle, and webhook synchronization.
+- [x] **REQ-50-01**: Dedicated Super Admin Console at `/super-admin` with tenant discovery, status toggling, and secure impersonation session switcher with persistent banner.
+- [x] **REQ-50-02**: SaaS Plan Builder allowing superadmins to create/edit subscription plans, price tiers, seat/contact quotas, and boolean module flags.
+- [x] **REQ-50-03**: Per-tenant override management allowing custom quotas, beta module access, and billing waivers.
+- [x] **REQ-50-04**: Platform SaaS billing integration with Dodo Payments (and Razorpay) for checkout sessions, recurring subscription lifecycle, and webhook synchronization.
 
 ### Phase 51: Dynamic Tax Engine, Interconnected Contacts, Deals, Quotes & Soft Inventory Holds
 - [ ] **REQ-51-01**: Country- and state-aware Dynamic Tax Engine using `country-state-city` (India GST with CGST/SGST/IGST + reverse charge, UK/EU VAT, US Sales Tax).
@@ -35,3 +35,4 @@ Upgrade DevCRM from a functional MVP into an enterprise-grade multi-tenant SaaS 
 - [ ] **REQ-53-03**: Outbound webhook orchestration with Svix for tenant endpoint registration and signature verification.
 - [ ] **REQ-53-04**: Global `Cmd+K` / `Ctrl+K` command palette (`cmdk`) for cross-module search and quick keyboard navigation.
 - [ ] **REQ-53-05**: Full test suite expansion (Vitest), Biome lint/format check, and staged Vercel deployment (preview on `dev` -> production on `prod` / `crm.devfinity.net`).
+

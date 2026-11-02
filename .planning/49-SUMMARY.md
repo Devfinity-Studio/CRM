@@ -10,3 +10,4 @@ See `.planning/phases/49-multi-tenancy-custom-domains-tenant-rbac-entitlements/4
 - Centralized Entitlements & RBAC Service implemented.
 - tRPC `tenantProcedure`, `tenantRoleProcedure`, and `entitlementProcedure` active.
 - Vitest tests: 33/33 passing; Next.js build: 45/45 routes compiled.
+

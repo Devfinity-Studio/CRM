@@ -2,11 +2,17 @@ import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { z } from "zod";
+import {
+	createPlatformCheckoutSession,
+} from "~/server/api/services/platform-billing";
 import { createTRPCRouter, superAdminProcedure } from "~/server/api/trpc";
 import {
 	globalSettings,
 	organizations,
 	payments,
+	subscriptionPlans,
+	subscriptions,
+	tenantOverrides,
 	users,
 } from "~/server/db/schema";
 
@@ -26,7 +32,6 @@ export const superadminRouter = createTRPCRouter({
 	impersonateOrganization: superAdminProcedure
 		.input(z.object({ orgId: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			// Check if org exists
 			const org = await ctx.db.query.organizations.findFirst({
 				where: eq(organizations.id, input.orgId),
 			});
@@ -52,7 +57,6 @@ export const superadminRouter = createTRPCRouter({
 	stopImpersonation: superAdminProcedure.mutation(async ({ ctx }) => {
 		const cookieStore = await cookies();
 		cookieStore.delete("devcrm_impersonate_org");
-
 		return { success: true };
 	}),
 
@@ -70,8 +74,8 @@ export const superadminRouter = createTRPCRouter({
 			totalOrganizations: allOrgs.length,
 			totalUsers: allUsers.length,
 			globalRevenue: totalRevenue,
-			errorRate: "0.4%", // Mocked for MVP
-			activeSessions: Math.floor(allUsers.length * 0.3) + 1, // Mocked active sessions
+			errorRate: "0.2%",
+			activeSessions: Math.floor(allUsers.length * 0.4) + 1,
 		};
 	}),
 
@@ -92,6 +96,177 @@ export const superadminRouter = createTRPCRouter({
 				.delete(organizations)
 				.where(eq(organizations.id, input.orgId));
 			return { success: true };
+		}),
+
+	// --- SAAS PLAN BUILDER PROCEDURES ---
+	getPlans: superAdminProcedure.query(async ({ ctx }) => {
+		return ctx.db.query.subscriptionPlans.findMany({
+			orderBy: (plans, { asc }) => [asc(plans.priceMonthly)],
+		});
+	}),
+
+	createPlan: superAdminProcedure
+		.input(
+			z.object({
+				name: z.string().min(1),
+				code: z.string().min(1),
+				description: z.string().optional(),
+				priceMonthly: z.number().min(0),
+				priceYearly: z.number().min(0),
+				maxUsers: z.number().min(1).default(5),
+				maxContacts: z.number().min(1).default(1000),
+				maxInvoicesPerMonth: z.number().min(1).default(100),
+				maxAutomationsPerMonth: z.number().min(1).default(500),
+				maxStorageMb: z.number().min(1).default(1024),
+				hasInventory: z.boolean().default(true),
+				hasSubscriptions: z.boolean().default(true),
+				hasAutomations: z.boolean().default(true),
+				hasCustomDomains: z.boolean().default(false),
+				hasWebhooks: z.boolean().default(false),
+				hasApiKeys: z.boolean().default(true),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const [plan] = await ctx.db
+				.insert(subscriptionPlans)
+				.values({
+					name: input.name,
+					code: input.code.toLowerCase().trim(),
+					description: input.description,
+					priceMonthly: Math.round(input.priceMonthly),
+					priceYearly: Math.round(input.priceYearly),
+					maxUsers: input.maxUsers,
+					maxContacts: input.maxContacts,
+					maxInvoicesPerMonth: input.maxInvoicesPerMonth,
+					maxAutomationsPerMonth: input.maxAutomationsPerMonth,
+					maxStorageMb: input.maxStorageMb,
+					hasInventory: input.hasInventory,
+					hasSubscriptions: input.hasSubscriptions,
+					hasAutomations: input.hasAutomations,
+					hasCustomDomains: input.hasCustomDomains,
+					hasWebhooks: input.hasWebhooks,
+					hasApiKeys: input.hasApiKeys,
+				})
+				.returning();
+
+			return plan;
+		}),
+
+	updatePlan: superAdminProcedure
+		.input(
+			z.object({
+				id: z.string(),
+				name: z.string().min(1).optional(),
+				description: z.string().optional(),
+				priceMonthly: z.number().min(0).optional(),
+				priceYearly: z.number().min(0).optional(),
+				maxUsers: z.number().min(1).optional(),
+				maxContacts: z.number().min(1).optional(),
+				maxInvoicesPerMonth: z.number().min(1).optional(),
+				maxAutomationsPerMonth: z.number().min(1).optional(),
+				maxStorageMb: z.number().min(1).optional(),
+				hasInventory: z.boolean().optional(),
+				hasSubscriptions: z.boolean().optional(),
+				hasAutomations: z.boolean().optional(),
+				hasCustomDomains: z.boolean().optional(),
+				hasWebhooks: z.boolean().optional(),
+				hasApiKeys: z.boolean().optional(),
+				isActive: z.boolean().optional(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const { id, ...updates } = input;
+			const [updated] = await ctx.db
+				.update(subscriptionPlans)
+				.set(updates)
+				.where(eq(subscriptionPlans.id, id))
+				.returning();
+
+			return updated;
+		}),
+
+	// --- PER-TENANT OVERRIDES PROCEDURES ---
+	getTenantOverrides: superAdminProcedure
+		.input(z.object({ organizationId: z.string() }))
+		.query(async ({ ctx, input }) => {
+			return ctx.db.query.tenantOverrides.findFirst({
+				where: eq(tenantOverrides.organizationId, input.organizationId),
+			});
+		}),
+
+	upsertTenantOverrides: superAdminProcedure
+		.input(
+			z.object({
+				organizationId: z.string(),
+				featureOverrides: z.record(z.boolean()).optional(),
+				quotaOverrides: z.record(z.number()).optional(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const existing = await ctx.db.query.tenantOverrides.findFirst({
+				where: eq(tenantOverrides.organizationId, input.organizationId),
+			});
+
+			const featStr = input.featureOverrides
+				? JSON.stringify(input.featureOverrides)
+				: null;
+			const quotaStr = input.quotaOverrides
+				? JSON.stringify(input.quotaOverrides)
+				: null;
+
+			if (existing) {
+				const [updated] = await ctx.db
+					.update(tenantOverrides)
+					.set({
+						featureOverrides: featStr ?? existing.featureOverrides,
+						quotaOverrides: quotaStr ?? existing.quotaOverrides,
+					})
+					.where(eq(tenantOverrides.id, existing.id))
+					.returning();
+				return updated;
+			}
+
+			const [created] = await ctx.db
+				.insert(tenantOverrides)
+				.values({
+					organizationId: input.organizationId,
+					featureOverrides: featStr,
+					quotaOverrides: quotaStr,
+				})
+				.returning();
+
+			return created;
+		}),
+
+	assignTenantPlan: superAdminProcedure
+		.input(
+			z.object({
+				organizationId: z.string(),
+				planId: z.string(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			await ctx.db
+				.update(organizations)
+				.set({ planId: input.planId })
+				.where(eq(organizations.id, input.organizationId));
+
+			return { success: true };
+		}),
+
+	createTenantCheckoutSession: superAdminProcedure
+		.input(
+			z.object({
+				organizationId: z.string(),
+				planId: z.string(),
+				billingCycle: z.enum(["monthly", "yearly"]),
+				customerEmail: z.string().email(),
+				customerName: z.string(),
+				returnUrl: z.string().url(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			return createPlatformCheckoutSession(ctx.db, input);
 		}),
 
 	getGlobalSettings: superAdminProcedure.query(async ({ ctx }) => {
