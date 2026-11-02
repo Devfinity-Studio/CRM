@@ -17,3 +17,4 @@ Synchronize the local code and database schema across both dev and production Ne
 - [x] **REQ-46-02**: Trigger production deployment on Vercel from the `prod` branch.
 - [x] **REQ-46-03**: Verify live health: root page, user authentication, multi-tenant dashboard, and API status on production URL.
 - [x] **REQ-46-04**: Execute live smoke tests on core workflows: deals pipeline, billing/invoices, and Neon Object Storage file uploads.
+

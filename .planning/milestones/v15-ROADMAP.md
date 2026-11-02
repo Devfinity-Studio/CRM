@@ -15,3 +15,4 @@
   - Fast-forward merged `dev` to `prod` and pushed to remote, triggering clean Vercel production deployment.
   - Confirmed Vercel deployment status `READY` on `devfinity-crm.vercel.app`.
   - Completed live smoke testing across root (`/`), auth (`/login`), CSRF, deals, quotes, and public invoices.
+
