@@ -8,8 +8,14 @@ import {
 	products,
 	quotes,
 	statements,
+	stockMovements,
 	userSettings,
 } from "~/server/db/schema";
+import {
+	fulfillInvoiceStock,
+	issueInvoiceCreditNote,
+	isValidInvoiceTransition,
+} from "~/server/api/services/invoice-state-machine";
 import { dispatchWebhook } from "~/server/webhooks/dispatch";
 import {
 	calculateRegionalTax,
@@ -1267,5 +1273,139 @@ export const billingRouter = createTRPCRouter({
 				),
 				orderBy: [desc(statements.createdAt)],
 			});
+		}),
+
+	// --- INVOICE STATE MACHINE & STOCK FULFILLMENT ---
+	updateInvoiceStatus: protectedProcedure
+		.input(
+			z.object({
+				invoiceId: z.string(),
+				status: z.enum([
+					"DRAFT",
+					"PROFORMA",
+					"SENT",
+					"VIEWED",
+					"PARTIALLY_PAID",
+					"PAID",
+					"OVERDUE",
+					"VOID",
+					"CREDIT_NOTE_ISSUED",
+					"CANCELLED",
+				]),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const member = await ctx.db.query.organizationMembers.findFirst({
+				where: eq(organizationMembers.userId, ctx.session.user.id),
+			});
+			if (!member?.organizationId) throw new Error("Unauthorized");
+
+			const invoice = await ctx.db.query.invoices.findFirst({
+				where: and(
+					eq(invoices.id, input.invoiceId),
+					eq(invoices.organizationId, member.organizationId),
+				),
+			});
+			if (!invoice) throw new Error("Invoice not found");
+
+			if (!isValidInvoiceTransition(invoice.status as any, input.status as any)) {
+				throw new Error(
+					`Invalid invoice transition from ${invoice.status} to ${input.status}`,
+				);
+			}
+
+			const updates: any = {
+				status: input.status,
+			};
+
+			if (input.status === "VIEWED" && !invoice.viewedAt) {
+				updates.viewedAt = new Date();
+			}
+			if (input.status === "PAID" && !invoice.paidAt) {
+				updates.paidAt = new Date();
+				updates.balanceDue = 0;
+			}
+
+			const [updated] = await ctx.db
+				.update(invoices)
+				.set(updates)
+				.where(eq(invoices.id, invoice.id))
+				.returning();
+
+			if (input.status === "PAID" && !invoice.fulfilledAt) {
+				await fulfillInvoiceStock(ctx.db, invoice.id, ctx.session.user.id);
+			}
+
+			await dispatchWebhook(member.organizationId, "invoice.status_changed", {
+				invoice: updated,
+				previousStatus: invoice.status,
+			});
+
+			return updated;
+		}),
+
+	fulfillInvoice: protectedProcedure
+		.input(z.object({ invoiceId: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			const member = await ctx.db.query.organizationMembers.findFirst({
+				where: eq(organizationMembers.userId, ctx.session.user.id),
+			});
+			if (!member?.organizationId) throw new Error("Unauthorized");
+
+			return fulfillInvoiceStock(ctx.db, input.invoiceId, ctx.session.user.id);
+		}),
+
+	issueCreditNote: protectedProcedure
+		.input(
+			z.object({
+				invoiceId: z.string(),
+				reason: z.string().min(1),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const member = await ctx.db.query.organizationMembers.findFirst({
+				where: eq(organizationMembers.userId, ctx.session.user.id),
+			});
+			if (!member?.organizationId) throw new Error("Unauthorized");
+
+			return issueInvoiceCreditNote(
+				ctx.db,
+				input.invoiceId,
+				input.reason,
+				ctx.session.user.id,
+			);
+		}),
+
+	getStockMovements: protectedProcedure
+		.input(z.object({ productId: z.string().optional() }).optional())
+		.query(async ({ ctx, input }) => {
+			const member = await ctx.db.query.organizationMembers.findFirst({
+				where: eq(organizationMembers.userId, ctx.session.user.id),
+			});
+			if (!member?.organizationId) throw new Error("Unauthorized");
+
+			const conditions = [eq(stockMovements.organizationId, member.organizationId)];
+			if (input?.productId) {
+				conditions.push(eq(stockMovements.productId, input.productId));
+			}
+
+			return ctx.db
+				.select({
+					id: stockMovements.id,
+					productId: stockMovements.productId,
+					invoiceId: stockMovements.invoiceId,
+					type: stockMovements.type,
+					quantity: stockMovements.quantity,
+					previousStock: stockMovements.previousStock,
+					newStock: stockMovements.newStock,
+					reason: stockMovements.reason,
+					createdAt: stockMovements.createdAt,
+					productName: products.name,
+					sku: products.sku,
+				})
+				.from(stockMovements)
+				.leftJoin(products, eq(stockMovements.productId, products.id))
+				.where(and(...conditions))
+				.orderBy(desc(stockMovements.createdAt));
 		}),
 });

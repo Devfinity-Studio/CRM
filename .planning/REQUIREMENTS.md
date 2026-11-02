@@ -24,10 +24,10 @@ Upgrade DevCRM from a functional MVP into an enterprise-grade multi-tenant SaaS 
 - [x] **REQ-51-04**: 360° unified chronological timeline on Contacts and Companies showing deals, rich-text notes (`@tiptap/react`), signed quotes, invoices, and LTV calculation.
 
 ### Phase 52: Invoicing Lifecycle, Subscriptions Engine & Unified Telemetry Dashboard
-- [ ] **REQ-52-01**: Invoicing full state machine (`Draft` -> `Sent` -> `Viewed` -> `Partially Paid` -> `Paid` -> `Overdue` -> `Void` / `Credit Note Issued`) with print-ready PDF generation (`react-to-print`) and hosted customer payment link.
-- [ ] **REQ-52-02**: Hard inventory stock deduction on invoice fulfillment with immutable `stockMovements` ledger tracking.
-- [ ] **REQ-52-03**: Recurring subscription engine supporting daily, weekly, monthly, and annual billing cycles, automated renewal invoice generation, and dunning alerts on payment failure.
-- [ ] **REQ-52-04**: Unified Executive Dashboard displaying live MRR/ARR, cash-flow run rate, pipeline conversion velocity, and low-stock alerts.
+- [x] **REQ-52-01**: Invoicing full state machine (`Draft` -> `Sent` -> `Viewed` -> `Partially Paid` -> `Paid` -> `Overdue` -> `Void` / `Credit Note Issued`) with print-ready PDF generation (`react-to-print`) and hosted customer payment link.
+- [x] **REQ-52-02**: Hard inventory stock deduction on invoice fulfillment with immutable `stockMovements` ledger tracking.
+- [x] **REQ-52-03**: Recurring subscription engine supporting daily, weekly, monthly, and annual billing cycles, automated renewal invoice generation, and dunning alerts on payment failure.
+- [x] **REQ-52-04**: Unified Executive Dashboard displaying live MRR/ARR, cash-flow run rate, pipeline conversion velocity, and low-stock alerts.
 
 ### Phase 53: Cross-Module Automation Event Bus, Svix Webhooks, Global Command Palette & Staged Release
 - [ ] **REQ-53-01**: Strongly-typed internal domain event bus emitting cross-module events (`deal.stage_changed`, `deal.won`, `invoice.created`, `invoice.paid`, `inventory.low_stock`).

@@ -516,8 +516,12 @@ export const invoiceStatusEnum = pgEnum("devcrm_invoice_status", [
 	"DRAFT",
 	"PROFORMA",
 	"SENT",
+	"VIEWED",
+	"PARTIALLY_PAID",
 	"PAID",
 	"OVERDUE",
+	"VOID",
+	"CREDIT_NOTE_ISSUED",
 	"CANCELLED",
 ]);
 
@@ -572,6 +576,44 @@ export const dealProducts = createTable("deal_product", (d) => ({
 		.references(() => products.id, { onDelete: "cascade" }),
 	quantity: d.integer().default(1).notNull(),
 	unitPrice: d.integer().notNull(),
+	createdAt: d
+		.timestamp({ withTimezone: true })
+		.$defaultFn(() => new Date())
+		.notNull(),
+}));
+
+export const stockMovementTypeEnum = pgEnum("devcrm_stock_movement_type", [
+	"INVOICE_FULFILLMENT",
+	"RESTOCK",
+	"ADJUSTMENT",
+	"RETURN",
+]);
+
+export const stockMovements = createTable("stock_movement", (d) => ({
+	id: d
+		.varchar({ length: 255 })
+		.notNull()
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	organizationId: d
+		.varchar({ length: 255 })
+		.notNull()
+		.references(() => organizations.id, { onDelete: "cascade" }),
+	productId: d
+		.varchar({ length: 255 })
+		.notNull()
+		.references(() => products.id, { onDelete: "cascade" }),
+	invoiceId: d
+		.varchar({ length: 255 })
+		.references(() => invoices.id, { onDelete: "set null" }),
+	type: stockMovementTypeEnum("type").default("INVOICE_FULFILLMENT").notNull(),
+	quantity: d.integer().notNull(),
+	previousStock: d.integer().notNull(),
+	newStock: d.integer().notNull(),
+	reason: d.text(),
+	performedByUserId: d
+		.varchar({ length: 255 })
+		.references(() => users.id, { onDelete: "set null" }),
 	createdAt: d
 		.timestamp({ withTimezone: true })
 		.$defaultFn(() => new Date())
@@ -711,6 +753,11 @@ export const invoices = createTable("invoice", (d) => ({
 	balanceDue: d.integer().notNull(),
 	dueDate: d.timestamp({ withTimezone: true }).notNull(),
 	paidAt: d.timestamp({ withTimezone: true }),
+	paymentLinkUrl: d.text(),
+	viewedAt: d.timestamp({ withTimezone: true }),
+	creditNoteNumber: d.varchar({ length: 100 }),
+	creditNoteReason: d.text(),
+	fulfilledAt: d.timestamp({ withTimezone: true }),
 	createdAt: d
 		.timestamp({ withTimezone: true })
 		.$defaultFn(() => new Date())
@@ -749,6 +796,21 @@ export const invoiceRelations = relations(invoices, ({ one, many }) => ({
 		references: [quotes.id],
 	}),
 	payments: many(payments),
+}));
+
+export const stockMovementsRelations = relations(stockMovements, ({ one }) => ({
+	product: one(products, {
+		fields: [stockMovements.productId],
+		references: [products.id],
+	}),
+	invoice: one(invoices, {
+		fields: [stockMovements.invoiceId],
+		references: [invoices.id],
+	}),
+	performedBy: one(users, {
+		fields: [stockMovements.performedByUserId],
+		references: [users.id],
+	}),
 }));
 
 export const taskPriorityEnum = pgEnum("devcrm_task_priority", [
@@ -878,6 +940,10 @@ export const clientSubscriptions = createTable("client_subscription", (d) => ({
 	price: d.integer().notNull(), // in cents
 	startDate: d.timestamp({ withTimezone: true }).notNull(),
 	nextRenewalDate: d.timestamp({ withTimezone: true }).notNull(),
+	lastRenewalDate: d.timestamp({ withTimezone: true }),
+	failedAttempts: d.integer().default(0).notNull(),
+	dunningStatus: d.varchar({ length: 50 }).default("NONE").notNull(),
+	dunningAlertSentAt: d.timestamp({ withTimezone: true }),
 	createdAt: d
 		.timestamp({ withTimezone: true })
 		.$defaultFn(() => new Date())

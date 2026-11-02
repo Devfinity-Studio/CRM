@@ -8,6 +8,7 @@ import {
 	Clock,
 	Compass,
 	FileCheck2,
+	Package,
 	Plus,
 	Receipt,
 	Sparkles,
@@ -41,6 +42,7 @@ export default function DashboardPage() {
 		api.dashboard.getRecentDeals.useQuery();
 	const { data: upcomingInvoices, isLoading: invoicesLoading } =
 		api.dashboard.getUpcomingInvoices.useQuery();
+	const { data: telemetry } = api.dashboard.getExecutiveTelemetry.useQuery();
 
 	const dashboardTourSteps = [
 		{
@@ -169,6 +171,78 @@ export default function DashboardPage() {
 					{/* Subtle Ambient Mesh Glow */}
 					<div className="pointer-events-none absolute -top-16 -right-16 h-80 w-80 rounded-full bg-primary/5 blur-3xl" />
 				</section>
+
+				{/* Executive Telemetry Strip */}
+				<div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+					<div className="rounded-xl border border-border/70 bg-card/60 p-3.5 shadow-xs">
+						<span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+							<TrendingUp className="h-3.5 w-3.5" /> Live MRR
+						</span>
+						<div className="mt-1 text-xl font-bold font-mono text-foreground">
+							{formatCurrency(telemetry?.mrr ?? 0)}
+						</div>
+						<div className="text-[11px] text-muted-foreground mt-0.5">
+							ARR: {formatCurrency(telemetry?.arr ?? 0)}
+						</div>
+					</div>
+
+					<div className="rounded-xl border border-border/70 bg-card/60 p-3.5 shadow-xs">
+						<span className="text-xs font-medium text-sky-600 dark:text-sky-400 flex items-center gap-1.5">
+							<Receipt className="h-3.5 w-3.5" /> 90-Day Cash Flow
+						</span>
+						<div className="mt-1 text-xl font-bold font-mono text-foreground">
+							{formatCurrency(telemetry?.monthlyCashFlowRunRate ?? 0)}
+						</div>
+						<div className="text-[11px] text-muted-foreground mt-0.5">
+							Monthly run rate
+						</div>
+					</div>
+
+					<div className="rounded-xl border border-border/70 bg-card/60 p-3.5 shadow-xs">
+						<span className="text-xs font-medium text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+							<Clock className="h-3.5 w-3.5" /> Sales Velocity
+						</span>
+						<div className="mt-1 text-xl font-bold font-mono text-foreground">
+							{telemetry?.avgDaysToClose ?? 0} days
+						</div>
+						<div className="text-[11px] text-muted-foreground mt-0.5">
+							Avg time to close deals
+						</div>
+					</div>
+
+					<div className="rounded-xl border border-border/70 bg-card/60 p-3.5 shadow-xs">
+						<span className="text-xs font-medium text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
+							<CheckCircle2 className="h-3.5 w-3.5" /> Recurring Accounts
+						</span>
+						<div className="mt-1 text-xl font-bold font-mono text-foreground">
+							{telemetry?.activeSubscriptionsCount ?? 0} active
+						</div>
+						<div className="text-[11px] text-muted-foreground mt-0.5">
+							Client subscriptions
+						</div>
+					</div>
+				</div>
+
+				{telemetry?.lowStockProducts && telemetry.lowStockProducts.length > 0 && (
+					<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 shadow-xs">
+						<div className="flex items-center gap-3">
+							<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white">
+								<Package className="h-5 w-5" />
+							</div>
+							<div>
+								<div className="font-semibold text-sm text-foreground">
+									Warehouse Inventory Alert: {telemetry.lowStockProducts.length} Product(s) Low on Stock
+								</div>
+								<div className="text-xs text-muted-foreground">
+									{telemetry.lowStockProducts.map((p) => `${p.name} (${p.availableStock} available)`).join(", ")}
+								</div>
+							</div>
+						</div>
+						<Button asChild size="sm" variant="outline" className="border-amber-500/40 text-amber-700 hover:bg-amber-500/10 dark:text-amber-400 shrink-0">
+							<Link href="/inventory/products">Manage Inventory</Link>
+						</Button>
+					</div>
+				)}
 
 				{/* 4 Glassmorphic KPI Cards Grid */}
 				<section

@@ -9,9 +9,12 @@ import {
 	invoices,
 	organizationMembers,
 	organizations,
+	clientSubscriptions,
 	pipelineStages,
+	products,
 	users,
 } from "~/server/db/schema";
+import { calculateMRRAndARR } from "~/server/api/services/subscription-engine";
 
 export const dashboardRouter = createTRPCRouter({
 	getLayoutData: protectedProcedure.query(async ({ ctx }) => {
@@ -320,5 +323,120 @@ export const dashboardRouter = createTRPCRouter({
 		});
 
 		return recentTasks;
+	}),
+
+	// Executive Telemetry: MRR, ARR, Cash-Flow Run Rate, Pipeline Velocity, and Low-Stock Alerts
+	getExecutiveTelemetry: protectedProcedure.query(async ({ ctx }) => {
+		const member = await ctx.db.query.organizationMembers.findFirst({
+			where: eq(organizationMembers.userId, ctx.session.user.id),
+		});
+		const organizationId =
+			ctx.impersonatedOrgId ||
+			ctx.session.user.organizationId ||
+			member?.organizationId;
+
+		if (!organizationId) {
+			return {
+				mrr: 0,
+				arr: 0,
+				activeSubscriptionsCount: 0,
+				monthlyCashFlowRunRate: 0,
+				annualCashFlowRunRate: 0,
+				avgDaysToClose: 0,
+				lowStockProducts: [],
+				overdueInvoices: [],
+			};
+		}
+
+		// 1. MRR & ARR from active client subscriptions
+		const subs = await ctx.db.query.clientSubscriptions.findMany({
+			where: eq(clientSubscriptions.organizationId, organizationId),
+		});
+		const mrrMetrics = calculateMRRAndARR(subs);
+
+		// 2. Cash-Flow 90-day Run Rate
+		const ninetyDaysAgo = subDays(new Date(), 90);
+		const [cashResult] = await ctx.db
+			.select({
+				totalCollected: sql<number>`cast(coalesce(sum(${invoices.amountPaid}), 0) as integer)`,
+			})
+			.from(invoices)
+			.where(
+				and(
+					eq(invoices.organizationId, organizationId),
+					gte(invoices.createdAt, ninetyDaysAgo),
+				),
+			);
+		const collected90Days = cashResult?.totalCollected || 0;
+		const monthlyCashFlowRunRate = Math.round(collected90Days / 3);
+
+		// 3. Pipeline Conversion Velocity
+		const wonDealsList = await ctx.db
+			.select({
+				createdAt: deals.createdAt,
+				updatedAt: deals.updatedAt,
+			})
+			.from(deals)
+			.where(
+				and(eq(deals.organizationId, organizationId), eq(deals.status, "WON")),
+			)
+			.limit(50);
+
+		let avgDaysToClose = 0;
+		if (wonDealsList.length > 0) {
+			const totalDays = wonDealsList.reduce((acc, d) => {
+				const created = new Date(d.createdAt).getTime();
+				const updated = new Date(d.updatedAt || d.createdAt).getTime();
+				const days = Math.max(1, Math.round((updated - created) / 86400000));
+				return acc + days;
+			}, 0);
+			avgDaysToClose = Math.round(totalDays / wonDealsList.length);
+		}
+
+		// 4. Low-Stock Alerts
+		const lowStockProducts = await ctx.db
+			.select({
+				id: products.id,
+				name: products.name,
+				sku: products.sku,
+				stockQuantity: products.stockQuantity,
+				reservedQuantity: products.reservedQuantity,
+			})
+			.from(products)
+			.where(
+				and(
+					eq(products.organizationId, organizationId),
+					sql`(${products.stockQuantity} - ${products.reservedQuantity}) <= 5`,
+				),
+			)
+			.limit(10);
+
+		// 5. Overdue Invoices
+		const overdueInvoices = await ctx.db
+			.select({
+				id: invoices.id,
+				invoiceNumber: invoices.invoiceNumber,
+				balanceDue: invoices.balanceDue,
+				dueDate: invoices.dueDate,
+			})
+			.from(invoices)
+			.where(
+				and(eq(invoices.organizationId, organizationId), eq(invoices.status, "OVERDUE")),
+			)
+			.limit(5);
+
+		return {
+			mrr: mrrMetrics.mrr,
+			arr: mrrMetrics.arr,
+			activeSubscriptionsCount: mrrMetrics.activeSubscriptionsCount,
+			monthlyCashFlowRunRate,
+			annualCashFlowRunRate: monthlyCashFlowRunRate * 12,
+			avgDaysToClose,
+			lowStockProducts: lowStockProducts.map((p) => ({
+				...p,
+				availableStock: Math.max(0, p.stockQuantity - p.reservedQuantity),
+			})),
+			overdueInvoices,
+		};
 	}),
 });

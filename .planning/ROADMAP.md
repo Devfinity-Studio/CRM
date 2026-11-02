@@ -15,10 +15,10 @@
   - **Goal:** Country/state-aware tax engine (CGST/SGST/IGST, VAT, Sales Tax), deal line-item integration with soft inventory reservations to prevent overselling, quotation e-signatures (react-signature-canvas), and 360° contact/company activity timeline with automated LTV metrics.
   - **Depends on:** Phase 50
   - **Plans:** 2/2 plans completed
-- [ ] **Phase 52: Invoicing Lifecycle, Subscriptions Engine & Unified Telemetry Dashboard**
+- [x] **Phase 52: Invoicing Lifecycle, Subscriptions Engine & Unified Telemetry Dashboard**
   - **Goal:** Compliant invoice lifecycle state machine, hard stock deductions with immutable stockMovements ledger, recurring subscription billing engine (daily to annual cycles, dunning alerts, auto renewal), and unified Executive Dashboard telemetry.
   - **Depends on:** Phase 51
-  - **Plans:** 0/2 plans completed
+  - **Plans:** 2/2 plans completed
 - [ ] **Phase 53: Cross-Module Automation Event Bus, Svix Webhooks, Global Command Palette & Staged Release**
   - **Goal:** Internal domain event bus, automation execution engine with multi-condition evaluation and audit logs, outbound Svix webhooks, global Cmd+K command palette (cmdk), Vitest automated testing, and staged Vercel deployment to production (crm.devfinity.net).
   - **Depends on:** Phase 52

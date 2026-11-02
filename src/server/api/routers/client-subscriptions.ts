@@ -2,6 +2,7 @@ import { addMonths, addYears } from "date-fns";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { processSubscriptionRenewals, computeNextRenewalDate } from "~/server/api/services/subscription-engine";
 import {
 	clientSubscriptions,
 	organizationMembers,
@@ -30,7 +31,7 @@ export const clientSubscriptionsRouter = createTRPCRouter({
 			z.object({
 				companyId: z.string(),
 				productId: z.string(),
-				billingCycle: z.enum(["MONTHLY", "YEARLY"]),
+				billingCycle: z.enum(["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]),
 				price: z.number().min(0),
 				startDate: z.date(),
 			}),
@@ -41,10 +42,10 @@ export const clientSubscriptionsRouter = createTRPCRouter({
 			});
 			if (!member?.organizationId) throw new Error("Unauthorized");
 
-			const nextRenewalDate =
-				input.billingCycle === "MONTHLY"
-					? addMonths(input.startDate, 1)
-					: addYears(input.startDate, 1);
+			const nextRenewalDate = computeNextRenewalDate(
+				input.startDate,
+				input.billingCycle,
+			);
 
 			const [sub] = await ctx.db
 				.insert(clientSubscriptions)
@@ -114,4 +115,13 @@ export const clientSubscriptionsRouter = createTRPCRouter({
 
 			return { success: true };
 		}),
+
+	triggerRenewals: protectedProcedure.mutation(async ({ ctx }) => {
+		const member = await ctx.db.query.organizationMembers.findFirst({
+			where: eq(organizationMembers.userId, ctx.session.user.id),
+		});
+		if (!member?.organizationId) throw new Error("Unauthorized");
+
+		return processSubscriptionRenewals(ctx.db, member.organizationId);
+	}),
 });
