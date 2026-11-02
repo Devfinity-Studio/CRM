@@ -2,27 +2,8 @@
 
 ## Milestones & Phases
 
-### Milestone 17: Enterprise Multi-Tenant SaaS Platform & Deep Module Interconnection
-- [x] **Phase 49: Multi-Tenancy, Custom Domains, Tenant RBAC & Entitlement Engine**
-  - **Goal:** Host-header routing in middleware.ts (crm.devfinity.net, {slug}.devfinity.net, custom domains via Vercel Domains API), expanded tenant RBAC with granular permissions matrix, centralized entitlement and quota engine, and tRPC tenantProcedure / entitlementProcedure.
-  - **Depends on:** Milestone 16
-  - **Plans:** 2/2 plans completed
-- [x] **Phase 50: Super Admin Control Plane, Plan Builder, Tenant Overrides & Platform Billing**
-  - **Goal:** Super Admin Console at /super-admin with tenant discovery, status toggling, impersonation session switcher, SaaS Plan Builder (pricing, quotas, module flags), per-tenant overrides, and platform SaaS billing integration (Dodo Payments / Razorpay webhooks and checkout).
-  - **Depends on:** Phase 49
-  - **Plans:** 2/2 plans completed
-- [x] **Phase 51: Dynamic Tax Engine, Interconnected Contacts, Deals, Quotes & Soft Inventory Holds**
-  - **Goal:** Country/state-aware tax engine (CGST/SGST/IGST, VAT, Sales Tax), deal line-item integration with soft inventory reservations to prevent overselling, quotation e-signatures (react-signature-canvas), and 360° contact/company activity timeline with automated LTV metrics.
-  - **Depends on:** Phase 50
-  - **Plans:** 2/2 plans completed
-- [x] **Phase 52: Invoicing Lifecycle, Subscriptions Engine & Unified Telemetry Dashboard**
-  - **Goal:** Compliant invoice lifecycle state machine, hard stock deductions with immutable stockMovements ledger, recurring subscription billing engine (daily to annual cycles, dunning alerts, auto renewal), and unified Executive Dashboard telemetry.
-  - **Depends on:** Phase 51
-  - **Plans:** 2/2 plans completed
-- [x] **Phase 53: Cross-Module Automation Event Bus, Svix Webhooks, Global Command Palette & Staged Release**
-  - **Goal:** Internal domain event bus, automation execution engine with multi-condition evaluation and audit logs, outbound Svix webhooks, global Cmd+K command palette (cmdk), Vitest automated testing, and staged Vercel deployment to production (crm.devfinity.net).
-  - **Depends on:** Phase 52
-  - **Plans:** 2/2 plans completed
+### Milestone 17: Enterprise Multi-Tenant SaaS Platform & Deep Module Interconnection (Completed)
+- [x] [Archived in v17-ROADMAP.md](./milestones/v17-ROADMAP.md)
 
 ### Milestone 16: Test Expansion, Dev/Prod DB Segregation & Staged Deployment (Completed)
 - [x] [Archived in v16-ROADMAP.md](./milestones/v16-ROADMAP.md)

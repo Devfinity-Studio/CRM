@@ -35,4 +35,3 @@ Upgrade DevCRM from a functional MVP into an enterprise-grade multi-tenant SaaS 
 - [x] **REQ-53-03**: Outbound webhook orchestration with Svix for tenant endpoint registration and signature verification.
 - [x] **REQ-53-04**: Global `Cmd+K` / `Ctrl+K` command palette (`cmdk`) for cross-module search and quick keyboard navigation.
 - [x] **REQ-53-05**: Full test suite expansion (Vitest), Biome lint/format check, and staged Vercel deployment (preview on `dev` -> production on `prod` / `crm.devfinity.net`).
-

@@ -18,14 +18,21 @@ Businesses, B2B companies, and sales/ops teams needing an all-in-one CRM suite f
 - **Testing**: Vitest (23 unit & integration test suites)
 
 ## Current State
-DevCRM has completed **Milestone 16: Test Expansion, Dev/Prod DB Segregation & Staged Deployment** (Phases 47-48).
-- **Automated Test Suite Expansion**: Comprehensive Vitest coverage across Webhooks dispatch, tRPC router procedures, presigned S3 upload pipelines, Dashboard telemetry, Deals Kanban pipelines, Onboarding state tracking, and CRM/Billing operations (23/23 tests passing).
-- **Neon Database Segregation & Parity**: Verified schema parity across Neon database branches `Dev` (`br-jolly-bird-az9jq7gz`) and `production` (`br-little-scene-az7iw7fk`).
-- **Staged Vercel Architecture**: Vercel project `devfinity-crm` linked to `dev` for Preview deployments (targeting Neon Dev DB) and `prod` for Production deployments (targeting Neon Prod DB).
-- **Master UI/UX Overhaul**: 75/75 routes, layout shells, modals, drawers, and edge views upgraded with 4-tier surface elevation, WCAG 2.1 AAA contrast, $\ge 44\text{px}$ mobile touch targets, and iOS Safari auto-zoom prevention.
-- **Selective Route Onboarding Gating**: Route-aware warning banner on `/dashboard` and `/settings/profile` ensuring full interaction without trapping the user; full-page backdrop blocker on restricted business sub-routes.
-- **Tutorial & Tour Synchronization**: Driver.js guided tour and Welcome Modal synchronized to only display after onboarding completion.
-- **Live Production Deployment**: Confirmed `READY` on `https://devfinity-crm.vercel.app` and `https://crm.devfinity.net` with `HTTP 200 OK`.
+DevCRM has completed **Milestone 17: Enterprise Multi-Tenant SaaS Platform & Deep Module Interconnection** (Phases 49-53).
+- **Multi-Tenancy & Edge Host Routing**: Fully dynamic host-header resolution for custom domains and subdomains (`crm.devfinity.net`, `{slug}.devfinity.net`), injecting `x-tenant-id` and `x-tenant-slug` headers with edge caching.
+- **Tenant RBAC & Entitlement Quota Engine**: 6 tenant roles (`TENANT_OWNER`, `ADMIN`, `SALES_REP`, `ACCOUNTANT`, `INVENTORY_MANAGER`, `CUSTOM_ROLE`) with modular JSON permissions matrix and centralized entitlement procedure guards.
+- **Super Admin Control Plane & SaaS Billing**: Superadmin console at `/super-admin` with plan builder, tenant quotas/overrides, secure impersonation banner, and platform SaaS billing via Dodo Payments / Razorpay.
+- **Regional Dynamic Tax Engine**: Country- and state-aware tax calculation supporting India GST (CGST/SGST/IGST + reverse charge), UK/EU VAT, and US Sales Tax.
+- **Deal Line Items & Soft Inventory Reservations**: Automated reservations preventing overselling, proposal digital e-signatures (`react-signature-canvas`), and 360° unified timeline with LTV telemetry.
+- **Compliant Invoicing State Machine & Ledger**: 8-state invoice transition engine, hard stock deductions into immutable `stockMovements` ledger, and recurring subscription billing cycles.
+- **Domain Event Bus & Outbound Webhooks**: Internal event dispatcher with multi-condition rules, audit logging in `automationLogs`, and Svix outbound webhook delivery.
+- **Global Command Palette (`cmdk`)**: Keyboard-first `⌘K`/`Ctrl+K` cross-module search querying Deals, Companies, Contacts, Invoices, Quotes, and Products.
+- **Testing & Staged Release**: 57/57 Vitest tests passing, 47/47 Next.js routes compiled cleanly, deployed to production.
+
+<details>
+<summary>Previous State (Milestone 16)</summary>
+DevCRM completed **Milestone 16: Test Expansion, Dev/Prod DB Segregation & Staged Deployment** (Phases 47-48) with automated test expansion, Neon DB Dev/Prod segregation, Master UI/UX overhaul across 75 surfaces, and Driver.js tour synchronization.
+</details>
 
 <details>
 <summary>Previous State (Milestone 15)</summary>
