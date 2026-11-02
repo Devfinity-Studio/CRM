@@ -2,6 +2,16 @@
 
 ## Milestones & Phases
 
+### Milestone 18: Platform SaaS Payment & Subscription Gateway Integration
+- [x] **Phase 54: Gateway SDK Setup, Secure Webhooks & Automated Quota Sync**
+  - **Goal:** Install dodopayments SDK, implement /api/webhooks/dodo with Standard Webhooks HMAC verification, idempotent event processing (subscription.active, renewed, cancelled, on_hold, payment.succeeded), and automated organization quota and plan sync.
+  - **Depends on:** Milestone 17
+  - **Plans:** 2/2 plans completed
+- [ ] **Phase 55: Tenant Subscription Billing Center, Checkout Sessions & Customer Portal**
+  - **Goal:** Implement tRPC procedures for platform checkout sessions and customer portal sessions, build /settings/billing dashboard with live quota meters and plan switcher, add quota warning banners, and full test & build verification.
+  - **Depends on:** Phase 54
+  - **Plans:** 0/2 plans completed
+
 ### Milestone 17: Enterprise Multi-Tenant SaaS Platform & Deep Module Interconnection (Completed)
 - [x] [Archived in v17-ROADMAP.md](./milestones/v17-ROADMAP.md)
 

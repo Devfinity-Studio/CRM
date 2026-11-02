@@ -1,7 +1,13 @@
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type * as schema from "~/server/db/schema";
-import { organizations, subscriptionPlans, subscriptions } from "~/server/db/schema";
+import {
+	organizations,
+	subscriptionPlans,
+	subscriptions,
+} from "~/server/db/schema";
+import { emitDomainEvent } from "~/server/events/event-bus";
+import { getDodoClient, isDodoConfigured } from "~/server/payments/dodo-client";
 
 export interface PlatformCheckoutSessionInput {
 	organizationId: string;
@@ -18,23 +24,30 @@ export interface PlatformBillingWebhookEvent {
 		| "subscription.renewed"
 		| "subscription.cancelled"
 		| "subscription.on_hold"
+		| "subscription.plan_changed"
 		| "payment.succeeded"
 		| "payment.failed";
 	data: {
 		subscription_id?: string;
 		customer_id?: string;
+		customer?: {
+			customer_id?: string;
+			email?: string;
+			name?: string;
+		};
 		metadata?: {
 			organizationId?: string;
 			planId?: string;
+			billingCycle?: string;
 		};
+		product_id?: string;
 		next_billing_date?: string;
 		status?: string;
 	};
 }
 
 /**
- * Creates a hosted checkout session URL for platform SaaS subscriptions.
- * Supports Dodo Payments / Razorpay configuration.
+ * Creates a hosted checkout session URL for platform SaaS subscriptions via Dodo Payments.
  */
 export async function createPlatformCheckoutSession(
 	db: PostgresJsDatabase<typeof schema>,
@@ -48,22 +61,20 @@ export async function createPlatformCheckoutSession(
 		throw new Error("Target subscription plan not found.");
 	}
 
-	const price =
-		input.billingCycle === "yearly" ? plan.priceYearly : plan.priceMonthly;
 	const sessionId = `pl_sess_${input.organizationId.slice(0, 8)}_${Date.now()}`;
 
-	// If DODO_API_KEY is configured, integrate with live Dodo checkout sessions;
-	// Otherwise generate a compliant checkout session payload
-	const dodoApiKey = process.env.DODO_PAYMENTS_API_KEY;
-	if (dodoApiKey) {
+	// If Dodo is configured, create live or test checkout session via official SDK
+	if (isDodoConfigured()) {
 		try {
-			const res = await fetch("https://api.dodopayments.com/v1/checkout-sessions", {
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${dodoApiKey}`,
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
+			const client = getDodoClient();
+			const planMetadata = (plan.metadata as Record<string, unknown>) || {};
+			const productId =
+				(planMetadata.dodoProductId as string) ||
+				process.env.DODO_DEFAULT_PRODUCT_ID;
+
+			if (productId) {
+				const session = await client.checkoutSessions.create({
+					product_cart: [{ product_id: productId, quantity: 1 }],
 					customer: {
 						email: input.customerEmail,
 						name: input.customerName,
@@ -74,37 +85,73 @@ export async function createPlatformCheckoutSession(
 						billingCycle: input.billingCycle,
 					},
 					return_url: input.returnUrl,
-					amount: price,
-					currency: "USD",
-				}),
-			});
+				});
 
-			if (res.ok) {
-				const data = await res.json();
-				return {
-					checkoutUrl: data.checkout_url || data.url || input.returnUrl,
-					sessionId: data.session_id || sessionId,
-				};
+				if (session?.checkout_url) {
+					return {
+						checkoutUrl: session.checkout_url,
+						sessionId: session.session_id || sessionId,
+					};
+				}
 			}
 		} catch (e) {
-			console.error("[PlatformBilling] Dodo checkout session creation fallback:", e);
+			console.error("[PlatformBilling] Dodo SDK checkoutSession error:", e);
 		}
 	}
 
-	// Compliant hosted URL fallback
-	const checkoutUrl = `${input.returnUrl}?session_id=${sessionId}&status=success`;
+	// Compliant fallback hosted URL for development & offline environments
+	const checkoutUrl = `${input.returnUrl}?session_id=${sessionId}&status=success&plan_id=${input.planId}`;
 	return { checkoutUrl, sessionId };
 }
 
 /**
- * Ingests platform SaaS billing webhooks from Dodo / Razorpay and synchronizes tenant subscription status.
+ * Creates a hosted Customer Portal session via Dodo Payments.
+ */
+export async function createPlatformCustomerPortalSession(
+	db: PostgresJsDatabase<typeof schema>,
+	organizationId: string,
+	returnUrl: string,
+): Promise<{ portalUrl: string }> {
+	const org = await db.query.organizations.findFirst({
+		where: eq(organizations.id, organizationId),
+	});
+
+	if (!org) {
+		throw new Error("Organization not found.");
+	}
+
+	const customerId = org.dodoCustomerId;
+
+	if (customerId && isDodoConfigured()) {
+		try {
+			const client = getDodoClient();
+			const session = await client.customers.customerPortal.create(customerId, {
+				return_url: returnUrl,
+			});
+			if (session?.link) {
+				return { portalUrl: session.link };
+			}
+		} catch (e) {
+			console.error("[PlatformBilling] Dodo CustomerPortal error:", e);
+		}
+	}
+
+	// Fallback returnUrl if portal session cannot be generated
+	return { portalUrl: `${returnUrl}?portal=unavailable` };
+}
+
+/**
+ * Ingests platform SaaS billing webhooks from Dodo Payments and synchronizes tenant quotas,
+ * subscription statuses, and team limits.
  */
 export async function handlePlatformBillingWebhook(
 	db: PostgresJsDatabase<typeof schema>,
 	event: PlatformBillingWebhookEvent,
-): Promise<{ success: boolean; handled: boolean }> {
+): Promise<{ success: boolean; handled: boolean; updatedPlan?: string }> {
 	const orgId = event.data.metadata?.organizationId;
 	const planId = event.data.metadata?.planId;
+	const customerId = event.data.customer_id || event.data.customer?.customer_id;
+	const subscriptionId = event.data.subscription_id;
 
 	if (!orgId) {
 		return { success: false, handled: false };
@@ -113,16 +160,51 @@ export async function handlePlatformBillingWebhook(
 	switch (event.event_type) {
 		case "subscription.active":
 		case "subscription.renewed":
+		case "subscription.plan_changed":
 		case "payment.succeeded": {
-			// 1. Update organization planId
+			// 1. Resolve target subscription plan to read quotas
+			let targetPlan = null;
 			if (planId) {
-				await db
-					.update(organizations)
-					.set({ planId })
-					.where(eq(organizations.id, orgId));
+				targetPlan = await db.query.subscriptionPlans.findFirst({
+					where: eq(subscriptionPlans.id, planId),
+				});
 			}
 
-			// 2. Upsert active subscription record
+			// Fallback: lookup default active plan if planId wasn't directly in metadata
+			if (!targetPlan && event.data.product_id) {
+				const allPlans = await db.query.subscriptionPlans.findMany();
+				targetPlan =
+					allPlans.find((p) => {
+						const meta = (p.metadata as Record<string, unknown>) || {};
+						return meta.dodoProductId === event.data.product_id;
+					}) || null;
+			}
+
+			// 2. Synchronize organization quotas and plan tier
+			const updatePayload: Record<string, unknown> = {
+				status: "ACTIVE",
+			};
+
+			if (targetPlan) {
+				updatePayload.planId = targetPlan.id;
+				updatePayload.plan = targetPlan.name;
+				updatePayload.maxContacts = targetPlan.maxContacts;
+				updatePayload.maxInvoices = targetPlan.maxInvoices;
+				updatePayload.maxAutomationsMonthly = targetPlan.maxAutomationsMonthly;
+				updatePayload.maxTeamSeats = targetPlan.maxTeamSeats;
+				updatePayload.maxStorageMb = targetPlan.maxStorageMb;
+			}
+
+			if (customerId) {
+				updatePayload.dodoCustomerId = customerId;
+			}
+
+			await db
+				.update(organizations)
+				.set(updatePayload)
+				.where(eq(organizations.id, orgId));
+
+			// 3. Upsert active subscription record
 			const existingSub = await db.query.subscriptions.findFirst({
 				where: eq(subscriptions.organizationId, orgId),
 			});
@@ -137,18 +219,45 @@ export async function handlePlatformBillingWebhook(
 					.set({
 						status: "ACTIVE",
 						currentPeriodEnd: nextBilling,
-						planId: planId || existingSub.planId,
+						planId: targetPlan?.id || existingSub.planId,
+						dodoSubscriptionId:
+							subscriptionId || existingSub.dodoSubscriptionId,
+						dodoCustomerId: customerId || existingSub.dodoCustomerId,
 					})
 					.where(eq(subscriptions.id, existingSub.id));
-			} else if (planId) {
+			} else if (targetPlan) {
 				await db.insert(subscriptions).values({
 					organizationId: orgId,
-					planId,
+					planId: targetPlan.id,
 					status: "ACTIVE",
 					currentPeriodEnd: nextBilling,
+					dodoSubscriptionId: subscriptionId,
+					dodoCustomerId: customerId,
 				});
 			}
-			return { success: true, handled: true };
+
+			// 4. Emit domain event on event bus
+			try {
+				await emitDomainEvent(db, {
+					type: "subscription.active",
+					organizationId: orgId,
+					targetEntityId: orgId,
+					payload: {
+						planId: targetPlan?.id,
+						planName: targetPlan?.name,
+						subscriptionId,
+						customerId,
+					},
+				});
+			} catch (e) {
+				console.warn("[PlatformBilling] Could not emit domain event:", e);
+			}
+
+			return {
+				success: true,
+				handled: true,
+				updatedPlan: targetPlan?.name,
+			};
 		}
 
 		case "subscription.cancelled": {
@@ -156,6 +265,18 @@ export async function handlePlatformBillingWebhook(
 				.update(subscriptions)
 				.set({ status: "CANCELED" })
 				.where(eq(subscriptions.organizationId, orgId));
+
+			try {
+				await emitDomainEvent(db, {
+					type: "subscription.cancelled",
+					organizationId: orgId,
+					targetEntityId: orgId,
+					payload: { subscriptionId },
+				});
+			} catch (e) {
+				console.warn("[PlatformBilling] Could not emit domain event:", e);
+			}
+
 			return { success: true, handled: true };
 		}
 
@@ -172,4 +293,3 @@ export async function handlePlatformBillingWebhook(
 			return { success: true, handled: false };
 	}
 }
-

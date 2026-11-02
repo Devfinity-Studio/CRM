@@ -14,7 +14,9 @@ export type DomainEventType =
 	| "invoice.created"
 	| "invoice.paid"
 	| "inventory.low_stock"
-	| "quote.accepted";
+	| "quote.accepted"
+	| "subscription.active"
+	| "subscription.cancelled";
 
 export interface DomainEvent<T = any> {
 	type: DomainEventType;

@@ -52,6 +52,7 @@
 		"cn": "^0.4.0",
 		"country-state-city": "^3.2.1",
 		"date-fns": "^4.4.0",
+		"dodopayments": "^2.59.0",
 		"driver.js": "^1.8.0",
 		"drizzle-orm": "^0.41.0",
 		"files-sdk": "^3.1.2",

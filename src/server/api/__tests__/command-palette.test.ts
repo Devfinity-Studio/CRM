@@ -101,3 +101,4 @@ describe("Global Search & Command Palette Router", () => {
 		expect(results.products[0]?.name).toBe("Enterprise Appliance");
 	});
 });
+
