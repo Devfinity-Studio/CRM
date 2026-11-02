@@ -1,20 +1,33 @@
 import { subDays } from "date-fns";
-import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
+import {
+	and,
+	asc,
+	desc,
+	eq,
+	gte,
+	ilike,
+	inArray,
+	lte,
+	or,
+	sql,
+} from "drizzle-orm";
 import { z } from "zod";
+import { calculateMRRAndARR } from "~/server/api/services/subscription-engine";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
+	clientSubscriptions,
 	companies,
+	contacts,
 	crmTasks,
 	deals,
 	invoices,
 	organizationMembers,
 	organizations,
-	clientSubscriptions,
 	pipelineStages,
 	products,
+	quotes,
 	users,
 } from "~/server/db/schema";
-import { calculateMRRAndARR } from "~/server/api/services/subscription-engine";
 
 export const dashboardRouter = createTRPCRouter({
 	getLayoutData: protectedProcedure.query(async ({ ctx }) => {
@@ -421,7 +434,10 @@ export const dashboardRouter = createTRPCRouter({
 			})
 			.from(invoices)
 			.where(
-				and(eq(invoices.organizationId, organizationId), eq(invoices.status, "OVERDUE")),
+				and(
+					eq(invoices.organizationId, organizationId),
+					eq(invoices.status, "OVERDUE"),
+				),
 			)
 			.limit(5);
 
@@ -439,4 +455,152 @@ export const dashboardRouter = createTRPCRouter({
 			overdueInvoices,
 		};
 	}),
+
+	// Global Cross-Module Search for Cmd+K Command Palette
+	globalSearch: protectedProcedure
+		.input(z.object({ query: z.string().min(1) }))
+		.query(async ({ ctx, input }) => {
+			const member = await ctx.db.query.organizationMembers.findFirst({
+				where: eq(organizationMembers.userId, ctx.session.user.id),
+			});
+			const organizationId =
+				ctx.impersonatedOrgId ||
+				ctx.session.user.organizationId ||
+				member?.organizationId;
+
+			if (!organizationId) {
+				return {
+					deals: [],
+					companies: [],
+					contacts: [],
+					invoices: [],
+					quotes: [],
+					products: [],
+				};
+			}
+
+			const q = `%${input.query.trim()}%`;
+
+			const [
+				matchedDeals,
+				matchedCompanies,
+				matchedContacts,
+				matchedInvoices,
+				matchedQuotes,
+				matchedProducts,
+			] = await Promise.all([
+				ctx.db
+					.select({
+						id: deals.id,
+						title: deals.title,
+						value: deals.value,
+						status: deals.status,
+					})
+					.from(deals)
+					.where(
+						and(
+							eq(deals.organizationId, organizationId),
+							ilike(deals.title, q),
+						),
+					)
+					.limit(5),
+				ctx.db
+					.select({ id: companies.id, name: companies.name })
+					.from(companies)
+					.where(
+						and(
+							eq(companies.organizationId, organizationId),
+							ilike(companies.name, q),
+						),
+					)
+					.limit(5),
+				ctx.db
+					.select({
+						id: contacts.id,
+						firstName: contacts.firstName,
+						lastName: contacts.lastName,
+						email: contacts.email,
+					})
+					.from(contacts)
+					.where(
+						and(
+							eq(contacts.organizationId, organizationId),
+							or(
+								ilike(contacts.firstName, q),
+								ilike(contacts.lastName, q),
+								ilike(contacts.email, q),
+							),
+						),
+					)
+					.limit(5),
+				ctx.db
+					.select({
+						id: invoices.id,
+						invoiceNumber: invoices.invoiceNumber,
+						totalAmount: invoices.totalAmount,
+						status: invoices.status,
+					})
+					.from(invoices)
+					.where(
+						and(
+							eq(invoices.organizationId, organizationId),
+							ilike(invoices.invoiceNumber, q),
+						),
+					)
+					.limit(5),
+				ctx.db
+					.select({
+						id: quotes.id,
+						quoteNumber: quotes.quoteNumber,
+						totalAmount: quotes.totalAmount,
+						status: quotes.status,
+					})
+					.from(quotes)
+					.where(
+						and(
+							eq(quotes.organizationId, organizationId),
+							ilike(quotes.quoteNumber, q),
+						),
+					)
+					.limit(5),
+				ctx.db
+					.select({
+						id: products.id,
+						name: products.name,
+						sku: products.sku,
+						stockQuantity: products.stockQuantity,
+					})
+					.from(products)
+					.where(
+						and(
+							eq(products.organizationId, organizationId),
+							or(ilike(products.name, q), ilike(products.sku, q)),
+						),
+					)
+					.limit(5),
+			]);
+
+			return {
+				deals: matchedDeals.map((d) => ({ ...d, url: `/deals` })),
+				companies: matchedCompanies.map((c) => ({
+					...c,
+					url: `/clients/${c.id}`,
+				})),
+				contacts: matchedContacts.map((c) => ({
+					id: c.id,
+					name: `${c.firstName} ${c.lastName || ""}`.trim(),
+					email: c.email,
+					url: `/clients`,
+				})),
+				invoices: matchedInvoices.map((inv) => ({
+					...inv,
+					url: `/billing/invoices`,
+				})),
+				quotes: matchedQuotes.map((q) => ({ ...q, url: `/billing/quotes` })),
+				products: matchedProducts.map((p) => ({
+					...p,
+					url: `/inventory/products`,
+				})),
+			};
+		}),
 });

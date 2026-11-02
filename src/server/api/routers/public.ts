@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { deals, invoices, payments, quotes, statements } from "~/server/db/schema";
+import { emitDomainEvent } from "~/server/events/event-bus";
 
 export const publicRouter = createTRPCRouter({
 	signQuote: publicProcedure
@@ -50,6 +51,20 @@ export const publicRouter = createTRPCRouter({
 					.set({ status: "WON", updatedAt: now })
 					.where(eq(deals.id, quote.dealId));
 			}
+
+			await emitDomainEvent(ctx.db, {
+				type: "quote.accepted",
+				organizationId: quote.organizationId,
+				targetEntityId: quote.id,
+				payload: {
+					quoteId: quote.id,
+					quoteNumber: quote.quoteNumber,
+					totalAmount: quote.totalAmount,
+					signatureName: input.signatureName,
+					companyId: quote.companyId,
+					dealId: quote.dealId,
+				},
+			});
 
 			return { success: true, quote: signed };
 		}),

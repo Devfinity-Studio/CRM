@@ -25,6 +25,7 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import type React from "react";
 import { useState } from "react";
+import { GlobalCommandPalette } from "~/components/layout/global-command-palette";
 import { ImpersonationBanner } from "~/components/layout/impersonation-banner";
 import { NotificationsBell } from "~/components/layout/notifications-bell";
 import { Badge } from "~/components/ui/badge";
@@ -70,6 +71,7 @@ export function DashboardLayout({
 	const pathname = usePathname();
 	const [isCollapsed, setIsCollapsed] = useState(false);
 	const [mobileOpen, setMobileOpen] = useState(false);
+	const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
 	const { data: layoutData, isLoading } =
 		api.dashboard.getLayoutData.useQuery();
@@ -367,18 +369,20 @@ export function DashboardLayout({
 								</SheetContent>
 							</Sheet>
 
-							{/* Quick Search */}
-							<div className="relative w-52 max-w-md sm:w-80">
-								<Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-								<Input
-									className="h-10 rounded-xl border-border/70 bg-card/70 pr-12 pl-9 text-xs focus:bg-card sm:text-sm"
-									placeholder="Search deals, contacts..."
-									type="text"
-								/>
-								<kbd className="absolute top-1/2 right-2.5 hidden -translate-y-1/2 items-center gap-0.5 rounded border border-border/80 bg-accent px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:inline-flex">
+							{/* Quick Search Trigger */}
+							<button
+								type="button"
+								onClick={() => setCommandPaletteOpen(true)}
+								className="relative flex h-10 w-52 max-w-md items-center justify-between rounded-xl border border-border/70 bg-card/70 px-3 text-xs text-muted-foreground transition-all hover:bg-card hover:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 sm:w-80 sm:text-sm"
+							>
+								<div className="flex items-center gap-2 truncate">
+									<Search className="h-4 w-4 text-muted-foreground shrink-0" />
+									<span className="truncate">Search deals, clients, invoices...</span>
+								</div>
+								<kbd className="hidden items-center gap-0.5 rounded border border-border/80 bg-accent px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:inline-flex shrink-0">
 									⌘K
 								</kbd>
-							</div>
+							</button>
 						</div>
 
 						{/* Trailing Controls & User Menu */}
@@ -542,6 +546,12 @@ export function DashboardLayout({
 							{children}
 						</div>
 					</main>
+
+					{/* Global Cmd+K Command Palette */}
+					<GlobalCommandPalette
+						open={commandPaletteOpen}
+						onOpenChange={setCommandPaletteOpen}
+					/>
 
 					{/* Mobile Fixed Bottom Navigation Bar */}
 					<nav className="fixed bottom-0 inset-x-0 z-30 flex h-16 items-center justify-around border-t border-border/80 bg-background/95 px-2 backdrop-blur-lg pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] md:hidden shadow-lg">

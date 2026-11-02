@@ -1048,12 +1048,20 @@ export const automationTriggerEnum = pgEnum("devcrm_automation_trigger", [
 	"SUBSCRIPTION_RENEWAL",
 	"DEAL_STALLED",
 	"QUOTE_SENT",
+	"DEAL_STAGE_CHANGED",
+	"DEAL_WON",
+	"INVOICE_CREATED",
+	"INVOICE_PAID",
+	"INVENTORY_LOW_STOCK",
+	"QUOTE_ACCEPTED",
 ]);
 export const automationActionEnum = pgEnum("devcrm_automation_action", [
 	"CREATE_NOTIFICATION",
 	"CREATE_TASK",
 	"SEND_EMAIL",
 	"INTERNAL_ALERT",
+	"DISPATCH_WEBHOOK",
+	"ADJUST_INVENTORY",
 ]);
 
 export const automationRules = createTable("automation_rule", (d) => ({
@@ -1071,6 +1079,7 @@ export const automationRules = createTable("automation_rule", (d) => ({
 	daysOffset: d.integer().default(0).notNull(), // e.g. -7 for 7 days before
 	actionType: automationActionEnum("action_type").notNull(),
 	actionPayload: d.jsonb().default({}).notNull(),
+	conditions: d.jsonb(),
 	isActive: d.boolean().default(true).notNull(),
 	createdAt: d
 		.timestamp({ withTimezone: true })
@@ -1094,6 +1103,8 @@ export const automationLogs = createTable("automation_log", (d) => ({
 		.notNull()
 		.references(() => automationRules.id, { onDelete: "cascade" }),
 	targetEntityId: d.varchar({ length: 255 }).notNull(),
+	status: d.varchar({ length: 50 }).default("SUCCESS").notNull(),
+	details: d.jsonb(),
 	executedAt: d
 		.timestamp({ withTimezone: true })
 		.$defaultFn(() => new Date())

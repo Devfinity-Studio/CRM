@@ -30,9 +30,9 @@ Upgrade DevCRM from a functional MVP into an enterprise-grade multi-tenant SaaS 
 - [x] **REQ-52-04**: Unified Executive Dashboard displaying live MRR/ARR, cash-flow run rate, pipeline conversion velocity, and low-stock alerts.
 
 ### Phase 53: Cross-Module Automation Event Bus, Svix Webhooks, Global Command Palette & Staged Release
-- [ ] **REQ-53-01**: Strongly-typed internal domain event bus emitting cross-module events (`deal.stage_changed`, `deal.won`, `invoice.created`, `invoice.paid`, `inventory.low_stock`).
-- [ ] **REQ-53-02**: Automation execution runner supporting multi-condition evaluation (`AND`/`OR`) and automated actions (tasks, notifications, emails, webhooks, inventory adjustments) with execution audit logs.
-- [ ] **REQ-53-03**: Outbound webhook orchestration with Svix for tenant endpoint registration and signature verification.
-- [ ] **REQ-53-04**: Global `Cmd+K` / `Ctrl+K` command palette (`cmdk`) for cross-module search and quick keyboard navigation.
-- [ ] **REQ-53-05**: Full test suite expansion (Vitest), Biome lint/format check, and staged Vercel deployment (preview on `dev` -> production on `prod` / `crm.devfinity.net`).
+- [x] **REQ-53-01**: Strongly-typed internal domain event bus emitting cross-module events (`deal.stage_changed`, `deal.won`, `invoice.created`, `invoice.paid`, `inventory.low_stock`).
+- [x] **REQ-53-02**: Automation execution runner supporting multi-condition evaluation (`AND`/`OR`) and automated actions (tasks, notifications, emails, webhooks, inventory adjustments) with execution audit logs.
+- [x] **REQ-53-03**: Outbound webhook orchestration with Svix for tenant endpoint registration and signature verification.
+- [x] **REQ-53-04**: Global `Cmd+K` / `Ctrl+K` command palette (`cmdk`) for cross-module search and quick keyboard navigation.
+- [x] **REQ-53-05**: Full test suite expansion (Vitest), Biome lint/format check, and staged Vercel deployment (preview on `dev` -> production on `prod` / `crm.devfinity.net`).
 

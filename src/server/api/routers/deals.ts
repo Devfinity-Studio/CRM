@@ -12,6 +12,7 @@ import {
 	users,
 } from "~/server/db/schema";
 import { syncDealInventoryHolds } from "~/server/api/services/deal-inventory";
+import { emitDomainEvent } from "~/server/events/event-bus";
 
 export const dealsRouter = createTRPCRouter({
 	// Get all pipelines for tenant organization
@@ -183,6 +184,12 @@ export const dealsRouter = createTRPCRouter({
 
 			if (updatedDeal) {
 				await syncDealInventoryHolds(ctx.db, ctx.session.user.organizationId);
+				await emitDomainEvent(ctx.db, {
+					type: "deal.stage_changed",
+					organizationId: ctx.session.user.organizationId,
+					targetEntityId: updatedDeal.id,
+					payload: updatedDeal,
+				});
 			}
 			return updatedDeal;
 		}),
@@ -311,6 +318,14 @@ export const dealsRouter = createTRPCRouter({
 				.returning();
 
 			await syncDealInventoryHolds(ctx.db, ctx.session.user.organizationId);
+			if (input.status === "WON") {
+				await emitDomainEvent(ctx.db, {
+					type: "deal.won",
+					organizationId: ctx.session.user.organizationId,
+					targetEntityId: updated.id,
+					payload: updated,
+				});
+			}
 			return updated;
 		}),
 
