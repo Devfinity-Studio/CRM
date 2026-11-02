@@ -11,3 +11,4 @@ Expand automated unit and integration tests across CRM, billing, and storage mod
 - [ ] **REQ-47-03**: Configure Vercel project environment variables so `Preview` deployments connect to the Neon `Dev` database branch and `Production` deployments connect to the Neon `production` database branch.
 - [ ] **REQ-47-04**: Commit changes and push to `origin/dev`, monitor Vercel preview deployment until `READY`, and perform automated health checks on preview URL.
 - [ ] **REQ-47-05**: Merge `dev` to `prod`, push to `origin/prod`, monitor Vercel production deployment until `READY`, and perform live smoke verification on `https://devfinity-crm.vercel.app`.
+
