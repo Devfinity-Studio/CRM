@@ -3,17 +3,7 @@
 ## Milestones & Phases
 
 ### Milestone 16: Test Expansion, Dev/Prod DB Segregation & Staged Deployment (Completed)
-- [x] **Phase 47: Test Expansion, Neon Dev/Prod Environment Segregation, & Staged Vercel Deployment**
-  - **Goal:** Expand automated Vitest suite (API routers, CRM, billing, storage integration), verify and synchronize Drizzle schemas across both Neon `Dev` and `production` database branches, configure Vercel environment variables with segregated Preview (Dev DB) and Production (Prod DB) connection strings, push to `dev` for Vercel preview deployment verification, and upon passing, merge to `prod` and deploy to production with live verification.
-  - **Plans:** 1/1 completed
-- [x] **Phase 48: UI and UX Redesign**
-  - **Goal:** Comprehensive route-by-route UI/UX overhaul, zero-defect contrast remediation, responsive mobile ergonomics, and Stitch MCP design system across all 45 routes and surfaces.
-  - **Depends on:** Phase 47
-  - **Plans:** 4/4 completed
-    * Plan 48-01: Global Design Tokens, Navigation Shells & Shared UI Primitives
-    * Plan 48-02: Operations, Sales Pipeline & CRM Views
-    * Plan 48-03: Billing, Catalog, Inventory, Marketing & Automations
-    * Plan 48-04: Administration, Auth, Portals, System Views & Staged Verification
+- [x] [Archived in v16-ROADMAP.md](./milestones/v16-ROADMAP.md)
 
 ### Milestone 15: Production Sync & Neon Object Storage Migration (Completed)
 - [x] [Archived in v15-ROADMAP.md](./milestones/v15-ROADMAP.md)
@@ -48,3 +38,16 @@
 - [x] [Archived in v6-ROADMAP.md](./milestones/v6-ROADMAP.md)
 
 ### Milestone 5: Public API & Webhooks (Completed)
+- [x] [Archived in v5-ROADMAP.md](./milestones/v5-ROADMAP.md)
+
+### Milestone 4: Lead Scoring & Pipeline Customization (Completed)
+- [x] [Archived in v4-ROADMAP.md](./milestones/v4-ROADMAP.md)
+
+### Milestone 3: Multi-Tenancy & Data Isolation (Completed)
+- [x] [Archived in v3-ROADMAP.md](./milestones/v3-ROADMAP.md)
+
+### Milestone 2: Core CRM Entities & Pipelines (Completed)
+- [x] [Archived in v2-ROADMAP.md](./milestones/v2-ROADMAP.md)
+
+### Milestone 1: Foundation & Authentication (Completed)
+- [x] [Archived in v1-ROADMAP.md](./milestones/v1-ROADMAP.md)

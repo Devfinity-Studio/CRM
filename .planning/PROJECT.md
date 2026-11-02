@@ -14,19 +14,27 @@ Businesses, B2B companies, and sales/ops teams needing an all-in-one CRM suite f
 - **Styling & UI**: TailwindCSS v4 with Stitch MCP Premium Indigo Design System
 - **Code Quality**: Biome
 - **File Storage**: Neon Object Storage (`uploads` bucket via Neon Files SDK / S3 API)
-- **Deployment & Hosting**: Vercel Production
-- **Testing**: Vitest
+- **Deployment & Hosting**: Vercel Production & Staged Preview
+- **Testing**: Vitest (23 unit & integration test suites)
 
 ## Current State
-DevCRM has completed **Milestone 15: Production Sync & Neon Object Storage Migration** (Phases 45-46).
-- **Database Sync**: Neon PostgreSQL branches (`production` and `Dev`) are 100% synchronized with all pending Drizzle schema migrations (0011-0013) applied across contacts, deals, notes, and user accounts.
-- **Neon Object Storage**: Cloudflare R2 has been replaced by native Neon Object Storage (`uploads` bucket in `ap-southeast-1`), integrated via `files-sdk/neon` and verified with small-file upload/download tests.
-- **Production Deployment**: Vercel project `devfinity-crm` is deployed live on `https://devfinity-crm.vercel.app` from synchronized `prod` branch with all production environment variables configured.
-- **Full Verification**: Static prerender resilience verified with all 45/45 routes compiled cleanly, 12/12 passing Vitest unit tests, 0 Biome errors/warnings, and live HTTP 200 health checks across core public and authenticated endpoints.
+DevCRM has completed **Milestone 16: Test Expansion, Dev/Prod DB Segregation & Staged Deployment** (Phases 47-48).
+- **Automated Test Suite Expansion**: Comprehensive Vitest coverage across Webhooks dispatch, tRPC router procedures, presigned S3 upload pipelines, Dashboard telemetry, Deals Kanban pipelines, Onboarding state tracking, and CRM/Billing operations (23/23 tests passing).
+- **Neon Database Segregation & Parity**: Verified schema parity across Neon database branches `Dev` (`br-jolly-bird-az9jq7gz`) and `production` (`br-little-scene-az7iw7fk`).
+- **Staged Vercel Architecture**: Vercel project `devfinity-crm` linked to `dev` for Preview deployments (targeting Neon Dev DB) and `prod` for Production deployments (targeting Neon Prod DB).
+- **Master UI/UX Overhaul**: 75/75 routes, layout shells, modals, drawers, and edge views upgraded with 4-tier surface elevation, WCAG 2.1 AAA contrast, $\ge 44\text{px}$ mobile touch targets, and iOS Safari auto-zoom prevention.
+- **Selective Route Onboarding Gating**: Route-aware warning banner on `/dashboard` and `/settings/profile` ensuring full interaction without trapping the user; full-page backdrop blocker on restricted business sub-routes.
+- **Tutorial & Tour Synchronization**: Driver.js guided tour and Welcome Modal synchronized to only display after onboarding completion.
+- **Live Production Deployment**: Confirmed `READY` on `https://devfinity-crm.vercel.app` and `https://crm.devfinity.net` with `HTTP 200 OK`.
+
+<details>
+<summary>Previous State (Milestone 15)</summary>
+DevCRM completed **Milestone 15: Production Sync & Neon Object Storage Migration** (Phases 45-46). Neon PostgreSQL branches were synchronized with pending Drizzle migrations (0011-0013), Cloudflare R2 was replaced by Neon Object Storage (`uploads` bucket), and live verification was performed on Vercel.
+</details>
 
 <details>
 <summary>Previous State (Milestone 14)</summary>
-DevCRM completed **Milestone 14: Stitch UI Implementation & Production Integration** (Phases 41-44). The redesigned Stitch MCP design system, responsive 2-column client profile layouts, glassmorphic dashboard shell, interactive activity timeline, drag-and-drop Kanban pipeline board, and polished billing/ledger views are fully implemented and verified with live tRPC backends and multi-tenant scoping.
+DevCRM completed **Milestone 14: Stitch UI Implementation & Production Integration** (Phases 41-44). The redesigned Stitch MCP design system, responsive 2-column client profile layouts, glassmorphic dashboard shell, interactive activity timeline, drag-and-drop Kanban pipeline board, and polished billing/ledger views were fully implemented.
 </details>
 
 <details>
@@ -35,7 +43,7 @@ DevCRM completed **Milestone 13: UI Overhaul via Stitch MCP** (Design system and
 </details>
 
 ## Next Milestone Goals
-- Plan and execute next feature set (e.g., advanced automated email notifications, customer portal enhancements, expanded reporting analytics, or AI-powered lead qualification).
+- Milestone 17: Next generation feature expansion (e.g. AI-powered lead scoring/qualification, advanced multi-channel notifications, customer portal payment gateway integration, or deep analytics reporting).
 
 ## Evolution
 
