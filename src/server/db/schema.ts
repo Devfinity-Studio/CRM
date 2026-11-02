@@ -144,6 +144,10 @@ export const organizations = createTable("organization", (d) => ({
 	addressPincode: d.varchar({ length: 20 }),
 
 	svixAppId: d.varchar({ length: 255 }), // Used to map the org to a Svix application for webhooks
+	customDomain: d.varchar({ length: 255 }).unique(),
+	customDomainVerified: d.boolean().default(false).notNull(),
+	customDomainCname: d.varchar({ length: 255 }),
+	planId: d.varchar({ length: 255 }),
 
 	createdAt: d
 		.timestamp({ withTimezone: true })
@@ -169,6 +173,7 @@ export const organizationMembers = createTable(
 			.notNull()
 			.references(() => users.id, { onDelete: "cascade" }),
 		role: orgRoleEnum("role").default("MEMBER").notNull(),
+	permissions: d.text(), // JSON permission matrix for CUSTOM_ROLE
 		createdAt: d
 			.timestamp({ withTimezone: true })
 			.$defaultFn(() => new Date())
@@ -221,6 +226,27 @@ export const subscriptions = createTable("subscription", (d) => ({
 		.$defaultFn(() => new Date())
 		.notNull(),
 }));
+
+export const tenantOverrides = createTable("tenant_override", (d) => ({
+	id: d
+		.varchar({ length: 255 })
+		.notNull()
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	organizationId: d
+		.varchar({ length: 255 })
+		.notNull()
+		.unique()
+		.references(() => organizations.id, { onDelete: "cascade" }),
+	featureOverrides: d.text(), // JSON of boolean feature overrides
+	quotaOverrides: d.text(),   // JSON of numeric quota overrides
+	createdAt: d
+		.timestamp({ withTimezone: true })
+		.$defaultFn(() => new Date())
+		.notNull(),
+	updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
+}));
+
 
 // --- CRM: COMPANIES & CONTACTS ---
 export const companies = createTable("company", (d) => ({

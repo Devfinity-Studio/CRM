@@ -4,9 +4,23 @@ import { and, eq, isNull } from "drizzle-orm";
 import { cookies } from "next/headers";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import {
+	type FeatureKey,
+	checkFeatureAccess,
+} from "~/server/api/services/entitlements";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
-import { apiKeys, organizationMembers } from "~/server/db/schema";
+import { apiKeys, organizationMembers, organizations } from "~/server/db/schema";
+
+export interface TenantContext {
+	id: string;
+	name: string;
+	slug: string;
+	role: string;
+	permissions?: string | null;
+	isOwner: boolean;
+	isAdmin: boolean;
+}
 
 export const createTRPCContext = async (opts: { headers: Headers }) => {
 	let session = await auth();
@@ -100,3 +114,119 @@ export const superAdminProcedure = protectedProcedure.use(({ ctx, next }) => {
 	}
 	return next();
 });
+
+// --- TENANT PROCEDURE WITH AUTOMATIC ISOLATION ---
+export const tenantProcedure = protectedProcedure.use(
+	async ({ ctx, next }) => {
+		const user = ctx.session.user;
+		const isSuperAdmin = user.systemRole === "SUPER_ADMIN";
+
+		// 1. Resolve organization by header, session, or active membership
+		const headerSlug = ctx.headers.get("x-tenant-slug");
+		const headerOrgId = ctx.headers.get("x-tenant-id");
+
+		let orgId = headerOrgId || user.organizationId;
+
+		if (!orgId && headerSlug) {
+			const orgBySlug = await ctx.db.query.organizations.findFirst({
+				where: eq(organizations.slug, headerSlug),
+			});
+			if (orgBySlug) {
+				orgId = orgBySlug.id;
+			}
+		}
+
+		// 2. Fall back to user's first membership if not resolved
+		let member: any = null;
+		if (orgId) {
+			member = await ctx.db.query.organizationMembers.findFirst({
+				where: and(
+					eq(organizationMembers.organizationId, orgId),
+					eq(organizationMembers.userId, user.id),
+				),
+			});
+		}
+
+		if (!member) {
+			member = await ctx.db.query.organizationMembers.findFirst({
+				where: eq(organizationMembers.userId, user.id),
+			});
+			if (member) {
+				orgId = member.organizationId;
+			}
+		}
+
+		if (!orgId || (!member && !isSuperAdmin)) {
+			throw new TRPCError({
+				code: "FORBIDDEN",
+				message: "No active tenant membership found.",
+			});
+		}
+
+		const org = await ctx.db.query.organizations.findFirst({
+			where: eq(organizations.id, orgId),
+		});
+
+		if (!org) {
+			throw new TRPCError({
+				code: "NOT_FOUND",
+				message: "Tenant organization not found.",
+			});
+		}
+
+		const role = isSuperAdmin ? "SUPER_ADMIN" : (member?.role || "MEMBER");
+		const permissions = member?.permissions || null;
+
+		const tenant: TenantContext = {
+			id: org.id,
+			name: org.name,
+			slug: org.slug,
+			role,
+			permissions,
+			isOwner: role === "OWNER" || isSuperAdmin,
+			isAdmin: role === "OWNER" || role === "ADMIN" || isSuperAdmin,
+		};
+
+		return next({
+			ctx: {
+				...ctx,
+				tenant,
+			},
+		});
+	},
+);
+
+// --- TENANT ROLE AUTHORIZATION PROCEDURE ---
+export const tenantRoleProcedure = (allowedRoles: string[]) =>
+	tenantProcedure.use(({ ctx, next }) => {
+		if (ctx.session.user.systemRole === "SUPER_ADMIN") {
+			return next();
+		}
+		if (!allowedRoles.includes(ctx.tenant.role)) {
+			throw new TRPCError({
+				code: "FORBIDDEN",
+				message: `Access denied. Requires one of roles: ${allowedRoles.join(", ")}.`,
+			});
+		}
+		return next();
+	});
+
+// --- ENTITLEMENT ENFORCEMENT PROCEDURE ---
+export const entitlementProcedure = (featureKey: FeatureKey) =>
+	tenantProcedure.use(async ({ ctx, next }) => {
+		if (ctx.session.user.systemRole === "SUPER_ADMIN") {
+			return next();
+		}
+		const hasAccess = await checkFeatureAccess(
+			ctx.db,
+			ctx.tenant.id,
+			featureKey,
+		);
+		if (!hasAccess) {
+			throw new TRPCError({
+				code: "FORBIDDEN",
+				message: `Your active plan does not include the ${featureKey} feature module.`,
+			});
+		}
+		return next();
+	});

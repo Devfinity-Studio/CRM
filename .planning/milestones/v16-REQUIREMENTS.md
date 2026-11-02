@@ -18,3 +18,4 @@ Expand automated unit and integration tests across CRM, billing, and storage mod
 - [x] **REQ-48-03**: Redesign billing, catalog, inventory, subscriptions, marketing, automations, and settings pages. *(Outcome: Verified in Plan 48-03)*
 - [x] **REQ-48-04**: Overhaul administration, authentication, onboarding, public customer portals, and error/loading fallback screens. *(Outcome: Verified in Plan 48-04)*
 - [x] **REQ-48-05**: Selective route onboarding gating: top red warning banner on dashboard/profile, full-page blocker on restricted routes, and conditional tutorial tour trigger. *(Outcome: Verified and passing 23/23 tests)*
+
