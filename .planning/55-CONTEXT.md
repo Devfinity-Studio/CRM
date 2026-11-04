@@ -20,3 +20,4 @@ Tenants can inspect their active plan and renewal dates, observe live quota util
 - **Verification:**
   - Vitest test suite `src/server/api/__tests__/platform-subscription.test.ts`.
   - Next.js production build (`pnpm build`).
+

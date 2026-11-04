@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { OrganizationProfileForm } from "~/components/settings/organization-profile-form";
 
-export default function OldOrganizationSettings() {
-	redirect("/dashboard/admin/workspace");
+export default function SettingsOrganizationPage() {
+	return <OrganizationProfileForm />;
 }

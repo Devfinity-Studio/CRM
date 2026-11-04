@@ -55,6 +55,7 @@ describe("Dashboard Router", () => {
 				name: "Acme Corp",
 				logoUrl: "https://example.com/logo.png",
 				slug: "acme",
+				currency: "USD",
 			},
 		];
 
@@ -92,6 +93,7 @@ describe("Dashboard Router", () => {
 		expect(result.activeOrganization.name).toBe("Acme Corp");
 		expect(result.organizations).toHaveLength(1);
 		expect(result.organizations[0]?.id).toBe("org-1");
+		expect(result.activeOrganization.currency).toBe("USD");
 	});
 
 	it("should calculate metrics with period filter", async () => {

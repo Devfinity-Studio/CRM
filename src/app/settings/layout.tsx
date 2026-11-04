@@ -46,7 +46,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
 
 	return (
 		<DashboardLayout>
-			<div className="mx-auto flex max-w-[1400px] flex-col gap-6 p-4 sm:p-6 lg:p-8 pb-16">
+			<div className="mx-auto flex max-w-[1400px] flex-col gap-6 p-4 pb-16 sm:p-6 lg:p-8">
 				<div className="space-y-1">
 					<div className="flex items-center gap-2">
 						<span className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 font-semibold text-primary text-xs">
@@ -60,7 +60,8 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
 						Settings
 					</h1>
 					<p className="text-muted-foreground text-xs sm:text-sm">
-						Manage your personal profile, credentials, security, branding rules, and developer integrations.
+						Manage your personal profile, credentials, security, branding rules,
+						and developer integrations.
 					</p>
 				</div>
 
@@ -68,12 +69,12 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
 
 				<div className="flex flex-col gap-8 lg:flex-row lg:gap-10">
 					{/* Sidebar Navigation */}
-					<aside className="w-full lg:w-56 shrink-0">
-						<nav className="flex space-x-1.5 overflow-x-auto no-scrollbar pb-2 lg:flex-col lg:space-x-0 lg:space-y-1 lg:pb-0">
+					<aside className="w-full shrink-0 lg:w-56">
+						<nav className="no-scrollbar flex space-x-1.5 overflow-x-auto pb-2 lg:flex-col lg:space-x-0 lg:space-y-1 lg:pb-0">
 							{sidebarNavItems.map((item) => (
 								<Link
 									className={cn(
-										"inline-flex min-h-[44px] sm:min-h-9 items-center justify-start whitespace-nowrap rounded-xl px-4 py-2 font-medium text-xs sm:text-sm transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+										"inline-flex min-h-[44px] items-center justify-start whitespace-nowrap rounded-xl px-4 py-2 font-medium text-xs transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring sm:min-h-9 sm:text-sm",
 										pathname === item.href
 											? "bg-primary font-semibold text-primary-foreground shadow-xs"
 											: "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
@@ -87,7 +88,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
 						</nav>
 					</aside>
 
-					<div className="flex-1 max-w-4xl">{children}</div>
+					<div className="max-w-4xl flex-1">{children}</div>
 				</div>
 			</div>
 		</DashboardLayout>

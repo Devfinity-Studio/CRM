@@ -39,6 +39,7 @@ export const dashboardRouter = createTRPCRouter({
 				name: organizations.name,
 				logoUrl: organizations.logoUrl,
 				slug: organizations.slug,
+				currency: organizations.currency,
 			})
 			.from(organizationMembers)
 			.innerJoin(
@@ -66,12 +67,22 @@ export const dashboardRouter = createTRPCRouter({
 			userMemberships.find((m) => m.organizationId === activeOrgId) ||
 			userMemberships[0];
 
+		let orgCurrency = impersonatedOrg?.currency || activeMembership?.currency;
+		if (!orgCurrency && activeOrgId) {
+			const directOrg = await ctx.db.query.organizations.findFirst({
+				where: eq(organizations.id, activeOrgId),
+				columns: { currency: true },
+			});
+			if (directOrg?.currency) orgCurrency = directOrg.currency;
+		}
+
 		const activeOrganization = impersonatedOrg
 			? {
 					id: impersonatedOrg.id,
 					name: impersonatedOrg.name,
 					logoUrl: impersonatedOrg.logoUrl,
 					slug: impersonatedOrg.slug,
+					currency: impersonatedOrg.currency || "USD",
 					role: "SUPER_ADMIN",
 				}
 			: {
@@ -79,6 +90,7 @@ export const dashboardRouter = createTRPCRouter({
 					name: activeMembership?.name || "My Workspace",
 					logoUrl: activeMembership?.logoUrl || null,
 					slug: activeMembership?.slug || "",
+					currency: orgCurrency || "USD",
 					role: activeMembership?.role || "MEMBER",
 				};
 
@@ -97,6 +109,7 @@ export const dashboardRouter = createTRPCRouter({
 				name: m.name,
 				logoUrl: m.logoUrl,
 				slug: m.slug,
+				currency: m.currency || "USD",
 				role: m.role,
 			})),
 			tenantRole: impersonatedOrg

@@ -85,9 +85,10 @@ export default function DashboardPage() {
 	}, [startTour]);
 
 	const formatCurrency = (cents: number) => {
+		const currency = layoutData?.activeOrganization?.currency || "USD";
 		return new Intl.NumberFormat("en-US", {
 			style: "currency",
-			currency: "USD",
+			currency,
 			maximumFractionDigits: 0,
 		}).format(cents / 100);
 	};
@@ -103,7 +104,9 @@ export default function DashboardPage() {
 	return (
 		<DashboardLayout>
 			<div className="mx-auto flex max-w-[1600px] flex-col gap-6 pb-10">
-				<WelcomeModal onStartTour={() => setTimeout(() => forceStartTour(), 300)} />
+				<WelcomeModal
+					onStartTour={() => setTimeout(() => forceStartTour(), 300)}
+				/>
 
 				<div id="tour-checklist">
 					<SetupChecklist />
@@ -175,74 +178,83 @@ export default function DashboardPage() {
 				{/* Executive Telemetry Strip */}
 				<div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
 					<div className="rounded-xl border border-border/70 bg-card/60 p-3.5 shadow-xs">
-						<span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+						<span className="flex items-center gap-1.5 font-medium text-emerald-600 text-xs dark:text-emerald-400">
 							<TrendingUp className="h-3.5 w-3.5" /> Live MRR
 						</span>
-						<div className="mt-1 text-xl font-bold font-mono text-foreground">
+						<div className="mt-1 font-bold font-mono text-foreground text-xl">
 							{formatCurrency(telemetry?.mrr ?? 0)}
 						</div>
-						<div className="text-[11px] text-muted-foreground mt-0.5">
+						<div className="mt-0.5 text-[11px] text-muted-foreground">
 							ARR: {formatCurrency(telemetry?.arr ?? 0)}
 						</div>
 					</div>
 
 					<div className="rounded-xl border border-border/70 bg-card/60 p-3.5 shadow-xs">
-						<span className="text-xs font-medium text-sky-600 dark:text-sky-400 flex items-center gap-1.5">
+						<span className="flex items-center gap-1.5 font-medium text-sky-600 text-xs dark:text-sky-400">
 							<Receipt className="h-3.5 w-3.5" /> 90-Day Cash Flow
 						</span>
-						<div className="mt-1 text-xl font-bold font-mono text-foreground">
+						<div className="mt-1 font-bold font-mono text-foreground text-xl">
 							{formatCurrency(telemetry?.monthlyCashFlowRunRate ?? 0)}
 						</div>
-						<div className="text-[11px] text-muted-foreground mt-0.5">
+						<div className="mt-0.5 text-[11px] text-muted-foreground">
 							Monthly run rate
 						</div>
 					</div>
 
 					<div className="rounded-xl border border-border/70 bg-card/60 p-3.5 shadow-xs">
-						<span className="text-xs font-medium text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+						<span className="flex items-center gap-1.5 font-medium text-amber-600 text-xs dark:text-amber-400">
 							<Clock className="h-3.5 w-3.5" /> Sales Velocity
 						</span>
-						<div className="mt-1 text-xl font-bold font-mono text-foreground">
+						<div className="mt-1 font-bold font-mono text-foreground text-xl">
 							{telemetry?.avgDaysToClose ?? 0} days
 						</div>
-						<div className="text-[11px] text-muted-foreground mt-0.5">
+						<div className="mt-0.5 text-[11px] text-muted-foreground">
 							Avg time to close deals
 						</div>
 					</div>
 
 					<div className="rounded-xl border border-border/70 bg-card/60 p-3.5 shadow-xs">
-						<span className="text-xs font-medium text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
+						<span className="flex items-center gap-1.5 font-medium text-purple-600 text-xs dark:text-purple-400">
 							<CheckCircle2 className="h-3.5 w-3.5" /> Recurring Accounts
 						</span>
-						<div className="mt-1 text-xl font-bold font-mono text-foreground">
+						<div className="mt-1 font-bold font-mono text-foreground text-xl">
 							{telemetry?.activeSubscriptionsCount ?? 0} active
 						</div>
-						<div className="text-[11px] text-muted-foreground mt-0.5">
+						<div className="mt-0.5 text-[11px] text-muted-foreground">
 							Client subscriptions
 						</div>
 					</div>
 				</div>
 
-				{telemetry?.lowStockProducts && telemetry.lowStockProducts.length > 0 && (
-					<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 shadow-xs">
-						<div className="flex items-center gap-3">
-							<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white">
-								<Package className="h-5 w-5" />
-							</div>
-							<div>
-								<div className="font-semibold text-sm text-foreground">
-									Warehouse Inventory Alert: {telemetry.lowStockProducts.length} Product(s) Low on Stock
+				{telemetry?.lowStockProducts &&
+					telemetry.lowStockProducts.length > 0 && (
+						<div className="flex flex-col items-start justify-between gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 shadow-xs sm:flex-row sm:items-center">
+							<div className="flex items-center gap-3">
+								<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white">
+									<Package className="h-5 w-5" />
 								</div>
-								<div className="text-xs text-muted-foreground">
-									{telemetry.lowStockProducts.map((p) => `${p.name} (${p.availableStock} available)`).join(", ")}
+								<div>
+									<div className="font-semibold text-foreground text-sm">
+										Warehouse Inventory Alert:{" "}
+										{telemetry.lowStockProducts.length} Product(s) Low on Stock
+									</div>
+									<div className="text-muted-foreground text-xs">
+										{telemetry.lowStockProducts
+											.map((p) => `${p.name} (${p.availableStock} available)`)
+											.join(", ")}
+									</div>
 								</div>
 							</div>
+							<Button
+								asChild
+								className="shrink-0 border-amber-500/40 text-amber-700 hover:bg-amber-500/10 dark:text-amber-400"
+								size="sm"
+								variant="outline"
+							>
+								<Link href="/inventory/products">Manage Inventory</Link>
+							</Button>
 						</div>
-						<Button asChild size="sm" variant="outline" className="border-amber-500/40 text-amber-700 hover:bg-amber-500/10 dark:text-amber-400 shrink-0">
-							<Link href="/inventory/products">Manage Inventory</Link>
-						</Button>
-					</div>
-				)}
+					)}
 
 				{/* 4 Glassmorphic KPI Cards Grid */}
 				<section

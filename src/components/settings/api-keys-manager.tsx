@@ -2,6 +2,7 @@
 
 import { format } from "date-fns";
 import { Copy, Plus, Trash2 } from "lucide-react";
+import type React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
@@ -26,7 +27,7 @@ import {
 } from "~/components/ui/table";
 import { api } from "~/trpc/react";
 
-export default function ApiKeysPage() {
+export function ApiKeysManager() {
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
 	const [keyName, setKeyName] = useState("");
 	const [newKey, setNewKey] = useState<{ rawKey: string; name: string } | null>(
@@ -67,23 +68,23 @@ export default function ApiKeysPage() {
 		try {
 			await navigator.clipboard.writeText(text);
 			toast.success("Copied to clipboard!");
-		} catch (err) {
+		} catch {
 			toast.error("Failed to copy");
 		}
 	};
 
 	const handleCloseDialog = () => {
 		setIsCreateOpen(false);
-		// Only clear the new key when the dialog is actually closed
-		// so we don't flash empty state during the exit animation
 		setTimeout(() => setNewKey(null), 300);
 	};
 
 	return (
 		<div className="space-y-6">
-			<div className="flex items-center justify-between">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<div>
-					<h3 className="font-medium text-lg">API Keys</h3>
+					<h3 className="font-bold text-foreground text-xl tracking-tight">
+						API Keys
+					</h3>
 					<p className="text-muted-foreground text-sm">
 						Manage API keys for programmatic access to your DevCRM account.
 					</p>
@@ -91,7 +92,7 @@ export default function ApiKeysPage() {
 
 				<Dialog onOpenChange={setIsCreateOpen} open={isCreateOpen}>
 					<DialogTrigger asChild>
-						<Button>
+						<Button className="font-semibold shadow-xs">
 							<Plus className="mr-2 h-4 w-4" />
 							Generate New Key
 						</Button>
@@ -102,8 +103,8 @@ export default function ApiKeysPage() {
 								<DialogHeader>
 									<DialogTitle>Generate New API Key</DialogTitle>
 									<DialogDescription>
-										This key will allow access to your DevCRM data. Keep it
-										secure.
+										This key will allow programmatic access to your DevCRM data.
+										Keep it secure.
 									</DialogDescription>
 								</DialogHeader>
 								<div className="grid gap-4 py-4">
@@ -139,13 +140,14 @@ export default function ApiKeysPage() {
 								<DialogHeader>
 									<DialogTitle>API Key Generated</DialogTitle>
 									<DialogDescription className="font-semibold text-destructive">
-										Please copy this key now. You won't be able to see it again!
+										Please copy this key now. You won&apos;t be able to see it
+										again!
 									</DialogDescription>
 								</DialogHeader>
 								<div className="py-6">
 									<div className="flex items-center space-x-2">
 										<Input
-											className="font-mono"
+											className="font-mono text-xs"
 											readOnly
 											value={newKey.rawKey}
 										/>
@@ -170,7 +172,7 @@ export default function ApiKeysPage() {
 				</Dialog>
 			</div>
 
-			<div className="rounded-md border">
+			<div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
 				<Table>
 					<TableHeader>
 						<TableRow>
@@ -182,7 +184,10 @@ export default function ApiKeysPage() {
 					<TableBody>
 						{isLoading ? (
 							<TableRow>
-								<TableCell className="h-24 text-center" colSpan={3}>
+								<TableCell
+									className="h-24 text-center text-muted-foreground"
+									colSpan={3}
+								>
 									Loading API keys...
 								</TableCell>
 							</TableRow>
@@ -198,8 +203,10 @@ export default function ApiKeysPage() {
 						) : (
 							apiKeys?.map((apiKey) => (
 								<TableRow key={apiKey.id}>
-									<TableCell className="font-medium">{apiKey.name}</TableCell>
-									<TableCell>
+									<TableCell className="font-medium text-foreground">
+										{apiKey.name}
+									</TableCell>
+									<TableCell className="text-muted-foreground text-xs sm:text-sm">
 										{format(new Date(apiKey.createdAt), "MMM d, yyyy")}
 									</TableCell>
 									<TableCell className="text-right">

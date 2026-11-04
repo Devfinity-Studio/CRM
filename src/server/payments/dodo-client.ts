@@ -29,3 +29,4 @@ export function getDodoClient(): DodoPayments {
 export function isDodoConfigured(): boolean {
 	return Boolean(process.env.DODO_PAYMENTS_API_KEY);
 }
+
