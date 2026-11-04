@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -41,22 +42,29 @@ export default function LoginPage() {
 	};
 
 	return (
-		<div className="flex min-h-dvh items-center justify-center bg-background px-4 py-12">
-			<div className="w-full max-w-md space-y-8 rounded-3xl border border-border/70 bg-card/85 p-6 sm:p-8 shadow-xl backdrop-blur-md">
-				<div className="text-center space-y-2">
-					<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary font-bold text-xl">
-						D
+		<div className="bg-background flex min-h-dvh items-center justify-center px-4 py-12">
+			<div className="border-border/70 bg-card/85 w-full max-w-md space-y-8 rounded-3xl border p-6 shadow-xl backdrop-blur-md sm:p-8">
+				<div className="space-y-2 text-center">
+					<div className="bg-card border-border/80 mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border p-2 shadow-sm">
+						<Image
+							alt="DevCRM"
+							className="h-full w-full object-contain"
+							height={48}
+							priority
+							src="/devfinity.png"
+							width={48}
+						/>
 					</div>
-					<h2 className="font-bold text-2xl text-foreground tracking-tight sm:text-3xl">
+					<h2 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl">
 						Welcome to DevCRM
 					</h2>
-					<p className="text-xs sm:text-sm text-muted-foreground">
+					<p className="text-muted-foreground text-xs sm:text-sm">
 						Sign in to your CRM and billing workspace.
 					</p>
 				</div>
 
 				{error && (
-					<div className="rounded-2xl border border-destructive/20 bg-destructive/10 p-3.5">
+					<div className="border-destructive/20 bg-destructive/10 rounded-2xl border p-3.5">
 						<p className="text-destructive text-xs font-medium">{error}</p>
 					</div>
 				)}
@@ -64,9 +72,7 @@ export default function LoginPage() {
 				<form className="mt-6 space-y-4" onSubmit={handleCredentialsLogin}>
 					<div className="space-y-4">
 						<div className="space-y-1.5">
-							<Label className="text-xs">
-								Email Address
-							</Label>
+							<Label className="text-xs">Email Address</Label>
 							<Input
 								className="h-10 text-sm"
 								onChange={(e) => setEmail(e.target.value)}
@@ -77,9 +83,7 @@ export default function LoginPage() {
 							/>
 						</div>
 						<div className="space-y-1.5">
-							<Label className="text-xs">
-								Password
-							</Label>
+							<Label className="text-xs">Password</Label>
 							<Input
 								className="h-10 text-sm"
 								onChange={(e) => setPassword(e.target.value)}
@@ -92,7 +96,7 @@ export default function LoginPage() {
 					</div>
 
 					<Button
-						className="w-full min-h-[44px] rounded-xl font-semibold mt-2"
+						className="mt-2 min-h-[44px] w-full rounded-xl font-semibold"
 						disabled={loading}
 						type="submit"
 					>
@@ -103,10 +107,10 @@ export default function LoginPage() {
 				<div className="mt-6">
 					<div className="relative">
 						<div className="absolute inset-0 flex items-center">
-							<div className="w-full border-border/70 border-t" />
+							<div className="border-border/70 w-full border-t" />
 						</div>
 						<div className="relative flex justify-center text-xs">
-							<span className="bg-card px-2 text-muted-foreground">
+							<span className="bg-card text-muted-foreground px-2">
 								Or continue with
 							</span>
 						</div>
@@ -114,7 +118,7 @@ export default function LoginPage() {
 
 					<div className="mt-6 grid grid-cols-2 gap-3">
 						<Button
-							className="rounded-xl min-h-[44px] text-xs"
+							className="min-h-[44px] rounded-xl text-xs"
 							onClick={() => handleOAuthLogin("github")}
 							variant="outline"
 						>
@@ -136,7 +140,7 @@ export default function LoginPage() {
 							GitHub
 						</Button>
 						<Button
-							className="rounded-xl min-h-[44px] text-xs"
+							className="min-h-[44px] rounded-xl text-xs"
 							onClick={() => handleOAuthLogin("google")}
 							variant="outline"
 						>
@@ -160,10 +164,10 @@ export default function LoginPage() {
 					</div>
 				</div>
 
-				<p className="mt-8 text-center text-xs text-muted-foreground">
+				<p className="text-muted-foreground mt-8 text-center text-xs">
 					Don't have an account?{" "}
 					<Link
-						className="font-semibold text-primary hover:underline"
+						className="text-primary font-semibold hover:underline"
 						href="/register"
 					>
 						Sign up for free

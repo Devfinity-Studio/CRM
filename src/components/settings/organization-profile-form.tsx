@@ -89,7 +89,7 @@ export function OrganizationProfileForm() {
 	if (isLoading) {
 		return (
 			<div className="flex h-[40vh] items-center justify-center">
-				<Loader2 className="h-8 w-8 animate-spin text-primary" />
+				<Loader2 className="text-primary h-8 w-8 animate-spin" />
 			</div>
 		);
 	}
@@ -99,7 +99,7 @@ export function OrganizationProfileForm() {
 		return (
 			<div className="space-y-6">
 				<div>
-					<h3 className="font-bold text-foreground text-lg">
+					<h3 className="text-foreground text-lg font-bold">
 						Workspace Settings
 					</h3>
 					<p className="text-muted-foreground text-sm">
@@ -129,7 +129,7 @@ export function OrganizationProfileForm() {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h3 className="font-bold text-foreground text-xl tracking-tight">
+				<h3 className="text-foreground text-xl font-bold tracking-tight">
 					Workspace Profile
 				</h3>
 				<p className="text-muted-foreground text-sm">
@@ -138,11 +138,11 @@ export function OrganizationProfileForm() {
 				</p>
 			</div>
 
-			<Card className="rounded-2xl border border-border bg-card shadow-sm">
+			<Card className="border-border bg-card rounded-2xl border shadow-sm">
 				<CardHeader className="border-border/60 border-b pb-4">
 					<div className="flex items-center gap-2">
-						<Building2 className="h-4 w-4 text-primary" />
-						<CardTitle className="font-bold text-base text-foreground sm:text-lg">
+						<Building2 className="text-primary h-4 w-4" />
+						<CardTitle className="text-foreground text-base font-bold sm:text-lg">
 							Organization Profile
 						</CardTitle>
 					</div>
@@ -161,13 +161,13 @@ export function OrganizationProfileForm() {
 										name="name"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel className="font-semibold text-foreground">
+												<FormLabel className="text-foreground font-semibold">
 													Company Legal Name{" "}
 													<span className="text-destructive">*</span>
 												</FormLabel>
 												<FormControl>
 													<Input
-														className="min-h-[44px] border-border bg-background text-foreground"
+														className="border-border bg-background text-foreground min-h-[44px]"
 														placeholder="Acme Corporation"
 														{...field}
 													/>
@@ -182,12 +182,12 @@ export function OrganizationProfileForm() {
 										name="industry"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel className="font-semibold text-foreground">
+												<FormLabel className="text-foreground font-semibold">
 													Primary Industry
 												</FormLabel>
 												<FormControl>
 													<Input
-														className="min-h-[44px] border-border bg-background text-foreground"
+														className="border-border bg-background text-foreground min-h-[44px]"
 														placeholder="e.g. Enterprise SaaS, Biotech, Logistics"
 														{...field}
 													/>
@@ -202,7 +202,7 @@ export function OrganizationProfileForm() {
 										name="currency"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel className="font-semibold text-foreground">
+												<FormLabel className="text-foreground font-semibold">
 													Default Operating Currency
 												</FormLabel>
 												<Select
@@ -211,7 +211,7 @@ export function OrganizationProfileForm() {
 													value={field.value}
 												>
 													<FormControl>
-														<SelectTrigger className="min-h-[44px] border-border bg-background text-foreground">
+														<SelectTrigger className="border-border bg-background text-foreground min-h-[44px]">
 															<SelectValue placeholder="Select a currency" />
 														</SelectTrigger>
 													</FormControl>
@@ -235,36 +235,47 @@ export function OrganizationProfileForm() {
 								</div>
 
 								<div className="w-full space-y-3 md:w-5/12">
-									<FormLabel className="block font-semibold text-foreground">
+									<FormLabel className="text-foreground block font-semibold">
 										Company Brand Mark
 									</FormLabel>
-									<div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4">
+									<div className="border-border bg-muted/20 space-y-3 rounded-xl border p-4">
 										<FileUploadDropzone
 											folder="logos"
 											onUploadSuccess={handleLogoUpload}
 										/>
 										{form.watch("logoUrl") ? (
 											<div className="space-y-1.5 pt-2">
-												<p className="font-medium text-muted-foreground text-xs">
+												<p className="text-muted-foreground text-xs font-medium">
 													Active Logo Preview:
 												</p>
 												{/* eslint-disable-next-line @next/next/no-img-element */}
 												<img
 													alt="Company Logo Preview"
-													className="max-h-[120px] max-w-full rounded-xl border border-border bg-background object-contain p-3 shadow-xs"
+													className="border-border bg-background max-h-[120px] max-w-full rounded-xl border object-contain p-3 shadow-xs"
 													src={form.watch("logoUrl")}
 												/>
 											</div>
 										) : (
-											<p className="text-center text-muted-foreground text-xs">
-												PNG, SVG or WEBP up to 2MB recommended.
-											</p>
+											<div className="space-y-1.5 pt-2">
+												<p className="text-muted-foreground text-xs font-medium">
+													Default Brand Mark:
+												</p>
+												{/* eslint-disable-next-line @next/next/no-img-element */}
+												<img
+													alt="Default Brand Mark"
+													className="border-border bg-background max-h-[80px] max-w-full rounded-xl border object-contain p-2 shadow-xs"
+													src="/devfinity.png"
+												/>
+												<p className="text-muted-foreground text-xs">
+													PNG, SVG or WEBP up to 2MB recommended.
+												</p>
+											</div>
 										)}
 									</div>
 								</div>
 							</div>
 
-							<div className="flex justify-end border-border border-t pt-4">
+							<div className="border-border flex justify-end border-t pt-4">
 								<Button
 									className="min-h-[44px] gap-2 px-6 font-semibold shadow-xs"
 									disabled={

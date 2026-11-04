@@ -9,6 +9,7 @@ import {
 	Loader2,
 	Phone,
 } from "lucide-react";
+import Image from "next/image";
 import type React from "react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
@@ -119,8 +120,18 @@ export function OnboardingWizard() {
 				onEscapeKeyDown={(e) => e.preventDefault()}
 				onPointerDownOutside={(e) => e.preventDefault()}
 			>
-				<DialogHeader>
-					<DialogTitle className="mb-2 text-center font-bold text-2xl">
+				<DialogHeader className="flex flex-col items-center">
+					<div className="mb-2 flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-700/80 bg-slate-800 p-1.5 shadow-sm">
+						<Image
+							alt="DevCRM"
+							className="h-full w-full object-contain"
+							height={36}
+							priority
+							src="/devfinity.png"
+							width={36}
+						/>
+					</div>
+					<DialogTitle className="mb-1 text-center text-2xl font-bold">
 						Welcome to DevCRM
 					</DialogTitle>
 					<DialogDescription className="text-center text-slate-400">
@@ -167,7 +178,7 @@ export function OnboardingWizard() {
 				>
 					{step === 1 && (
 						<div className="fade-in slide-in-from-bottom-4 animate-in space-y-4">
-							<h3 className="flex items-center gap-2 border-slate-800 border-b pb-2 font-semibold text-lg">
+							<h3 className="flex items-center gap-2 border-b border-slate-800 pb-2 text-lg font-semibold">
 								<Building2 className="h-5 w-5" /> Basic Details
 							</h3>
 
@@ -295,7 +306,7 @@ export function OnboardingWizard() {
 									)}
 								</div>
 								{otpSent && !otpVerified && (
-									<p className="text-blue-400 text-xs">
+									<p className="text-xs text-blue-400">
 										Mock: Sending OTP... Auto-verifying in 1.5s.
 									</p>
 								)}
@@ -305,7 +316,7 @@ export function OnboardingWizard() {
 
 					{step === 2 && (
 						<div className="fade-in slide-in-from-right-4 animate-in space-y-4">
-							<h3 className="flex items-center gap-2 border-slate-800 border-b pb-2 font-semibold text-lg">
+							<h3 className="flex items-center gap-2 border-b border-slate-800 pb-2 text-lg font-semibold">
 								<FileText className="h-5 w-5" /> Region & Tax
 							</h3>
 
@@ -408,7 +419,7 @@ export function OnboardingWizard() {
 											</Button>
 										</div>
 										{gstVerified && (
-											<p className="flex items-center gap-1 text-emerald-400 text-xs">
+											<p className="flex items-center gap-1 text-xs text-emerald-400">
 												<CheckCircle2 className="h-3 w-3" /> GST Details
 												Verified
 											</p>
@@ -436,7 +447,7 @@ export function OnboardingWizard() {
 
 					{step === 3 && (
 						<div className="fade-in slide-in-from-right-4 animate-in space-y-4">
-							<h3 className="border-slate-800 border-b pb-2 font-semibold text-lg">
+							<h3 className="border-b border-slate-800 pb-2 text-lg font-semibold">
 								Address & Business Profile
 							</h3>
 
@@ -573,7 +584,7 @@ export function OnboardingWizard() {
 												<p className="font-medium text-white">
 													Service Provider
 												</p>
-												<p className="text-slate-400 text-xs">
+												<p className="text-xs text-slate-400">
 													Agencies, Consultants, Freelancers
 												</p>
 											</div>
@@ -585,7 +596,7 @@ export function OnboardingWizard() {
 											<RadioGroupItem id="t-product" value="product" />
 											<div>
 												<p className="font-medium text-white">Product / SaaS</p>
-												<p className="text-slate-400 text-xs">
+												<p className="text-xs text-slate-400">
 													Software, physical products, e-commerce
 												</p>
 											</div>
@@ -596,7 +607,7 @@ export function OnboardingWizard() {
 						</div>
 					)}
 
-					<div className="flex justify-between border-slate-800 border-t pt-4">
+					<div className="flex justify-between border-t border-slate-800 pt-4">
 						<Button
 							disabled={step === 1 || isLoading}
 							onClick={handlePrev}

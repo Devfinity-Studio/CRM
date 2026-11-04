@@ -92,7 +92,6 @@ export function DashboardLayout({
 	const shouldShowTopWarning =
 		isOnboardingIncomplete && isAllowedUnonboardedRoute;
 
-
 	const displayUserName = layoutData?.user?.name || userName || "Alex Vance";
 	const displayUserEmail =
 		layoutData?.user?.email || userEmail || "alex@devcrm.io";
@@ -101,6 +100,7 @@ export function DashboardLayout({
 		name: "DevCRM HQ",
 		slug: "hq",
 		role: "OWNER",
+		logoUrl: "/devfinity.png",
 	};
 	const orgList = layoutData?.organizations || [activeOrg];
 
@@ -135,27 +135,39 @@ export function DashboardLayout({
 						<DropdownMenuTrigger asChild>
 							<button
 								className={cn(
-									"flex w-full items-center gap-3 rounded-xl p-2 text-left transition-all hover:bg-accent/60 focus:outline-none focus:ring-2 focus:ring-primary/40",
+									"hover:bg-accent/60 focus:ring-primary/40 flex w-full items-center gap-3 rounded-xl p-2 text-left transition-all focus:ring-2 focus:outline-none",
 									collapsed && "justify-center p-1.5",
 								)}
 								type="button"
 							>
-								<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-sm ring-2 ring-primary/20">
-									<span className="font-bold font-mono text-sm tracking-tight">
-										{activeOrg.name.slice(0, 2).toUpperCase()}
-									</span>
+								<div className="bg-card border-border/80 ring-border/50 flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border p-1 shadow-xs ring-1">
+									{activeOrg.logoUrl ? (
+										// biome-ignore lint/performance/noImgElement: user organization logo
+										<img
+											alt={activeOrg.name}
+											className="h-full w-full object-contain"
+											src={activeOrg.logoUrl}
+										/>
+									) : (
+										// biome-ignore lint/performance/noImgElement: default platform branding logo
+										<img
+											alt="DevCRM"
+											className="h-full w-full object-contain"
+											src="/devfinity.png"
+										/>
+									)}
 								</div>
 								{!collapsed && (
 									<div className="flex min-w-0 flex-1 items-center justify-between">
 										<div className="flex flex-col truncate">
-											<span className="truncate font-semibold text-foreground text-sm">
+											<span className="text-foreground truncate text-sm font-semibold">
 												{activeOrg.name}
 											</span>
-											<span className="truncate text-muted-foreground text-xs">
+											<span className="text-muted-foreground truncate text-xs">
 												{isSuperAdmin ? "Super Admin" : "Active Workspace"}
 											</span>
 										</div>
-										<ChevronsUpDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+										<ChevronsUpDown className="text-muted-foreground h-4 w-4 shrink-0" />
 									</div>
 								)}
 							</button>
@@ -171,7 +183,7 @@ export function DashboardLayout({
 								>
 									<span className="truncate">{org.name}</span>
 									{org.id === activeOrg.id && (
-										<Check className="h-4 w-4 text-primary" />
+										<Check className="text-primary h-4 w-4" />
 									)}
 								</DropdownMenuItem>
 							))}
@@ -189,7 +201,7 @@ export function DashboardLayout({
 				{!collapsed ? (
 					<Link className="w-full" href="/deals">
 						<Button
-							className="w-full justify-start gap-2 border-primary/25 bg-primary/10 font-semibold text-primary hover:bg-primary/15"
+							className="border-primary/25 bg-primary/10 text-primary hover:bg-primary/15 w-full justify-start gap-2 font-semibold"
 							size="sm"
 							variant="outline"
 						>
@@ -202,7 +214,7 @@ export function DashboardLayout({
 						<TooltipTrigger asChild>
 							<Link className="mx-auto" href="/deals">
 								<Button
-									className="h-9 w-9 border-primary/25 bg-primary/10 text-primary hover:bg-primary/15"
+									className="border-primary/25 bg-primary/10 text-primary hover:bg-primary/15 h-9 w-9"
 									size="icon"
 									variant="outline"
 								>
@@ -246,9 +258,9 @@ export function DashboardLayout({
 						return (
 							<Link
 								className={cn(
-									"flex items-center gap-3 rounded-xl px-3 py-2.5 font-medium text-sm transition-all",
+									"flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
 									isActive
-										? "bg-primary/15 font-semibold text-primary shadow-2xs"
+										? "bg-primary/15 text-primary font-semibold shadow-2xs"
 										: "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
 								)}
 								href={item.href}
@@ -269,13 +281,13 @@ export function DashboardLayout({
 			</div>
 
 			{/* Footer / System Status & Collapse Toggle */}
-			<div className="flex flex-col gap-2 border-border/60 border-t pt-3">
+			<div className="border-border/60 flex flex-col gap-2 border-t pt-3">
 				{!collapsed ? (
-					<div className="rounded-xl border border-border/70 bg-card/60 p-3 backdrop-blur-xs">
+					<div className="border-border/70 bg-card/60 rounded-xl border p-3 backdrop-blur-xs">
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-2">
 								<span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-								<span className="font-semibold text-foreground text-xs">
+								<span className="text-foreground text-xs font-semibold">
 									Production Engine
 								</span>
 							</div>
@@ -283,7 +295,7 @@ export function DashboardLayout({
 								Active
 							</Badge>
 						</div>
-						<p className="mt-1 text-[11px] text-muted-foreground">
+						<p className="text-muted-foreground mt-1 text-[11px]">
 							Dual-region isolated DB
 						</p>
 					</div>
@@ -327,11 +339,11 @@ export function DashboardLayout({
 
 	return (
 		<TooltipProvider delayDuration={150}>
-			<div className="flex min-h-dvh flex-col md:flex-row bg-background text-foreground selection:bg-primary/20 selection:text-primary">
+			<div className="bg-background text-foreground selection:bg-primary/20 selection:text-primary flex min-h-dvh flex-col md:flex-row">
 				{/* Desktop Sidebar */}
 				<aside
 					className={cn(
-						"z-40 hidden flex-col border-border/70 border-r bg-card/85 backdrop-blur-md transition-all duration-300 md:flex md:sticky md:top-0 md:h-dvh",
+						"border-border/70 bg-card/85 z-40 hidden flex-col border-r backdrop-blur-md transition-all duration-300 md:sticky md:top-0 md:flex md:h-dvh",
 						isCollapsed ? "w-16" : "w-64",
 					)}
 				>
@@ -347,7 +359,7 @@ export function DashboardLayout({
 						/>
 					)}
 					{/* Top Sticky Header */}
-					<header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-border/70 border-b bg-background/85 px-4 backdrop-blur-md md:px-6">
+					<header className="border-border/70 bg-background/85 sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b px-4 backdrop-blur-md md:px-6">
 						<div className="flex items-center gap-3">
 							{/* Mobile Drawer Trigger (min 44px tap target) */}
 							<Sheet onOpenChange={setMobileOpen} open={mobileOpen}>
@@ -371,15 +383,17 @@ export function DashboardLayout({
 
 							{/* Quick Search Trigger */}
 							<button
-								type="button"
+								className="border-border/70 bg-card/70 text-muted-foreground hover:bg-card hover:border-primary/40 focus:ring-primary/20 relative flex h-10 w-52 max-w-md items-center justify-between rounded-xl border px-3 text-xs transition-all focus:ring-2 focus:outline-none sm:w-80 sm:text-sm"
 								onClick={() => setCommandPaletteOpen(true)}
-								className="relative flex h-10 w-52 max-w-md items-center justify-between rounded-xl border border-border/70 bg-card/70 px-3 text-xs text-muted-foreground transition-all hover:bg-card hover:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20 sm:w-80 sm:text-sm"
+								type="button"
 							>
 								<div className="flex items-center gap-2 truncate">
-									<Search className="h-4 w-4 text-muted-foreground shrink-0" />
-									<span className="truncate">Search deals, clients, invoices...</span>
+									<Search className="text-muted-foreground h-4 w-4 shrink-0" />
+									<span className="truncate">
+										Search deals, clients, invoices...
+									</span>
 								</div>
-								<kbd className="hidden items-center gap-0.5 rounded border border-border/80 bg-accent px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:inline-flex shrink-0">
+								<kbd className="border-border/80 bg-accent text-muted-foreground hidden shrink-0 items-center gap-0.5 rounded border px-1.5 py-0.5 font-mono text-[10px] sm:inline-flex">
 									⌘K
 								</kbd>
 							</button>
@@ -389,7 +403,7 @@ export function DashboardLayout({
 						<div className="flex items-center gap-2 sm:gap-3">
 							<Link href="/deals">
 								<Button
-									className="hidden gap-1.5 bg-primary font-semibold text-primary-foreground text-xs shadow-xs hover:bg-primary/90 sm:inline-flex"
+									className="bg-primary text-primary-foreground hover:bg-primary/90 hidden gap-1.5 text-xs font-semibold shadow-xs sm:inline-flex"
 									size="sm"
 								>
 									<Plus className="h-3.5 w-3.5" />
@@ -403,20 +417,20 @@ export function DashboardLayout({
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
 									<button
-										className="flex h-11 w-11 sm:h-9 sm:w-9 items-center justify-center rounded-full p-0.5 ring-2 ring-primary/20 transition-all hover:ring-primary/40 focus:outline-none"
+										className="ring-primary/20 hover:ring-primary/40 flex h-11 w-11 items-center justify-center rounded-full p-0.5 ring-2 transition-all focus:outline-none sm:h-9 sm:w-9"
 										type="button"
 									>
-										<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 font-bold text-primary text-xs">
+										<div className="bg-primary/15 text-primary flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold">
 											{displayUserName.slice(0, 2).toUpperCase()}
 										</div>
 									</button>
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end" className="w-56 p-2">
 									<div className="flex flex-col px-2 py-1.5">
-										<span className="font-semibold text-foreground text-sm">
+										<span className="text-foreground text-sm font-semibold">
 											{displayUserName}
 										</span>
-										<span className="truncate text-muted-foreground text-xs">
+										<span className="text-muted-foreground truncate text-xs">
 											{displayUserEmail}
 										</span>
 										<Badge
@@ -446,7 +460,7 @@ export function DashboardLayout({
 									{isSuperAdmin && (
 										<DropdownMenuItem asChild>
 											<Link
-												className="cursor-pointer font-medium text-destructive text-xs"
+												className="text-destructive cursor-pointer text-xs font-medium"
 												href="/superadmin"
 											>
 												Super Admin Center
@@ -455,7 +469,7 @@ export function DashboardLayout({
 									)}
 									<DropdownMenuSeparator />
 									<DropdownMenuItem
-										className="cursor-pointer text-destructive text-xs"
+										className="text-destructive cursor-pointer text-xs"
 										onClick={() => signOut({ callbackUrl: "/login" })}
 									>
 										<LogOut className="mr-2 h-3.5 w-3.5" />
@@ -467,31 +481,33 @@ export function DashboardLayout({
 					</header>
 
 					{/* Main View Canvas (Bottom padded on mobile for bottom bar) */}
-					<main className="flex-1 overflow-x-hidden bg-background p-4 pb-24 sm:p-6 sm:pb-24 md:p-8 md:pb-8">
+					<main className="bg-background flex-1 overflow-x-hidden p-4 pb-24 sm:p-6 sm:pb-24 md:p-8 md:pb-8">
 						{/* Top Warning Banner for Dashboard & Profile when onboarding is incomplete */}
 						{shouldShowTopWarning && (
 							<div
+								className="border-destructive/40 bg-destructive/10 text-foreground ring-destructive/20 mb-6 flex flex-col items-start justify-between gap-4 rounded-2xl border p-4 shadow-sm ring-1 sm:flex-row sm:items-center sm:p-5"
 								role="alert"
-								className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl border border-destructive/40 bg-destructive/10 p-4 sm:p-5 text-foreground shadow-sm ring-1 ring-destructive/20"
 							>
-								<div className="flex items-start sm:items-center gap-3">
-									<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-destructive text-destructive-foreground shadow-xs">
+								<div className="flex items-start gap-3 sm:items-center">
+									<div className="bg-destructive text-destructive-foreground flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-xs">
 										<ShieldAlert className="h-5 w-5" />
 									</div>
 									<div>
-										<h3 className="font-semibold text-destructive text-sm tracking-tight sm:text-base">
+										<h3 className="text-destructive text-sm font-semibold tracking-tight sm:text-base">
 											Onboarding Incomplete — Features Restricted
 										</h3>
 										<p className="text-muted-foreground text-xs sm:text-sm">
-											Please complete your organization onboarding to unlock full access to deals, clients, billing, inventory, and automations.
+											Please complete your organization onboarding to unlock
+											full access to deals, clients, billing, inventory, and
+											automations.
 										</p>
 									</div>
 								</div>
-								<Link href="/onboarding" className="w-full sm:w-auto shrink-0">
+								<Link className="w-full shrink-0 sm:w-auto" href="/onboarding">
 									<Button
-										variant="destructive"
+										className="min-h-[44px] w-full px-5 font-semibold shadow-xs sm:min-h-[38px] sm:w-auto"
 										size="sm"
-										className="w-full sm:w-auto min-h-[44px] sm:min-h-[38px] px-5 font-semibold shadow-xs"
+										variant="destructive"
 									>
 										Complete Onboarding
 									</Button>
@@ -501,32 +517,33 @@ export function DashboardLayout({
 
 						{/* Full-Page Blocker Overlay for All Other Routes */}
 						{shouldBlockWholePage ? (
-							<div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-md">
-								<div className="flex w-full max-w-md flex-col items-center rounded-2xl border border-destructive/40 bg-card p-6 sm:p-8 text-center shadow-2xl">
-									<div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive/15 text-destructive ring-8 ring-destructive/10">
+							<div className="bg-background/80 fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md">
+								<div className="border-destructive/40 bg-card flex w-full max-w-md flex-col items-center rounded-2xl border p-6 text-center shadow-2xl sm:p-8">
+									<div className="bg-destructive/15 text-destructive ring-destructive/10 mb-4 flex h-14 w-14 items-center justify-center rounded-2xl ring-8">
 										<ShieldAlert className="h-7 w-7" />
 									</div>
-									<h2 className="mb-2 font-bold text-foreground text-xl tracking-tight">
+									<h2 className="text-foreground mb-2 text-xl font-bold tracking-tight">
 										Feature Blocked
 									</h2>
-									<p className="mb-6 text-muted-foreground text-sm">
-										This feature is locked. You need to complete your organization onboarding before accessing this section.
+									<p className="text-muted-foreground mb-6 text-sm">
+										This feature is locked. You need to complete your
+										organization onboarding before accessing this section.
 									</p>
 									<div className="flex w-full flex-col gap-3">
-										<Link href="/onboarding" className="w-full">
+										<Link className="w-full" href="/onboarding">
 											<Button
-												variant="destructive"
-												className="w-full min-h-[44px] font-semibold"
+												className="min-h-[44px] w-full font-semibold"
 												size="lg"
+												variant="destructive"
 											>
 												Complete Onboarding
 											</Button>
 										</Link>
-										<Link href="/dashboard" className="w-full">
+										<Link className="w-full" href="/dashboard">
 											<Button
-												variant="outline"
-												className="w-full min-h-[44px]"
+												className="min-h-[44px] w-full"
 												size="lg"
+												variant="outline"
 											>
 												Back to Dashboard
 											</Button>
@@ -539,7 +556,7 @@ export function DashboardLayout({
 						<div
 							className={
 								shouldBlockWholePage
-									? "pointer-events-none select-none opacity-15"
+									? "pointer-events-none opacity-15 select-none"
 									: ""
 							}
 						>
@@ -549,12 +566,12 @@ export function DashboardLayout({
 
 					{/* Global Cmd+K Command Palette */}
 					<GlobalCommandPalette
-						open={commandPaletteOpen}
 						onOpenChange={setCommandPaletteOpen}
+						open={commandPaletteOpen}
 					/>
 
 					{/* Mobile Fixed Bottom Navigation Bar */}
-					<nav className="fixed bottom-0 inset-x-0 z-30 flex h-16 items-center justify-around border-t border-border/80 bg-background/95 px-2 backdrop-blur-lg pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] md:hidden shadow-lg">
+					<nav className="border-border/80 bg-background/95 fixed inset-x-0 bottom-0 z-30 flex h-16 items-center justify-around border-t px-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] shadow-lg backdrop-blur-lg md:hidden">
 						{mobileBottomTabs.map((tab) => {
 							const Icon = tab.icon;
 							const isActive =
@@ -564,26 +581,33 @@ export function DashboardLayout({
 							return (
 								<Link
 									className={cn(
-										"flex flex-1 flex-col items-center justify-center py-1 text-xs transition-colors min-h-[44px]",
+										"flex min-h-[44px] flex-1 flex-col items-center justify-center py-1 text-xs transition-colors",
 										isActive
-											? "font-semibold text-primary"
+											? "text-primary font-semibold"
 											: "text-muted-foreground hover:text-foreground",
 									)}
 									href={tab.href}
 									key={tab.href}
 								>
-									<Icon className={cn("h-5 w-5 mb-0.5", isActive ? "text-primary" : "text-muted-foreground")} />
-									<span className="text-[10px] tracking-tight">{tab.label}</span>
+									<Icon
+										className={cn(
+											"mb-0.5 h-5 w-5",
+											isActive ? "text-primary" : "text-muted-foreground",
+										)}
+									/>
+									<span className="text-[10px] tracking-tight">
+										{tab.label}
+									</span>
 								</Link>
 							);
 						})}
 						{/* More button to open drawer */}
 						<button
-							className="flex flex-1 flex-col items-center justify-center py-1 text-xs text-muted-foreground hover:text-foreground min-h-[44px]"
+							className="text-muted-foreground hover:text-foreground flex min-h-[44px] flex-1 flex-col items-center justify-center py-1 text-xs"
 							onClick={() => setMobileOpen(true)}
 							type="button"
 						>
-							<MoreHorizontal className="h-5 w-5 mb-0.5" />
+							<MoreHorizontal className="mb-0.5 h-5 w-5" />
 							<span className="text-[10px] tracking-tight">More</span>
 						</button>
 					</nav>

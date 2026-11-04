@@ -10,6 +10,7 @@ import {
 	ShieldAlert,
 	Users,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -51,23 +52,28 @@ export function SuperAdminLayout({
 	const sidebarContent = (
 		<div className="flex h-full flex-col justify-between p-4">
 			<div>
-				<div className="mb-6 flex items-center justify-between border-border/70 border-b px-2 pb-4 pt-1">
+				<div className="border-border/70 mb-6 flex items-center justify-between border-b px-2 pt-1 pb-4">
 					<div className="flex items-center gap-2.5">
-						<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-destructive font-bold text-white shadow-sm ring-2 ring-destructive/20">
-							SA
+						<div className="bg-card border-border/80 flex h-9 w-9 items-center justify-center rounded-xl border p-1 shadow-xs">
+							<Image
+								alt="DevCRM"
+								className="h-full w-full object-contain"
+								height={28}
+								priority
+								src="/devfinity.png"
+								width={28}
+							/>
 						</div>
 						<div className="flex flex-col">
-							<span className="font-bold text-foreground text-sm tracking-tight">
+							<span className="text-foreground text-sm font-bold tracking-tight">
 								DevCRM
 							</span>
-							<span className="text-[11px] text-muted-foreground">
+							<span className="text-muted-foreground text-[11px]">
 								Global Engine
 							</span>
 						</div>
 					</div>
-					<Badge variant="destructive">
-						ADMIN
-					</Badge>
+					<Badge variant="destructive">ADMIN</Badge>
 				</div>
 
 				<nav className="space-y-1">
@@ -79,9 +85,9 @@ export function SuperAdminLayout({
 						return (
 							<Link
 								className={cn(
-									"flex items-center gap-3 rounded-xl px-3 py-2.5 font-medium text-sm transition-all",
+									"flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
 									isActive
-										? "bg-primary/15 font-semibold text-primary shadow-2xs"
+										? "bg-primary/15 text-primary font-semibold shadow-2xs"
 										: "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
 								)}
 								href={item.href}
@@ -103,14 +109,14 @@ export function SuperAdminLayout({
 
 			<div className="border-border/70 border-t pt-4">
 				<div className="mb-4 flex items-center gap-3 px-3 py-2">
-					<div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 font-semibold text-primary text-sm">
+					<div className="bg-primary/15 text-primary flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold">
 						{userName?.charAt(0) || "A"}
 					</div>
 					<div className="overflow-hidden">
-						<p className="truncate font-medium text-foreground text-sm">
+						<p className="text-foreground truncate text-sm font-medium">
 							{userName || "Super Admin"}
 						</p>
-						<p className="truncate text-xs text-muted-foreground">
+						<p className="text-muted-foreground truncate text-xs">
 							{userEmail || "admin@system.io"}
 						</p>
 					</div>
@@ -119,7 +125,7 @@ export function SuperAdminLayout({
 				<div className="space-y-1.5">
 					<Link className="block" href="/dashboard">
 						<Button
-							className="w-full justify-start border-border/80 text-foreground/80 hover:bg-accent/60"
+							className="border-border/80 text-foreground/80 hover:bg-accent/60 w-full justify-start"
 							size="sm"
 							variant="outline"
 						>
@@ -128,7 +134,7 @@ export function SuperAdminLayout({
 						</Button>
 					</Link>
 					<Button
-						className="w-full justify-start text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+						className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive w-full justify-start"
 						onClick={() => signOut({ callbackUrl: "/login" })}
 						size="sm"
 						variant="ghost"
@@ -142,16 +148,16 @@ export function SuperAdminLayout({
 	);
 
 	return (
-		<div className="flex min-h-dvh flex-col md:flex-row bg-background text-foreground">
+		<div className="bg-background text-foreground flex min-h-dvh flex-col md:flex-row">
 			{/* Desktop Sidebar */}
-			<aside className="hidden w-64 flex-col border-border/70 border-r bg-card/85 p-0 backdrop-blur-md md:flex md:sticky md:top-0 md:h-dvh">
+			<aside className="border-border/70 bg-card/85 hidden w-64 flex-col border-r p-0 backdrop-blur-md md:sticky md:top-0 md:flex md:h-dvh">
 				{sidebarContent}
 			</aside>
 
 			{/* Main Content */}
 			<div className="flex min-w-0 flex-1 flex-col">
 				{/* Top Header */}
-				<header className="sticky top-0 z-30 flex h-14 items-center justify-between border-border/70 border-b bg-background/85 px-4 backdrop-blur-md sm:px-6">
+				<header className="border-border/70 bg-background/85 sticky top-0 z-30 flex h-14 items-center justify-between border-b px-4 backdrop-blur-md sm:px-6">
 					<div className="flex items-center gap-3">
 						<Sheet onOpenChange={setMobileOpen} open={mobileOpen}>
 							<SheetTrigger asChild>
@@ -172,7 +178,7 @@ export function SuperAdminLayout({
 							</SheetContent>
 						</Sheet>
 
-						<div className="flex items-center gap-2 text-muted-foreground text-xs sm:text-sm">
+						<div className="text-muted-foreground flex items-center gap-2 text-xs sm:text-sm">
 							<ShieldAlert className="h-4 w-4 text-amber-500" />
 							<span>Global Administration Area</span>
 						</div>

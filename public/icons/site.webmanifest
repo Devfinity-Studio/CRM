@@ -1,0 +1,30 @@
+{
+	"name": "DevCRM | Devfinity Revenue Operations Platform",
+	"short_name": "DevCRM",
+	"description": "Modern B2B CRM, Sales Pipeline Kanban, Multi-currency Invoicing, and Workflow Automations.",
+	"icons": [
+		{
+			"src": "/icons/android-chrome-192x192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "any"
+		},
+		{
+			"src": "/icons/android-chrome-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "any"
+		},
+		{
+			"src": "/icons/android-chrome-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "maskable"
+		}
+	],
+	"theme_color": "#0284c7",
+	"background_color": "#090d16",
+	"display": "standalone",
+	"start_url": "/dashboard",
+	"orientation": "portrait-primary"
+}
