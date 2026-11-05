@@ -183,5 +183,84 @@ describe("Entitlements & RBAC Service", () => {
 			const quotaAtLimit = await checkQuotaUsage(mockDb, "org-4", "maxUsers", 3);
 			expect(quotaAtLimit.allowed).toBe(false);
 		});
+
+		it("should enforce global kill-switch when feature is globally disabled", async () => {
+			const mockDb: any = {
+				query: {
+					globalSettings: {
+						findFirst: () =>
+							Promise.resolve({
+								id: "default",
+								featureFlags: JSON.stringify({ hasInventory: false }),
+							}),
+					},
+					organizations: {
+						findFirst: () => Promise.resolve({ id: "org-5", planId: "plan-pro" }),
+					},
+					subscriptions: {
+						findFirst: () => Promise.resolve(null),
+					},
+					subscriptionPlans: {
+						findFirst: () =>
+							Promise.resolve({
+								id: "plan-pro",
+								name: "Pro Tier",
+								code: "pro",
+								maxUsers: 10,
+								maxContacts: 5000,
+								hasInventory: true,
+							}),
+					},
+					tenantOverrides: {
+						findFirst: () => Promise.resolve(null),
+					},
+				},
+			};
+
+			// Even though plan-pro has hasInventory: true, global kill-switch forces it false
+			const entitlements = await getTenantEntitlements(mockDb, "org-5");
+			expect(entitlements.features.hasInventory).toBe(false);
+		});
+
+		it("should allow tenant VIP override to bypass global kill-switch", async () => {
+			const mockDb: any = {
+				query: {
+					globalSettings: {
+						findFirst: () =>
+							Promise.resolve({
+								id: "default",
+								featureFlags: JSON.stringify({ hasInventory: false }),
+							}),
+					},
+					organizations: {
+						findFirst: () => Promise.resolve({ id: "org-6", planId: "plan-pro" }),
+					},
+					subscriptions: {
+						findFirst: () => Promise.resolve(null),
+					},
+					subscriptionPlans: {
+						findFirst: () =>
+							Promise.resolve({
+								id: "plan-pro",
+								name: "Pro Tier",
+								code: "pro",
+								maxUsers: 10,
+								maxContacts: 5000,
+								hasInventory: true,
+							}),
+					},
+					tenantOverrides: {
+						findFirst: () =>
+							Promise.resolve({
+								organizationId: "org-6",
+								featureOverrides: JSON.stringify({ hasInventory: true }),
+							}),
+					},
+				},
+			};
+
+			const entitlements = await getTenantEntitlements(mockDb, "org-6");
+			expect(entitlements.features.hasInventory).toBe(true);
+		});
 	});
 });

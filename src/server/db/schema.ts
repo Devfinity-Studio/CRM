@@ -1176,5 +1176,6 @@ export const globalSettings = createTable("global_settings", (d) => ({
 	id: d.varchar({ length: 255 }).notNull().primaryKey().default("default"),
 	maintenanceMode: d.boolean().default(false).notNull(),
 	enableBetaFeatures: d.boolean().default(false).notNull(),
+	featureFlags: d.text(), // JSON serialized Record<FeatureKey, boolean>
 	updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
 }));

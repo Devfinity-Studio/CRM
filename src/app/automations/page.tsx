@@ -2,7 +2,8 @@
 
 import { format } from "date-fns";
 import { Bell, Mail, Plus, Sparkles, Trash2, Zap } from "lucide-react";
-import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CreateRuleDialog } from "~/components/automations/create-rule-dialog";
 import { DashboardLayout } from "~/components/layout/dashboard-layout";
@@ -27,13 +28,34 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { api } from "~/trpc/react";
 
 export default function AutomationsPage() {
+	const router = useRouter();
+	const { data: layoutData, isLoading: layoutLoading } =
+		api.dashboard.getLayoutData.useQuery();
+
+	const isFeatureDisabled =
+		!layoutLoading &&
+		layoutData?.entitlements?.features?.hasAutomations === false;
+
+	useEffect(() => {
+		if (isFeatureDisabled) {
+			toast.error(
+				"The Automations module is currently disabled for your workspace.",
+			);
+			router.replace("/dashboard");
+		}
+	}, [isFeatureDisabled, router]);
+
 	const {
 		data: rules,
 		isLoading: rulesLoading,
 		refetch,
-	} = api.automations.getRules.useQuery();
+	} = api.automations.getRules.useQuery(undefined, {
+		enabled: !isFeatureDisabled,
+	});
 	const { data: communications, isLoading: commsLoading } =
-		api.automations.getCommunications.useQuery();
+		api.automations.getCommunications.useQuery(undefined, {
+			enabled: !isFeatureDisabled,
+		});
 
 	const deleteMutation = api.automations.deleteRule.useMutation({
 		onSuccess: () => {
@@ -78,6 +100,10 @@ export default function AutomationsPage() {
 				return type;
 		}
 	};
+
+	if (isFeatureDisabled) {
+		return null;
+	}
 
 	return (
 		<DashboardLayout>

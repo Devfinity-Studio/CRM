@@ -69,3 +69,4 @@ Super admins gain complete control over modules (Inventory, Subscriptions, Autom
 ---
 *Phase: 56-dynamic-feature-flags-module-toggles*
 *Context gathered: 2026-11-05*
+

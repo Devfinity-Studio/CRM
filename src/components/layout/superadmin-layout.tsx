@@ -8,6 +8,7 @@ import {
 	Menu,
 	Settings,
 	ShieldAlert,
+	ToggleLeft,
 	Users,
 } from "lucide-react";
 import Image from "next/image";
@@ -46,6 +47,7 @@ export function SuperAdminLayout({
 		{ label: "Organizations", href: "/admin/organizations", icon: Building2 },
 		{ label: "Global Users", href: "/admin/users", icon: Users },
 		{ label: "Subscription Tiers", href: "/admin/plans", icon: CreditCard },
+		{ label: "Features & Toggles", href: "/superadmin/features", icon: ToggleLeft },
 		{ label: "System Settings", href: "/admin/settings", icon: Settings },
 	];
 

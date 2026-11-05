@@ -13,6 +13,7 @@ import {
 } from "drizzle-orm";
 import { z } from "zod";
 import { calculateMRRAndARR } from "~/server/api/services/subscription-engine";
+import { getTenantEntitlements } from "~/server/api/services/entitlements";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
 	clientSubscriptions,
@@ -116,6 +117,9 @@ export const dashboardRouter = createTRPCRouter({
 				? "SUPER_ADMIN"
 				: (activeMembership?.role ?? "MEMBER"),
 			onboardingComplete: userDb?.onboardingComplete ?? false,
+			entitlements: activeOrganization.id
+				? await getTenantEntitlements(ctx.db, activeOrganization.id)
+				: null,
 		};
 	}),
 

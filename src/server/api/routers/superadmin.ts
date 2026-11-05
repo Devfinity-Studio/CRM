@@ -3,6 +3,12 @@ import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { z } from "zod";
 import {
+	DEFAULT_GLOBAL_FEATURE_FLAGS,
+	type FeatureKey,
+	getGlobalFeatureFlags,
+	getTenantEntitlements,
+} from "~/server/api/services/entitlements";
+import {
 	createPlatformCheckoutSession,
 } from "~/server/api/services/platform-billing";
 import { createTRPCRouter, superAdminProcedure } from "~/server/api/trpc";
@@ -267,6 +273,135 @@ export const superadminRouter = createTRPCRouter({
 		)
 		.mutation(async ({ ctx, input }) => {
 			return createPlatformCheckoutSession(ctx.db, input);
+		}),
+
+	getGlobalFeatureFlags: superAdminProcedure.query(async ({ ctx }) => {
+		return getGlobalFeatureFlags(ctx.db);
+	}),
+
+	updateGlobalFeatureFlags: superAdminProcedure
+		.input(
+			z.record(z.boolean()),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const currentFlags = await getGlobalFeatureFlags(ctx.db);
+			const updated = {
+				...currentFlags,
+				...input,
+			};
+
+			let settings = await ctx.db.query.globalSettings.findFirst({
+				where: eq(globalSettings.id, "default"),
+			});
+
+			if (!settings) {
+				await ctx.db.insert(globalSettings).values({
+					id: "default",
+					featureFlags: JSON.stringify(updated),
+				});
+			} else {
+				await ctx.db
+					.update(globalSettings)
+					.set({ featureFlags: JSON.stringify(updated) })
+					.where(eq(globalSettings.id, "default"));
+			}
+
+			return updated;
+		}),
+
+	getTenantFeatureMatrix: superAdminProcedure.query(async ({ ctx }) => {
+		const orgs = await ctx.db.query.organizations.findMany({
+			orderBy: (o, { desc }) => [desc(o.createdAt)],
+		});
+
+		const globalFlags = await getGlobalFeatureFlags(ctx.db);
+
+		const results = await Promise.all(
+			orgs.map(async (org) => {
+				const entitlements = await getTenantEntitlements(ctx.db, org.id);
+				const override = await ctx.db.query.tenantOverrides.findFirst({
+					where: eq(tenantOverrides.organizationId, org.id),
+				});
+
+				let parsedOverrides: Partial<Record<FeatureKey, boolean>> = {};
+				if (override?.featureOverrides) {
+					try {
+						parsedOverrides = JSON.parse(override.featureOverrides);
+					} catch {}
+				}
+
+				return {
+					id: org.id,
+					name: org.name,
+					slug: org.slug,
+					planName: entitlements.planName,
+					planCode: entitlements.planCode,
+					features: entitlements.features,
+					overrides: parsedOverrides,
+				};
+			}),
+		);
+
+		return {
+			globalFlags,
+			tenants: results,
+		};
+	}),
+
+	setTenantFeatureOverride: superAdminProcedure
+		.input(
+			z.object({
+				organizationId: z.string(),
+				featureKey: z.enum([
+					"hasInventory",
+					"hasSubscriptions",
+					"hasAutomations",
+					"hasCustomDomains",
+					"hasWebhooks",
+					"hasApiKeys",
+					"hasQuotes",
+					"hasInvoicing",
+					"hasAiInsights",
+				]),
+				value: z.boolean().nullable(), // null means reset to plan/global default
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const existing = await ctx.db.query.tenantOverrides.findFirst({
+				where: eq(tenantOverrides.organizationId, input.organizationId),
+			});
+
+			let currentOverrides: Partial<Record<string, boolean>> = {};
+			if (existing?.featureOverrides) {
+				try {
+					currentOverrides = JSON.parse(existing.featureOverrides);
+				} catch {}
+			}
+
+			if (input.value === null) {
+				delete currentOverrides[input.featureKey];
+			} else {
+				currentOverrides[input.featureKey] = input.value;
+			}
+
+			const featStr =
+				Object.keys(currentOverrides).length > 0
+					? JSON.stringify(currentOverrides)
+					: null;
+
+			if (existing) {
+				await ctx.db
+					.update(tenantOverrides)
+					.set({ featureOverrides: featStr })
+					.where(eq(tenantOverrides.id, existing.id));
+			} else if (featStr) {
+				await ctx.db.insert(tenantOverrides).values({
+					organizationId: input.organizationId,
+					featureOverrides: featStr,
+				});
+			}
+
+			return { success: true };
 		}),
 
 	getGlobalSettings: superAdminProcedure.query(async ({ ctx }) => {

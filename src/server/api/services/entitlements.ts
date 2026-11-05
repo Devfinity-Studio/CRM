@@ -2,6 +2,7 @@ import { and, eq } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type * as schema from "~/server/db/schema";
 import {
+	globalSettings,
 	organizations,
 	subscriptionPlans,
 	subscriptions,
@@ -14,7 +15,10 @@ export type FeatureKey =
 	| "hasAutomations"
 	| "hasCustomDomains"
 	| "hasWebhooks"
-	| "hasApiKeys";
+	| "hasApiKeys"
+	| "hasQuotes"
+	| "hasInvoicing"
+	| "hasAiInsights";
 
 export type QuotaKey =
 	| "maxUsers"
@@ -42,6 +46,18 @@ export interface TenantEntitlements {
 	planCode: string;
 }
 
+export const DEFAULT_GLOBAL_FEATURE_FLAGS: Record<FeatureKey, boolean> = {
+	hasInventory: true,
+	hasSubscriptions: true,
+	hasAutomations: true,
+	hasCustomDomains: true,
+	hasWebhooks: true,
+	hasApiKeys: true,
+	hasQuotes: true,
+	hasInvoicing: true,
+	hasAiInsights: true,
+};
+
 const DEFAULT_STARTER_ENTITLEMENTS: TenantEntitlements = {
 	features: {
 		hasInventory: true,
@@ -50,6 +66,9 @@ const DEFAULT_STARTER_ENTITLEMENTS: TenantEntitlements = {
 		hasCustomDomains: false,
 		hasWebhooks: false,
 		hasApiKeys: true,
+		hasQuotes: true,
+		hasInvoicing: true,
+		hasAiInsights: false,
 	},
 	quotas: {
 		maxUsers: 3,
@@ -62,13 +81,44 @@ const DEFAULT_STARTER_ENTITLEMENTS: TenantEntitlements = {
 	planCode: "starter",
 };
 
+export async function getGlobalFeatureFlags(
+	db: PostgresJsDatabase<typeof schema>,
+): Promise<Record<FeatureKey, boolean>> {
+	try {
+		if (db?.query?.globalSettings?.findFirst) {
+			const settings = await db.query.globalSettings.findFirst({
+				where: eq(globalSettings.id, "default"),
+			});
+
+			if (settings?.featureFlags) {
+				const parsed = JSON.parse(
+					settings.featureFlags,
+				) as Partial<Record<FeatureKey, boolean>>;
+				return {
+					...DEFAULT_GLOBAL_FEATURE_FLAGS,
+					...parsed,
+				};
+			}
+		}
+	} catch (e) {
+		console.error("[Entitlements] Failed to read global featureFlags:", e);
+	}
+
+	return { ...DEFAULT_GLOBAL_FEATURE_FLAGS };
+}
+
 export async function getTenantEntitlements(
 	db: PostgresJsDatabase<typeof schema>,
 	organizationId: string,
 ): Promise<TenantEntitlements> {
-	const org = await db.query.organizations.findFirst({
-		where: eq(organizations.id, organizationId),
-	});
+	// 1. Resolve Global Feature Flags first
+	const globalFlags = await getGlobalFeatureFlags(db);
+
+	const org = db?.query?.organizations?.findFirst
+		? await db.query.organizations.findFirst({
+				where: eq(organizations.id, organizationId),
+			})
+		: null;
 
 	let baseEntitlements: TenantEntitlements = {
 		...DEFAULT_STARTER_ENTITLEMENTS,
@@ -78,7 +128,7 @@ export async function getTenantEntitlements(
 
 	let planId = org?.planId;
 
-	if (!planId) {
+	if (!planId && db?.query?.subscriptions?.findFirst) {
 		const activeSub = await db.query.subscriptions.findFirst({
 			where: and(
 				eq(subscriptions.organizationId, organizationId),
@@ -91,7 +141,7 @@ export async function getTenantEntitlements(
 		}
 	}
 
-	if (planId) {
+	if (planId && db?.query?.subscriptionPlans?.findFirst) {
 		const plan = await db.query.subscriptionPlans.findFirst({
 			where: eq(subscriptionPlans.id, planId),
 		});
@@ -105,6 +155,9 @@ export async function getTenantEntitlements(
 					hasCustomDomains: plan.hasCustomDomains ?? false,
 					hasWebhooks: plan.hasWebhooks ?? false,
 					hasApiKeys: plan.hasApiKeys ?? true,
+					hasQuotes: true,
+					hasInvoicing: true,
+					hasAiInsights: false,
 				},
 				quotas: {
 					maxUsers: plan.maxUsers,
@@ -119,9 +172,20 @@ export async function getTenantEntitlements(
 		}
 	}
 
-	const overrides = await db.query.tenantOverrides.findFirst({
-		where: eq(tenantOverrides.organizationId, organizationId),
-	});
+	// 2. Apply Global Kill-Switch rule:
+	// If a feature is globally false, it shuts down across all plans by default
+	for (const key of Object.keys(globalFlags) as FeatureKey[]) {
+		if (globalFlags[key] === false) {
+			baseEntitlements.features[key] = false;
+		}
+	}
+
+	// 3. Apply Tenant-Specific Overrides (Allows VIP bypass even if globally killed)
+	const overrides = db?.query?.tenantOverrides?.findFirst
+		? await db.query.tenantOverrides.findFirst({
+				where: eq(tenantOverrides.organizationId, organizationId),
+			})
+		: null;
 
 	if (overrides) {
 		if (overrides.featureOverrides) {

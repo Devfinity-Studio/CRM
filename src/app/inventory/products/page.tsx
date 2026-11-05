@@ -1,8 +1,9 @@
 "use client";
 
 import { Edit, Package, Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { DashboardLayout } from "~/components/layout/dashboard-layout";
 import { Badge } from "~/components/ui/badge";
@@ -43,11 +44,30 @@ import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/trpc/react";
 
 export default function ProductsPage() {
+	const router = useRouter();
+	const { data: layoutData, isLoading: layoutLoading } =
+		api.dashboard.getLayoutData.useQuery();
+
+	const isFeatureDisabled =
+		!layoutLoading &&
+		layoutData?.entitlements?.features?.hasInventory === false;
+
+	useEffect(() => {
+		if (isFeatureDisabled) {
+			toast.error(
+				"The Inventory module is currently disabled for your workspace.",
+			);
+			router.replace("/dashboard");
+		}
+	}, [isFeatureDisabled, router]);
+
 	const {
 		data: products,
 		isLoading,
 		refetch,
-	} = api.inventory.getProducts.useQuery();
+	} = api.inventory.getProducts.useQuery(undefined, {
+		enabled: !isFeatureDisabled,
+	});
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [editingItem, setEditingItem] = useState<any>(null);
 
@@ -148,6 +168,10 @@ export default function ProductsPage() {
 			deleteMutation.mutate({ id });
 		}
 	};
+
+	if (isFeatureDisabled) {
+		return null;
+	}
 
 	return (
 		<DashboardLayout>

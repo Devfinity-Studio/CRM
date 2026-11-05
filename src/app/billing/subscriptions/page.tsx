@@ -11,8 +11,9 @@ import {
 	ShieldCheck,
 	Trash2,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import type React from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DashboardLayout } from "~/components/layout/dashboard-layout";
 import { Badge } from "~/components/ui/badge";
@@ -52,13 +53,36 @@ import {
 import { api } from "~/trpc/react";
 
 export default function ClientSubscriptionsPage() {
+	const router = useRouter();
+	const { data: layoutData, isLoading: layoutLoading } =
+		api.dashboard.getLayoutData.useQuery();
+
+	const isFeatureDisabled =
+		!layoutLoading &&
+		layoutData?.entitlements?.features?.hasSubscriptions === false;
+
+	useEffect(() => {
+		if (isFeatureDisabled) {
+			toast.error(
+				"The Subscriptions module is currently disabled for your workspace.",
+			);
+			router.replace("/dashboard");
+		}
+	}, [isFeatureDisabled, router]);
+
 	const {
 		data: subscriptions,
 		isLoading,
 		refetch,
-	} = api.clientSubscriptions.getSubscriptions.useQuery();
-	const { data: clients } = api.crm.getCompanies.useQuery();
-	const { data: products } = api.inventory.getProducts.useQuery();
+	} = api.clientSubscriptions.getSubscriptions.useQuery(undefined, {
+		enabled: !isFeatureDisabled,
+	});
+	const { data: clients } = api.crm.getCompanies.useQuery(undefined, {
+		enabled: !isFeatureDisabled,
+	});
+	const { data: products } = api.inventory.getProducts.useQuery(undefined, {
+		enabled: !isFeatureDisabled,
+	});
 
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [editingItem, setEditingItem] = useState<any>(null);
@@ -251,6 +275,10 @@ export default function ClientSubscriptionsPage() {
 		}
 		return null;
 	};
+
+	if (isFeatureDisabled) {
+		return null;
+	}
 
 	return (
 		<DashboardLayout>

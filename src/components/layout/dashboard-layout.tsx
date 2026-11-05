@@ -103,27 +103,38 @@ export function DashboardLayout({
 		logoUrl: "/devfinity.png",
 	};
 	const orgList = layoutData?.organizations || [activeOrg];
+	const features = layoutData?.entitlements?.features;
 
 	const navItems = [
 		{ label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
 		{ label: "Deals", href: "/deals", icon: Building2 },
 		{ label: "Contacts", href: "/clients", icon: Users },
-		{ label: "Invoices & Quotes", href: "/billing/invoices", icon: CreditCard },
-		{ label: "Inventory", href: "/inventory/products", icon: Package },
-		{ label: "Subscriptions", href: "/billing/subscriptions", icon: Repeat },
-		{ label: "Automations", href: "/automations", icon: Zap },
+		...(features && features.hasInvoicing === false && features.hasQuotes === false
+			? []
+			: [{ label: "Invoices & Quotes", href: "/billing/invoices", icon: CreditCard }]),
+		...(features && features.hasInventory === false
+			? []
+			: [{ label: "Inventory", href: "/inventory/products", icon: Package }]),
+		...(features && features.hasSubscriptions === false
+			? []
+			: [{ label: "Subscriptions", href: "/billing/subscriptions", icon: Repeat }]),
+		...(features && features.hasAutomations === false
+			? []
+			: [{ label: "Automations", href: "/automations", icon: Zap }]),
 		...(canAdminTenant
 			? [{ label: "Tenant Admin", href: "/dashboard/admin", icon: ShieldAlert }]
 			: []),
 		{ label: "Settings", href: "/settings/profile", icon: Settings },
 	];
 
-	// Primary 4 tabs for mobile bottom navigation bar
+	// Primary tabs for mobile bottom navigation bar
 	const mobileBottomTabs = [
 		{ label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
 		{ label: "Deals", href: "/deals", icon: Building2 },
 		{ label: "Contacts", href: "/clients", icon: Users },
-		{ label: "Invoices", href: "/billing/invoices", icon: CreditCard },
+		...(features && features.hasInvoicing === false && features.hasQuotes === false
+			? []
+			: [{ label: "Invoices", href: "/billing/invoices", icon: CreditCard }]),
 	];
 
 	const sidebarContent = (collapsed: boolean) => (
