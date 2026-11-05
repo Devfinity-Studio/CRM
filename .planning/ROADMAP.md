@@ -2,6 +2,28 @@
 
 ## Milestones & Phases
 
+### Milestone 19: Super Admin Platform Engine: Feature Management, Integrations Hub & System Governance (Active)
+- [ ] **Phase 56: Dynamic Feature Flags & Cascading Module Toggles**
+  - **Goal**: Implement hierarchical feature flag resolution (Global -> Plan -> Tenant) and UI controls in `/superadmin/features`.
+  - **Depends on**: Phase 55
+  - **Requirements**: REQ-56-01, REQ-56-02, REQ-56-03, REQ-56-04, REQ-56-05
+  - **Plans**: 1-2 plans
+- [ ] **Phase 57: Global Integration Center & Third-Party Service Health Monitoring**
+  - **Goal**: Build integration monitoring and operational tools for Dodo Payments, Svix, Neon Storage, and Email.
+  - **Depends on**: Phase 56
+  - **Requirements**: REQ-57-01, REQ-57-02, REQ-57-03, REQ-57-04, REQ-57-05
+  - **Plans**: 1-2 plans
+- [ ] **Phase 58: Tenant Deep Inspection & Superadmin Activity Audit Trail**
+  - **Goal**: Create immutable system audit logging and tenant drill-down inspection dashboard.
+  - **Depends on**: Phase 57
+  - **Requirements**: REQ-58-01, REQ-58-02, REQ-58-03, REQ-58-04, REQ-58-05
+  - **Plans**: 1-2 plans
+- [ ] **Phase 59: Global Staff Administration & User Access Governance**
+  - **Goal**: Full user governance, staff role management, session revocation, navigation polish, and full production build verification.
+  - **Depends on**: Phase 58
+  - **Requirements**: REQ-59-01, REQ-59-02, REQ-59-03, REQ-59-04, REQ-59-05
+  - **Plans**: 1-2 plans
+
 ### Milestone 18: Platform SaaS Payment & Subscription Gateway Integration (Completed)
 - [x] [Archived in v18-ROADMAP.md](./milestones/v18-ROADMAP.md)
 
