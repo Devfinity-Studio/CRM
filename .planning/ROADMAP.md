@@ -8,9 +8,14 @@
   - **Depends on**: Phase 55
   - **Requirements**: REQ-56-01, REQ-56-02, REQ-56-03, REQ-56-04, REQ-56-05
   - **Plans**: 2 plans (completed)
+- [ ] **Phase 56.1: Security Hardening & PII Encryption (INSERTED)**
+  - **Goal**: Implement application-level PII encryption (PAN, Aadhaar, Passport), eliminate cross-tenant IDORs in remaining domain routers (billing, automations, apiKeys, clientSubscriptions), secure public ingestion endpoints, and enforce role-based access control (RBAC).
+  - **Depends on**: Phase 56
+  - **Requirements**: SEC-01, SEC-02, SEC-05, SEC-07, SEC-08, SEC-12
+  - **Plans**: 1-2 plans
 - [ ] **Phase 57: Global Integration Center & Third-Party Service Health Monitoring**
   - **Goal**: Build integration monitoring and operational tools for Dodo Payments, Svix, Neon Storage, and Email.
-  - **Depends on**: Phase 56
+  - **Depends on**: Phase 56.1
   - **Requirements**: REQ-57-01, REQ-57-02, REQ-57-03, REQ-57-04, REQ-57-05
   - **Plans**: 1-2 plans
 - [ ] **Phase 58: Tenant Deep Inspection & Superadmin Activity Audit Trail**
