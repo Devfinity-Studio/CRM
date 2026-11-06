@@ -20,11 +20,11 @@ Deliver an enterprise-grade Super Admin command center for DevCRM. Enable platfo
 - [x] **REQ-57-05**: Vitest tests covering diagnostic endpoints, failure handling, and health check procedures.
 
 ### Phase 58: Tenant Deep Inspection & Superadmin Activity Audit Trail
-- [ ] **REQ-58-01**: Create `devcrm_system_audit_log` database table storing immutable records: `actorId`, `actorEmail`, `action` (`IMPERSONATE_ORG`, `TOGGLE_FEATURE`, `UPDATE_PLAN`, `OVERRIDE_QUOTA`, `SUSPEND_TENANT`, `RESET_PASSWORD`), `targetType`, `targetId`, `metadata`, `ipAddress`, `createdAt`.
-- [ ] **REQ-58-02**: Implement centralized `logSuperAdminAction` utility and wire into all mutating superadmin procedures.
-- [ ] **REQ-58-03**: Create Tenant Deep Inspector page at `/superadmin/tenants/[id]` displaying member roster with roles, historical deal revenue, invoice stats, storage usage, and recent tenant logs.
-- [ ] **REQ-58-04**: Build the Audit Logs viewer in `/superadmin/audit` with filterable action timeline, actor badges, date range filter, and formatted JSON metadata modal.
-- [ ] **REQ-58-05**: Vitest tests for audit log creation, pagination, and tenant inspector aggregations.
+- [x] **REQ-58-01**: Create `devcrm_system_audit_log` database table storing immutable records: `actorId`, `actorEmail`, `action` (`IMPERSONATE_ORG`, `TOGGLE_FEATURE`, `UPDATE_PLAN`, `OVERRIDE_QUOTA`, `SUSPEND_TENANT`, `RESET_PASSWORD`), `targetType`, `targetId`, `metadata`, `ipAddress`, `createdAt`.
+- [x] **REQ-58-02**: Implement centralized `logSuperAdminAction` utility and wire into all mutating superadmin procedures.
+- [x] **REQ-58-03**: Create Tenant Deep Inspector page at `/superadmin/tenants/[id]` displaying member roster with roles, historical deal revenue, invoice stats, storage usage, and recent tenant logs.
+- [x] **REQ-58-04**: Build the Audit Logs viewer in `/superadmin/audit` with filterable action timeline, actor badges, date range filter, and formatted JSON metadata modal.
+- [x] **REQ-58-05**: Vitest tests for audit log creation, pagination, and tenant inspector aggregations.
 
 ### Phase 59: Global Staff Administration & User Access Governance
 - [ ] **REQ-59-01**: Expand `/superadmin/users` with full global user governance: search and filter across all organizations, role elevation (`SUPER_ADMIN` vs `USER`), and account suspension toggle (`isActive`).

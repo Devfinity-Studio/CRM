@@ -1179,3 +1179,45 @@ export const globalSettings = createTable("global_settings", (d) => ({
 	featureFlags: d.text(), // JSON serialized Record<FeatureKey, boolean>
 	updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
 }));
+
+// --- SYSTEM AUDIT LOG ---
+export const systemAuditLogs = createTable(
+	"system_audit_log",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		actorId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+		actorEmail: d.varchar({ length: 255 }).notNull(),
+		action: d.varchar({ length: 100 }).notNull(),
+		targetType: d.varchar({ length: 50 }),
+		targetId: d.varchar({ length: 255 }),
+		metadata: d.text(), // JSON stringified metadata object
+		ipAddress: d.varchar({ length: 100 }),
+		createdAt: d
+			.timestamp({ withTimezone: true })
+			.$defaultFn(() => new Date())
+			.notNull(),
+	}),
+	(t) => [
+		index("audit_actor_idx").on(t.actorId),
+		index("audit_action_idx").on(t.action),
+		index("audit_target_idx").on(t.targetId),
+		index("audit_created_idx").on(t.createdAt),
+	],
+);
+
+export const systemAuditLogsRelations = relations(
+	systemAuditLogs,
+	({ one }) => ({
+		actor: one(users, {
+			fields: [systemAuditLogs.actorId],
+			references: [users.id],
+		}),
+	}),
+);

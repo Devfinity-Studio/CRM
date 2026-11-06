@@ -1,6 +1,7 @@
 "use client";
 
-import { Globe, Layers, PlayCircle, Settings2, ShieldBan, Trash2 } from "lucide-react";
+import { Eye, Globe, Layers, PlayCircle, Settings2, ShieldBan, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "sonner";
@@ -211,6 +212,16 @@ export default function TenantsPage() {
 													</Badge>
 												</TableCell>
 												<TableCell className="space-x-1.5 text-right whitespace-nowrap">
+													<Button
+														size="sm"
+														variant="ghost"
+														asChild
+														className="min-h-[36px]"
+													>
+														<Link href={`/superadmin/tenants/${org.id}`}>
+															<Eye className="mr-1 h-3.5 w-3.5" /> Inspect
+														</Link>
+													</Button>
 													<Button
 														size="sm"
 														variant="outline"

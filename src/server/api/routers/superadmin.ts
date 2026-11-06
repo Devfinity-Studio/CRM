@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import { and, desc, eq, ilike } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { z } from "zod";
 import { env } from "~/env";
@@ -22,14 +22,21 @@ import {
 } from "~/server/api/services/platform-billing";
 import { createTRPCRouter, superAdminProcedure } from "~/server/api/trpc";
 import {
+	companies,
+	contacts,
+	deals,
 	globalSettings,
+	invoices,
+	organizationMembers,
 	organizations,
 	payments,
 	subscriptionPlans,
 	subscriptions,
+	systemAuditLogs,
 	tenantOverrides,
 	users,
 } from "~/server/db/schema";
+import { logSuperAdminAction } from "~/server/security/audit";
 
 export const superadminRouter = createTRPCRouter({
 	getOrganizations: superAdminProcedure.query(async ({ ctx }) => {
@@ -69,12 +76,29 @@ export const superadminRouter = createTRPCRouter({
 				path: "/",
 			});
 
+			await logSuperAdminAction(ctx.db, {
+				actorId: ctx.session.user.id,
+				actorEmail: ctx.session.user.email || "superadmin@devcrm.io",
+				action: "IMPERSONATE_ORG",
+				targetType: "ORGANIZATION",
+				targetId: input.orgId,
+				metadata: { organizationName: org.name, slug: org.slug },
+			});
+
 			return { success: true, orgName: org.name };
 		}),
 
 	stopImpersonation: superAdminProcedure.mutation(async ({ ctx }) => {
 		const cookieStore = await cookies();
 		cookieStore.delete("devcrm_impersonate_org");
+
+		await logSuperAdminAction(ctx.db, {
+			actorId: ctx.session.user.id,
+			actorEmail: ctx.session.user.email || "superadmin@devcrm.io",
+			action: "STOP_IMPERSONATION",
+			targetType: "ORGANIZATION",
+		});
+
 		return { success: true };
 	}),
 
@@ -167,6 +191,15 @@ export const superadminRouter = createTRPCRouter({
 				})
 				.returning();
 
+			await logSuperAdminAction(ctx.db, {
+				actorId: ctx.session.user.id,
+				actorEmail: ctx.session.user.email || "superadmin@devcrm.io",
+				action: "CREATE_PLAN",
+				targetType: "PLAN",
+				targetId: plan.id,
+				metadata: { name: plan.name, code: plan.code },
+			});
+
 			return plan;
 		}),
 
@@ -200,6 +233,15 @@ export const superadminRouter = createTRPCRouter({
 				.where(eq(subscriptionPlans.id, id))
 				.returning();
 
+			await logSuperAdminAction(ctx.db, {
+				actorId: ctx.session.user.id,
+				actorEmail: ctx.session.user.email || "superadmin@devcrm.io",
+				action: "UPDATE_PLAN",
+				targetType: "PLAN",
+				targetId: id,
+				metadata: updates,
+			});
+
 			return updated;
 		}),
 
@@ -232,6 +274,7 @@ export const superadminRouter = createTRPCRouter({
 				? JSON.stringify(input.quotaOverrides)
 				: null;
 
+			let result: any = null;
 			if (existing) {
 				const [updated] = await ctx.db
 					.update(tenantOverrides)
@@ -241,19 +284,32 @@ export const superadminRouter = createTRPCRouter({
 					})
 					.where(eq(tenantOverrides.id, existing.id))
 					.returning();
-				return updated;
+				result = updated;
+			} else {
+				const [created] = await ctx.db
+					.insert(tenantOverrides)
+					.values({
+						organizationId: input.organizationId,
+						featureOverrides: featStr,
+						quotaOverrides: quotaStr,
+					})
+					.returning();
+				result = created;
 			}
 
-			const [created] = await ctx.db
-				.insert(tenantOverrides)
-				.values({
-					organizationId: input.organizationId,
-					featureOverrides: featStr,
-					quotaOverrides: quotaStr,
-				})
-				.returning();
+			await logSuperAdminAction(ctx.db, {
+				actorId: ctx.session.user.id,
+				actorEmail: ctx.session.user.email || "superadmin@devcrm.io",
+				action: "UPSERT_TENANT_OVERRIDES",
+				targetType: "ORGANIZATION",
+				targetId: input.organizationId,
+				metadata: {
+					featureOverrides: input.featureOverrides,
+					quotaOverrides: input.quotaOverrides,
+				},
+			});
 
-			return created;
+			return result;
 		}),
 
 	assignTenantPlan: superAdminProcedure
@@ -268,6 +324,15 @@ export const superadminRouter = createTRPCRouter({
 				.update(organizations)
 				.set({ planId: input.planId })
 				.where(eq(organizations.id, input.organizationId));
+
+			await logSuperAdminAction(ctx.db, {
+				actorId: ctx.session.user.id,
+				actorEmail: ctx.session.user.email || "superadmin@devcrm.io",
+				action: "ASSIGN_TENANT_PLAN",
+				targetType: "ORGANIZATION",
+				targetId: input.organizationId,
+				metadata: { planId: input.planId },
+			});
 
 			return { success: true };
 		}),
@@ -317,6 +382,14 @@ export const superadminRouter = createTRPCRouter({
 					.set({ featureFlags: JSON.stringify(updated) })
 					.where(eq(globalSettings.id, "default"));
 			}
+
+			await logSuperAdminAction(ctx.db, {
+				actorId: ctx.session.user.id,
+				actorEmail: ctx.session.user.email || "superadmin@devcrm.io",
+				action: "UPDATE_GLOBAL_FEATURE_FLAGS",
+				targetType: "GLOBAL_SETTING",
+				metadata: { flags: input },
+			});
 
 			return updated;
 		}),
@@ -413,6 +486,15 @@ export const superadminRouter = createTRPCRouter({
 				});
 			}
 
+			await logSuperAdminAction(ctx.db, {
+				actorId: ctx.session.user.id,
+				actorEmail: ctx.session.user.email || "superadmin@devcrm.io",
+				action: "SET_TENANT_FEATURE_OVERRIDE",
+				targetType: "ORGANIZATION",
+				targetId: input.organizationId,
+				metadata: { featureKey: input.featureKey, value: input.value },
+			});
+
 			return { success: true };
 		}),
 
@@ -441,6 +523,15 @@ export const superadminRouter = createTRPCRouter({
 				.set(input)
 				.where(eq(globalSettings.id, "default"))
 				.returning();
+
+			await logSuperAdminAction(ctx.db, {
+				actorId: ctx.session.user.id,
+				actorEmail: ctx.session.user.email || "superadmin@devcrm.io",
+				action: "UPDATE_GLOBAL_SETTINGS",
+				targetType: "GLOBAL_SETTING",
+				metadata: input,
+			});
+
 			return settings;
 		}),
 
@@ -528,6 +619,14 @@ export const superadminRouter = createTRPCRouter({
 					},
 				});
 
+				await logSuperAdminAction(ctx.db, {
+					actorId: ctx.session.user.id,
+					actorEmail: ctx.session.user.email || "superadmin@devcrm.io",
+					action: "DISPATCH_TEST_WEBHOOK",
+					targetType: "WEBHOOK",
+					targetId: targetAppId,
+				});
+
 				return {
 					success: true,
 					mock: false,
@@ -560,4 +659,213 @@ export const superadminRouter = createTRPCRouter({
 			status: "HEALTHY",
 		};
 	}),
+
+	// --- SYSTEM AUDIT TRAIL PROCEDURES ---
+	getAuditLogs: superAdminProcedure
+		.input(
+			z
+				.object({
+					action: z.string().optional(),
+					actorEmail: z.string().optional(),
+					targetId: z.string().optional(),
+					limit: z.number().min(1).max(100).default(50),
+					offset: z.number().min(0).default(0),
+				})
+				.optional(),
+		)
+		.query(async ({ ctx, input }) => {
+			const conditions = [];
+			if (input?.action && input.action !== "ALL") {
+				conditions.push(eq(systemAuditLogs.action, input.action));
+			}
+			if (input?.actorEmail && input.actorEmail.trim() !== "") {
+				conditions.push(
+					ilike(systemAuditLogs.actorEmail, `%${input.actorEmail.trim()}%`),
+				);
+			}
+			if (input?.targetId && input.targetId.trim() !== "") {
+				conditions.push(eq(systemAuditLogs.targetId, input.targetId.trim()));
+			}
+
+			const query = ctx.db
+				.select()
+				.from(systemAuditLogs);
+
+			if (conditions.length > 0) {
+				return query
+					.where(and(...conditions))
+					.orderBy(desc(systemAuditLogs.createdAt))
+					.limit(input?.limit || 50)
+					.offset(input?.offset || 0);
+			}
+
+			return query
+				.orderBy(desc(systemAuditLogs.createdAt))
+				.limit(input?.limit || 50)
+				.offset(input?.offset || 0);
+		}),
+
+	getAuditActions: superAdminProcedure.query(async ({ ctx }) => {
+		const distinctActions = await ctx.db
+			.selectDistinct({ action: systemAuditLogs.action })
+			.from(systemAuditLogs);
+		return distinctActions.map((d: any) => d.action).filter(Boolean);
+	}),
+
+	// --- TENANT DEEP INSPECTOR PROCEDURES ---
+	getTenantDeepInspection: superAdminProcedure
+		.input(z.object({ orgId: z.string() }))
+		.query(async ({ ctx, input }) => {
+			const org = await ctx.db.query.organizations.findFirst({
+				where: eq(organizations.id, input.orgId),
+			});
+
+			if (!org) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Tenant organization not found",
+				});
+			}
+
+			// Members with user profile
+			const members = await ctx.db.query.organizationMembers.findMany({
+				where: eq(organizationMembers.organizationId, input.orgId),
+				with: {
+					user: {
+						columns: {
+							id: true,
+							name: true,
+							email: true,
+							image: true,
+							systemRole: true,
+							createdAt: true,
+						},
+					},
+				},
+			});
+
+			// Financials & Commercial Metrics
+			const tenantDeals = await ctx.db
+				.select()
+				.from(deals)
+				.where(eq(deals.organizationId, input.orgId));
+
+			const wonDeals = tenantDeals.filter((d) => d.status === "WON");
+			const openDeals = tenantDeals.filter((d) => d.status === "OPEN");
+			const totalWonRevenue = wonDeals.reduce(
+				(sum, d) => sum + (d.value || 0),
+				0,
+			);
+			const openPipelineValue = openDeals.reduce(
+				(sum, d) => sum + (d.value || 0),
+				0,
+			);
+
+			const tenantInvoices = await ctx.db
+				.select()
+				.from(invoices)
+				.where(eq(invoices.organizationId, input.orgId));
+
+			const totalInvoiced = tenantInvoices.reduce(
+				(sum, i) => sum + (i.totalAmount || 0),
+				0,
+			);
+			const totalPaid = tenantInvoices.reduce(
+				(sum, i) => sum + (i.amountPaid || 0),
+				0,
+			);
+			const paidInvoicesCount = tenantInvoices.filter(
+				(i) => i.status === "PAID",
+			).length;
+			const overdueInvoicesCount = tenantInvoices.filter(
+				(i) => i.status === "OVERDUE",
+			).length;
+
+			// Entitlements & Overrides
+			const entitlements = await getTenantEntitlements(ctx.db, input.orgId);
+			const overridesRecord = await ctx.db.query.tenantOverrides.findFirst({
+				where: eq(tenantOverrides.organizationId, input.orgId),
+			});
+
+			let parsedOverrides = { features: {}, quotas: {} };
+			if (overridesRecord) {
+				try {
+					if (overridesRecord.featureOverrides) {
+						parsedOverrides.features = JSON.parse(
+							overridesRecord.featureOverrides,
+						);
+					}
+					if (overridesRecord.quotaOverrides) {
+						parsedOverrides.quotas = JSON.parse(
+							overridesRecord.quotaOverrides,
+						);
+					}
+				} catch {}
+			}
+
+			// Recent Audit Logs targeting this tenant
+			const recentAuditLogs = await ctx.db
+				.select()
+				.from(systemAuditLogs)
+				.where(eq(systemAuditLogs.targetId, input.orgId))
+				.orderBy(desc(systemAuditLogs.createdAt))
+				.limit(15);
+
+			return {
+				organization: org,
+				members: members.map((m) => ({
+					id: m.id,
+					userId: m.userId,
+					role: m.role,
+					joinedAt: m.joinedAt,
+					user: m.user,
+				})),
+				metrics: {
+					deals: {
+						total: tenantDeals.length,
+						wonCount: wonDeals.length,
+						openCount: openDeals.length,
+						wonRevenueCents: totalWonRevenue,
+						openPipelineCents: openPipelineValue,
+					},
+					invoices: {
+						total: tenantInvoices.length,
+						paidCount: paidInvoicesCount,
+						overdueCount: overdueInvoicesCount,
+						totalInvoicedCents: totalInvoiced,
+						totalPaidCents: totalPaid,
+					},
+					totalMembers: members.length,
+				},
+				entitlements,
+				overrides: parsedOverrides,
+				recentAuditLogs,
+			};
+		}),
+
+	toggleTenantStatus: superAdminProcedure
+		.input(
+			z.object({
+				orgId: z.string(),
+				isActive: z.boolean(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const [updated] = await ctx.db
+				.update(organizations)
+				.set({ isActive: input.isActive })
+				.where(eq(organizations.id, input.orgId))
+				.returning();
+
+			await logSuperAdminAction(ctx.db, {
+				actorId: ctx.session.user.id,
+				actorEmail: ctx.session.user.email || "superadmin@devcrm.io",
+				action: input.isActive ? "ACTIVATE_TENANT" : "SUSPEND_TENANT",
+				targetType: "ORGANIZATION",
+				targetId: input.orgId,
+				metadata: { organizationName: updated?.name, isActive: input.isActive },
+			});
+
+			return updated;
+		}),
 });
