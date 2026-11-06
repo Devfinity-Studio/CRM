@@ -2,12 +2,21 @@ import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { z } from "zod";
+import { env } from "~/env";
+import { svix } from "~/lib/svix";
 import {
 	DEFAULT_GLOBAL_FEATURE_FLAGS,
 	type FeatureKey,
 	getGlobalFeatureFlags,
 	getTenantEntitlements,
 } from "~/server/api/services/entitlements";
+import {
+	checkDodoHealth,
+	checkEmailHealth,
+	checkStorageHealth,
+	checkSvixHealth,
+	getAllIntegrationsHealth,
+} from "~/server/api/services/integrations-health";
 import {
 	createPlatformCheckoutSession,
 } from "~/server/api/services/platform-billing";
@@ -434,4 +443,121 @@ export const superadminRouter = createTRPCRouter({
 				.returning();
 			return settings;
 		}),
+
+	// --- INTEGRATION CENTER & SERVICE HEALTH MONITORING ---
+	getIntegrationsHealth: superAdminProcedure.query(async () => {
+		return getAllIntegrationsHealth();
+	}),
+
+	testDodoConnection: superAdminProcedure.mutation(async () => {
+		return checkDodoHealth();
+	}),
+
+	testSvixConnection: superAdminProcedure.mutation(async () => {
+		return checkSvixHealth();
+	}),
+
+	testStorageConnection: superAdminProcedure.mutation(async () => {
+		return checkStorageHealth();
+	}),
+
+	testEmailConnection: superAdminProcedure.mutation(async () => {
+		return checkEmailHealth();
+	}),
+
+	getSvixApplications: superAdminProcedure.query(async () => {
+		try {
+			if (env.SVIX_TOKEN === "test_sk_fake_token_for_devcrm" || !env.SVIX_TOKEN) {
+				return {
+					data: [],
+					isMock: true,
+					message: "Using mock SVIX_TOKEN",
+				};
+			}
+			const apps = await svix.application.list({ limit: 25 });
+			return {
+				data: apps.data,
+				isMock: false,
+			};
+		} catch (err: any) {
+			return {
+				data: [],
+				isMock: false,
+				error: err?.message || "Failed to list Svix applications",
+			};
+		}
+	}),
+
+	dispatchSvixTestWebhook: superAdminProcedure
+		.input(
+			z.object({
+				appId: z.string().optional(),
+			}),
+		)
+		.mutation(async ({ input }) => {
+			if (env.SVIX_TOKEN === "test_sk_fake_token_for_devcrm" || !env.SVIX_TOKEN) {
+				return {
+					success: true,
+					mock: true,
+					message: "Test webhook simulated (mock SVIX_TOKEN).",
+					timestamp: new Date().toISOString(),
+				};
+			}
+
+			try {
+				let targetAppId = input.appId;
+				if (!targetAppId) {
+					const apps = await svix.application.list({ limit: 1 });
+					if (apps.data.length > 0 && apps.data[0]) {
+						targetAppId = apps.data[0].id;
+					} else {
+						const newApp = await svix.application.create({
+							name: "SuperAdmin Diagnostic App",
+							uid: `diag-${Date.now()}`,
+						});
+						targetAppId = newApp.id;
+					}
+				}
+
+				const message = await svix.message.create(targetAppId, {
+					eventType: "test.ping",
+					payload: {
+						test: true,
+						triggeredAt: new Date().toISOString(),
+						source: "SuperAdmin Integration Center",
+					},
+				});
+
+				return {
+					success: true,
+					mock: false,
+					messageId: message.id,
+					appId: targetAppId,
+					timestamp: new Date().toISOString(),
+				};
+			} catch (err: any) {
+				throw new TRPCError({
+					code: "INTERNAL_SERVER_ERROR",
+					message: `Failed to dispatch test webhook: ${err?.message || "Unknown error"}`,
+				});
+			}
+		}),
+
+	getPlatformStorageStats: superAdminProcedure.query(async ({ ctx }) => {
+		const totalOrgs = await ctx.db.query.organizations.findMany({
+			columns: { id: true, name: true, logoUrl: true },
+		});
+		const orgsWithCustomLogos = totalOrgs.filter((o) => Boolean(o.logoUrl)).length;
+
+		return {
+			bucket: env.S3_BUCKET_NAME,
+			region: env.S3_REGION,
+			endpoint: env.S3_ENDPOINT_URL,
+			publicUrl: env.S3_PUBLIC_URL || `${env.S3_ENDPOINT_URL}/${env.S3_BUCKET_NAME}`,
+			pathStyleAddressing: true,
+			totalTenants: totalOrgs.length,
+			tenantsWithUploadedAssets: orgsWithCustomLogos,
+			status: "HEALTHY",
+		};
+	}),
 });

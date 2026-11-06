@@ -13,11 +13,11 @@ Deliver an enterprise-grade Super Admin command center for DevCRM. Enable platfo
 - [ ] **REQ-56-05**: Develop automated Vitest test suite validating cascading feature resolution and route guards.
 
 ### Phase 57: Global Integration Center & Third-Party Service Health Monitoring
-- [ ] **REQ-57-01**: Build `/superadmin/integrations` dashboard displaying real-time connectivity status, response latency, and operational health for Dodo Payments, Svix Webhooks, Neon Object Storage, and Email Service.
-- [ ] **REQ-57-02**: Implement diagnostic verification procedures (`testDodoConnection`, `testSvixConnection`, `testStorageConnection`, `testEmailConnection`) validating API keys, endpoints, and bucket permissions.
-- [ ] **REQ-57-03**: Provide operational management actions for Dodo Payments (live subscription inspection, manual sync triggers) and Svix (application directory, test message dispatch, failed delivery queue review).
-- [ ] **REQ-57-04**: Monitor platform-wide storage consumption (total files uploaded, bucket capacity, active presigned URLs) across tenants.
-- [ ] **REQ-57-05**: Vitest tests covering diagnostic endpoints, failure handling, and health check procedures.
+- [x] **REQ-57-01**: Build `/superadmin/integrations` dashboard displaying real-time connectivity status, response latency, and operational health for Dodo Payments, Svix Webhooks, Neon Object Storage, and Email Service.
+- [x] **REQ-57-02**: Implement diagnostic verification procedures (`testDodoConnection`, `testSvixConnection`, `testStorageConnection`, `testEmailConnection`) validating API keys, endpoints, and bucket permissions.
+- [x] **REQ-57-03**: Provide operational management actions for Dodo Payments (live subscription inspection, manual sync triggers) and Svix (application directory, test message dispatch, failed delivery queue review).
+- [x] **REQ-57-04**: Monitor platform-wide storage consumption (total files uploaded, bucket capacity, active presigned URLs) across tenants.
+- [x] **REQ-57-05**: Vitest tests covering diagnostic endpoints, failure handling, and health check procedures.
 
 ### Phase 58: Tenant Deep Inspection & Superadmin Activity Audit Trail
 - [ ] **REQ-58-01**: Create `devcrm_system_audit_log` database table storing immutable records: `actorId`, `actorEmail`, `action` (`IMPERSONATE_ORG`, `TOGGLE_FEATURE`, `UPDATE_PLAN`, `OVERRIDE_QUOTA`, `SUSPEND_TENANT`, `RESET_PASSWORD`), `targetType`, `targetId`, `metadata`, `ipAddress`, `createdAt`.
