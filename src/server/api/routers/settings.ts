@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import bcrypt from "bcryptjs";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -114,21 +115,29 @@ export const settingsRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			// In a real app we'd use bcrypt to compare current password and hash the new one
-			// Since this is MVP, we just update the passwordHash. NextAuth credentials provider
-			// should match how we store it here.
-			// E.g., const hashed = await hash(input.newPassword, 10);
 			const user = await ctx.db.query.users.findFirst({
 				where: eq(users.id, ctx.session.user.id),
 			});
-			if (!user) {
-				throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+			if (!user || !user.passwordHash) {
+				throw new TRPCError({ code: "NOT_FOUND", message: "User not found or credentials not initialized" });
 			}
 
-			// Basic implementation without bcrypt comparison for MVP demo
+			const isCurrentValid = await bcrypt.compare(
+				input.currentPassword,
+				user.passwordHash,
+			);
+			if (!isCurrentValid) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Current password does not match",
+				});
+			}
+
+			const passwordHash = await bcrypt.hash(input.newPassword, 10);
+
 			await ctx.db
 				.update(users)
-				.set({ passwordHash: input.newPassword })
+				.set({ passwordHash })
 				.where(eq(users.id, ctx.session.user.id));
 
 			return { success: true };

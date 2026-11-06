@@ -20,6 +20,14 @@ export async function POST(req: NextRequest) {
 
 		// 1. Signature Verification via Standard Webhooks specification
 		const webhookKey = process.env.DODO_PAYMENTS_WEBHOOK_KEY;
+		if (!webhookKey && process.env.NODE_ENV === "production") {
+			console.error("[Dodo Webhook] Missing DODO_PAYMENTS_WEBHOOK_KEY in production");
+			return NextResponse.json(
+				{ error: "Webhook configuration error" },
+				{ status: 500 },
+			);
+		}
+
 		if (webhookKey) {
 			if (!webhookId || !webhookSignature || !webhookTimestamp) {
 				return NextResponse.json(
@@ -45,6 +53,11 @@ export async function POST(req: NextRequest) {
 					{ status: 401 },
 				);
 			}
+		} else if (process.env.NODE_ENV !== "test") {
+			return NextResponse.json(
+				{ error: "Webhook signature verification required" },
+				{ status: 401 },
+			);
 		}
 
 		// 2. Idempotency Guard

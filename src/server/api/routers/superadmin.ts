@@ -31,6 +31,9 @@ export const superadminRouter = createTRPCRouter({
 
 	getUsers: superAdminProcedure.query(async ({ ctx }) => {
 		return ctx.db.query.users.findMany({
+			columns: {
+				passwordHash: false,
+			},
 			orderBy: (u, { desc }) => [desc(u.createdAt)],
 		});
 	}),

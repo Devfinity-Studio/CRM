@@ -1,5 +1,6 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { env } from "~/env";
@@ -17,6 +18,17 @@ const s3 = new S3Client({
 	forcePathStyle: true,
 });
 
+const DISALLOWED_MIME_TYPES = [
+	"text/html",
+	"application/xhtml+xml",
+	"application/javascript",
+	"text/javascript",
+	"image/svg+xml",
+	"application/x-msdownload",
+	"application/x-sh",
+	"application/x-executable",
+];
+
 export const uploadsRouter = createTRPCRouter({
 	getPresignedUrl: protectedProcedure
 		.input(
@@ -27,16 +39,31 @@ export const uploadsRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			// 1. Get user's organization to isolate files
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			if (DISALLOWED_MIME_TYPES.includes(input.contentType.toLowerCase())) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "The requested file type is not permitted for upload.",
+				});
+			}
 
-			// 2. Generate a unique key
+			// 1. Get user's organization to isolate files
+			const orgId =
+				ctx.session?.user?.organizationId ||
+				(
+					await ctx.db.query.organizationMembers.findFirst({
+						where: eq(organizationMembers.userId, ctx.session.user.id),
+					})
+				)?.organizationId;
+
+			if (!orgId) {
+				throw new TRPCError({ code: "UNAUTHORIZED", message: "Unauthorized" });
+			}
+
+			// 2. Generate a unique key with sanitized folder and filename
 			const uuid = crypto.randomUUID();
+			const sanitizedFolder = input.folder.replace(/[^a-zA-Z0-9_-]/g, "") || "misc";
 			const sanitizedFilename = input.filename.replace(/[^a-zA-Z0-9.-]/g, "_");
-			const key = `${member.organizationId}/${input.folder}/${uuid}-${sanitizedFilename}`;
+			const key = `${orgId}/${sanitizedFolder}/${uuid}-${sanitizedFilename}`;
 
 			// 3. Create the presigned URL
 			const command = new PutObjectCommand({

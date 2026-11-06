@@ -1,13 +1,35 @@
+import { TRPCError } from "@trpc/server";
 import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { adCampaigns, crmTasks, notifications } from "~/server/db/schema";
+import { adCampaigns, crmTasks, notifications, organizationMembers } from "~/server/db/schema";
+
+async function verifyOrgMembership(ctx: any, organizationId: string) {
+	if (ctx.session?.user?.systemRole === "SUPER_ADMIN") return true;
+	if (ctx.session?.user?.organizationId === organizationId) return true;
+	if (ctx.db?.query?.organizationMembers?.findFirst) {
+		const member = await ctx.db.query.organizationMembers.findFirst({
+			where: and(
+				eq(organizationMembers.organizationId, organizationId),
+				eq(organizationMembers.userId, ctx.session.user.id),
+			),
+		});
+		if (!member) {
+			throw new TRPCError({
+				code: "FORBIDDEN",
+				message: "You do not have access to this organization.",
+			});
+		}
+	}
+	return true;
+}
 
 export const marketingRouter = createTRPCRouter({
 	// Get all ad campaigns
 	getCampaigns: protectedProcedure
 		.input(z.object({ organizationId: z.string() }))
 		.query(async ({ ctx, input }) => {
+			await verifyOrgMembership(ctx, input.organizationId);
 			const campaigns = await ctx.db
 				.select()
 				.from(adCampaigns)
@@ -39,6 +61,7 @@ export const marketingRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
+			await verifyOrgMembership(ctx, input.organizationId);
 			const [campaign] = await ctx.db
 				.insert(adCampaigns)
 				.values(input)
@@ -50,6 +73,7 @@ export const marketingRouter = createTRPCRouter({
 	getTasks: protectedProcedure
 		.input(z.object({ organizationId: z.string() }))
 		.query(async ({ ctx, input }) => {
+			await verifyOrgMembership(ctx, input.organizationId);
 			return ctx.db
 				.select()
 				.from(crmTasks)
@@ -70,6 +94,7 @@ export const marketingRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
+			await verifyOrgMembership(ctx, input.organizationId);
 			const [task] = await ctx.db
 				.insert(crmTasks)
 				.values({
@@ -89,6 +114,14 @@ export const marketingRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
+			const task = await ctx.db.query.crmTasks.findFirst({
+				where: eq(crmTasks.id, input.taskId),
+			});
+			if (!task) {
+				throw new TRPCError({ code: "NOT_FOUND", message: "Task not found" });
+			}
+			await verifyOrgMembership(ctx, task.organizationId);
+
 			const [updated] = await ctx.db
 				.update(crmTasks)
 				.set({ status: input.status })

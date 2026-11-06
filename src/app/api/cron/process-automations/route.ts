@@ -14,7 +14,8 @@ import {
 export async function POST(request: Request) {
 	// In a real app, verify a secret token from Vercel Cron
 	const authHeader = request.headers.get("authorization");
-	if (authHeader !== `Bearer ${process.env.CRON_SECRET || "secret"}`) {
+	const cronSecret = process.env.CRON_SECRET;
+	if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
 

@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -6,6 +7,7 @@ import {
 	contacts,
 	dealProducts,
 	deals,
+	organizationMembers,
 	pipelineStages,
 	pipelines,
 	products,
@@ -14,11 +16,32 @@ import {
 import { syncDealInventoryHolds } from "~/server/api/services/deal-inventory";
 import { emitDomainEvent } from "~/server/events/event-bus";
 
+async function verifyOrgMembership(ctx: any, organizationId: string) {
+	if (ctx.session?.user?.systemRole === "SUPER_ADMIN") return true;
+	if (ctx.session?.user?.organizationId === organizationId) return true;
+	if (ctx.db?.query?.organizationMembers?.findFirst) {
+		const member = await ctx.db.query.organizationMembers.findFirst({
+			where: and(
+				eq(organizationMembers.organizationId, organizationId),
+				eq(organizationMembers.userId, ctx.session.user.id),
+			),
+		});
+		if (!member) {
+			throw new TRPCError({
+				code: "FORBIDDEN",
+				message: "You do not have access to this organization.",
+			});
+		}
+	}
+	return true;
+}
+
 export const dealsRouter = createTRPCRouter({
 	// Get all pipelines for tenant organization
 	getPipelines: protectedProcedure
 		.input(z.object({ organizationId: z.string() }))
 		.query(async ({ ctx, input }) => {
+			await verifyOrgMembership(ctx, input.organizationId);
 			return ctx.db
 				.select()
 				.from(pipelines)
@@ -69,6 +92,7 @@ export const dealsRouter = createTRPCRouter({
 	getDeals: protectedProcedure
 		.input(z.object({ organizationId: z.string(), pipelineId: z.string() }))
 		.query(async ({ ctx, input }) => {
+			await verifyOrgMembership(ctx, input.organizationId);
 			const allDeals = await ctx.db
 				.select({
 					deal: deals,
@@ -240,6 +264,7 @@ export const dealsRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
+			await verifyOrgMembership(ctx, input.organizationId);
 			const [newDeal] = await ctx.db.insert(deals).values(input).returning();
 			return newDeal;
 		}),
@@ -248,6 +273,7 @@ export const dealsRouter = createTRPCRouter({
 	getMetricsSummary: protectedProcedure
 		.input(z.object({ organizationId: z.string(), pipelineId: z.string() }))
 		.query(async ({ ctx, input }) => {
+			await verifyOrgMembership(ctx, input.organizationId);
 			const allDeals = await ctx.db
 				.select()
 				.from(deals)

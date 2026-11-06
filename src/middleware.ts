@@ -5,19 +5,30 @@ import { auth } from "~/server/auth";
 const protectedRoutes = [
 	"/dashboard",
 	"/admin",
+	"/superadmin",
+	"/deals",
 	"/clients",
 	"/pipeline",
 	"/billing",
 	"/products",
+	"/inventory",
+	"/automations",
 	"/marketing",
 	"/tasks",
+	"/settings",
+	"/onboarding",
 ];
 
 const authRoutes = ["/login", "/register"];
 
 export default auth((req) => {
 	const isLoggedIn = !!req.auth;
+	const isSuperAdmin = req.auth?.user?.systemRole === "SUPER_ADMIN";
 	const { nextUrl } = req;
+
+	const isSuperAdminRoute =
+		nextUrl.pathname.startsWith("/superadmin") ||
+		nextUrl.pathname.startsWith("/admin");
 
 	const isProtectedRoute = protectedRoutes.some((route) =>
 		nextUrl.pathname.startsWith(route),
@@ -29,6 +40,12 @@ export default auth((req) => {
 
 	if (isProtectedRoute && !isLoggedIn) {
 		return NextResponse.redirect(new URL("/login", nextUrl));
+	}
+
+	if (isSuperAdminRoute && (!isLoggedIn || !isSuperAdmin)) {
+		return NextResponse.redirect(
+			new URL(isLoggedIn ? "/dashboard" : "/login", nextUrl),
+		);
 	}
 
 	if (isAuthRoute && isLoggedIn) {

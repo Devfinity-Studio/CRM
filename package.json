@@ -55,7 +55,6 @@
 		"dodopayments": "^2.61.0",
 		"driver.js": "^1.10.2",
 		"drizzle-orm": "^0.41.0",
-		"files-sdk": "^3.1.2",
 		"libphonenumber-js": "^1.13.15",
 		"lucide-react": "^1.66.0",
 		"next": "15.5.29",
@@ -98,5 +97,5 @@
 	"ct3aMetadata": {
 		"initVersion": "7.40.0"
 	},
-	"packageManager": "pnpm@11.5.1"
+	"packageManager": "pnpm@12.18.0"
 }
