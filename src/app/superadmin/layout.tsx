@@ -65,6 +65,12 @@ export default async function SuperAdminLayout({
 							</Link>
 							<Link
 								className="rounded-xl px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
+								href="/superadmin/users"
+							>
+								Global Users
+							</Link>
+							<Link
+								className="rounded-xl px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
 								href="/superadmin/settings"
 							>
 								Settings

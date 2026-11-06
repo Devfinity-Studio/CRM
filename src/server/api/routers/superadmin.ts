@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, ilike } from "drizzle-orm";
+import bcrypt from "bcryptjs";
+import { and, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { z } from "zod";
 import { env } from "~/env";
@@ -30,6 +31,7 @@ import {
 	organizationMembers,
 	organizations,
 	payments,
+	sessions,
 	subscriptionPlans,
 	subscriptions,
 	systemAuditLogs,
@@ -867,5 +869,394 @@ export const superadminRouter = createTRPCRouter({
 			});
 
 			return updated;
+		}),
+
+	getGlobalUsers: superAdminProcedure
+		.input(
+			z.object({
+				search: z.string().optional(),
+				systemRole: z
+					.enum(["ALL", "SUPER_ADMIN", "USER"])
+					.optional()
+					.default("ALL"),
+				status: z
+					.enum(["ALL", "ACTIVE", "SUSPENDED"])
+					.optional()
+					.default("ALL"),
+				limit: z.number().min(1).max(100).optional().default(50),
+				offset: z.number().min(0).optional().default(0),
+			}),
+		)
+		.query(async ({ ctx, input }) => {
+			const conditions = [];
+
+			if (input.search && input.search.trim()) {
+				const q = `%${input.search.trim()}%`;
+				conditions.push(or(ilike(users.name, q), ilike(users.email, q)));
+			}
+
+			if (input.systemRole && input.systemRole !== "ALL") {
+				conditions.push(eq(users.systemRole, input.systemRole));
+			}
+
+			if (input.status === "ACTIVE") {
+				conditions.push(eq(users.isActive, true));
+			} else if (input.status === "SUSPENDED") {
+				conditions.push(eq(users.isActive, false));
+			}
+
+			const whereClause =
+				conditions.length > 0 ? and(...conditions) : undefined;
+
+			const [userList, totalCountRes, statsRes] = await Promise.all([
+				ctx.db
+					.select({
+						id: users.id,
+						name: users.name,
+						email: users.email,
+						image: users.image,
+						phone: users.phone,
+						systemRole: users.systemRole,
+						isActive: users.isActive,
+						onboardingComplete: users.onboardingComplete,
+						createdAt: users.createdAt,
+						updatedAt: users.updatedAt,
+					})
+					.from(users)
+					.where(whereClause)
+					.orderBy(desc(users.createdAt))
+					.limit(input.limit)
+					.offset(input.offset),
+				ctx.db
+					.select({ count: sql<number>`cast(count(*) as integer)` })
+					.from(users)
+					.where(whereClause),
+				ctx.db
+					.select({
+						totalUsers: sql<number>`cast(count(*) as integer)`,
+						superAdmins: sql<number>`cast(count(*) filter (where ${users.systemRole} = 'SUPER_ADMIN') as integer)`,
+						activeUsers: sql<number>`cast(count(*) filter (where ${users.isActive} = true) as integer)`,
+						suspendedUsers: sql<number>`cast(count(*) filter (where ${users.isActive} = false) as integer)`,
+					})
+					.from(users),
+			]);
+
+			const total = totalCountRes[0]?.count ?? 0;
+			const stats = statsRes[0] ?? {
+				totalUsers: 0,
+				superAdmins: 0,
+				activeUsers: 0,
+				suspendedUsers: 0,
+			};
+
+			const userIds = userList.map((u) => u.id);
+			const membershipsByUser: Record<
+				string,
+				Array<{
+					organizationId: string;
+					organizationName: string;
+					organizationSlug: string;
+					role: string;
+				}>
+			> = {};
+
+			if (userIds.length > 0) {
+				const memberships = await ctx.db
+					.select({
+						userId: organizationMembers.userId,
+						role: organizationMembers.role,
+						organizationId: organizationMembers.organizationId,
+						organizationName: organizations.name,
+						organizationSlug: organizations.slug,
+					})
+					.from(organizationMembers)
+					.innerJoin(
+						organizations,
+						eq(organizationMembers.organizationId, organizations.id),
+					)
+					.where(inArray(organizationMembers.userId, userIds));
+
+				for (const m of memberships) {
+					if (!membershipsByUser[m.userId]) {
+						membershipsByUser[m.userId] = [];
+					}
+					membershipsByUser[m.userId]!.push({
+						organizationId: m.organizationId,
+						organizationName: m.organizationName,
+						organizationSlug: m.organizationSlug,
+						role: m.role,
+					});
+				}
+			}
+
+			const items = userList.map((u) => ({
+				...u,
+				organizations: membershipsByUser[u.id] ?? [],
+			}));
+
+			return {
+				items,
+				total,
+				stats,
+			};
+		}),
+
+	updateUserSystemRole: superAdminProcedure
+		.input(
+			z.object({
+				userId: z.string(),
+				systemRole: z.enum(["SUPER_ADMIN", "USER"]),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			if (
+				input.userId === ctx.session.user.id &&
+				input.systemRole !== "SUPER_ADMIN"
+			) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "You cannot demote your own Super Admin account.",
+				});
+			}
+
+			const targetUser = await ctx.db.query.users.findFirst({
+				where: eq(users.id, input.userId),
+			});
+
+			if (!targetUser) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "User not found",
+				});
+			}
+
+			const [updated] = await ctx.db
+				.update(users)
+				.set({ systemRole: input.systemRole })
+				.where(eq(users.id, input.userId))
+				.returning();
+
+			await logSuperAdminAction(ctx.db, {
+				actorId: ctx.session.user.id,
+				actorEmail: ctx.session.user.email || "superadmin@devcrm.io",
+				action: "UPDATE_USER_ROLE",
+				targetType: "USER",
+				targetId: input.userId,
+				metadata: {
+					targetEmail: targetUser.email,
+					oldRole: targetUser.systemRole,
+					newRole: input.systemRole,
+				},
+			});
+
+			return {
+				id: updated?.id ?? input.userId,
+				email: updated?.email ?? targetUser.email,
+				systemRole: updated?.systemRole ?? input.systemRole,
+			};
+		}),
+
+	toggleUserActiveStatus: superAdminProcedure
+		.input(
+			z.object({
+				userId: z.string(),
+				isActive: z.boolean(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			if (input.userId === ctx.session.user.id && !input.isActive) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "You cannot suspend your own account.",
+				});
+			}
+
+			const targetUser = await ctx.db.query.users.findFirst({
+				where: eq(users.id, input.userId),
+			});
+
+			if (!targetUser) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "User not found",
+				});
+			}
+
+			const [updated] = await ctx.db
+				.update(users)
+				.set({ isActive: input.isActive })
+				.where(eq(users.id, input.userId))
+				.returning();
+
+			// If suspended, terminate all active sessions immediately
+			if (!input.isActive) {
+				await ctx.db
+					.delete(sessions)
+					.where(eq(sessions.userId, input.userId));
+			}
+
+			await logSuperAdminAction(ctx.db, {
+				actorId: ctx.session.user.id,
+				actorEmail: ctx.session.user.email || "superadmin@devcrm.io",
+				action: input.isActive ? "ACTIVATE_USER" : "SUSPEND_USER",
+				targetType: "USER",
+				targetId: input.userId,
+				metadata: {
+					targetEmail: targetUser.email,
+					isActive: input.isActive,
+					sessionsTerminated: !input.isActive,
+				},
+			});
+
+			return {
+				id: updated?.id ?? input.userId,
+				email: updated?.email ?? targetUser.email,
+				isActive: updated?.isActive ?? input.isActive,
+			};
+		}),
+
+	adminResetUserPassword: superAdminProcedure
+		.input(
+			z.object({
+				userId: z.string(),
+				newPassword: z
+					.string()
+					.min(8, "Password must be at least 8 characters"),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const targetUser = await ctx.db.query.users.findFirst({
+				where: eq(users.id, input.userId),
+			});
+
+			if (!targetUser) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "User not found",
+				});
+			}
+
+			const passwordHash = await bcrypt.hash(input.newPassword, 10);
+
+			await ctx.db
+				.update(users)
+				.set({ passwordHash })
+				.where(eq(users.id, input.userId));
+
+			// Invalidate all existing sessions so user is forced to re-authenticate
+			await ctx.db
+				.delete(sessions)
+				.where(eq(sessions.userId, input.userId));
+
+			await logSuperAdminAction(ctx.db, {
+				actorId: ctx.session.user.id,
+				actorEmail: ctx.session.user.email || "superadmin@devcrm.io",
+				action: "RESET_USER_PASSWORD",
+				targetType: "USER",
+				targetId: input.userId,
+				metadata: {
+					targetEmail: targetUser.email,
+					sessionsTerminated: true,
+				},
+			});
+
+			return { success: true };
+		}),
+
+	revokeUserSessions: superAdminProcedure
+		.input(
+			z.object({
+				userId: z.string(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const targetUser = await ctx.db.query.users.findFirst({
+				where: eq(users.id, input.userId),
+			});
+
+			if (!targetUser) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "User not found",
+				});
+			}
+
+			await ctx.db
+				.delete(sessions)
+				.where(eq(sessions.userId, input.userId));
+
+			await logSuperAdminAction(ctx.db, {
+				actorId: ctx.session.user.id,
+				actorEmail: ctx.session.user.email || "superadmin@devcrm.io",
+				action: "REVOKE_USER_SESSIONS",
+				targetType: "USER",
+				targetId: input.userId,
+				metadata: {
+					targetEmail: targetUser.email,
+				},
+			});
+
+			return { success: true };
+		}),
+
+	createStaffUser: superAdminProcedure
+		.input(
+			z.object({
+				name: z.string().min(1, "Name is required"),
+				email: z.string().email("Invalid email address"),
+				password: z
+					.string()
+					.min(8, "Password must be at least 8 characters"),
+				systemRole: z.enum(["SUPER_ADMIN", "USER"]).default("USER"),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const normalizedEmail = input.email.trim().toLowerCase();
+
+			const existing = await ctx.db.query.users.findFirst({
+				where: eq(users.email, normalizedEmail),
+			});
+
+			if (existing) {
+				throw new TRPCError({
+					code: "CONFLICT",
+					message: "A user with this email address already exists.",
+				});
+			}
+
+			const passwordHash = await bcrypt.hash(input.password, 10);
+
+			const [newUser] = await ctx.db
+				.insert(users)
+				.values({
+					name: input.name.trim(),
+					email: normalizedEmail,
+					passwordHash,
+					systemRole: input.systemRole,
+					isActive: true,
+					onboardingComplete: true,
+				})
+				.returning();
+
+			await logSuperAdminAction(ctx.db, {
+				actorId: ctx.session.user.id,
+				actorEmail: ctx.session.user.email || "superadmin@devcrm.io",
+				action: "CREATE_STAFF_USER",
+				targetType: "USER",
+				targetId: newUser?.id ?? "unknown",
+				metadata: {
+					name: input.name.trim(),
+					email: normalizedEmail,
+					systemRole: input.systemRole,
+				},
+			});
+
+			return {
+				id: newUser?.id,
+				name: newUser?.name,
+				email: newUser?.email,
+				systemRole: newUser?.systemRole,
+				isActive: newUser?.isActive,
+			};
 		}),
 });

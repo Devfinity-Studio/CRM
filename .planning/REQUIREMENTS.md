@@ -6,11 +6,11 @@ Deliver an enterprise-grade Super Admin command center for DevCRM. Enable platfo
 ## 2. Requirements
 
 ### Phase 56: Dynamic Feature Flags & Cascading Module Toggles
-- [ ] **REQ-56-01**: Define comprehensive feature flag schema (`inventory`, `invoicing`, `quotes`, `automations`, `aiInsights`, `customDomains`, `webhooks`, `apiKeys`) with default values in `globalSettings`.
-- [ ] **REQ-56-02**: Implement hierarchical feature flag resolution engine (`getEffectiveFeatureFlags(orgId)`): Global defaults $\rightarrow$ Subscription Plan entitlements $\rightarrow$ Per-tenant custom overrides in `tenantOverrides`.
-- [ ] **REQ-56-03**: Build the Super Admin Feature Flags management UI in `/superadmin/features` with interactive switch controls for global defaults and granular per-tenant toggles.
-- [ ] **REQ-56-04**: Enforce feature flag guards across application layout navigation and backend tRPC routers, hiding disabled modules and preventing unauthorized API execution.
-- [ ] **REQ-56-05**: Develop automated Vitest test suite validating cascading feature resolution and route guards.
+- [x] **REQ-56-01**: Define comprehensive feature flag schema (`inventory`, `invoicing`, `quotes`, `automations`, `aiInsights`, `customDomains`, `webhooks`, `apiKeys`) with default values in `globalSettings`.
+- [x] **REQ-56-02**: Implement hierarchical feature flag resolution engine (`getEffectiveFeatureFlags(orgId)`): Global defaults $\rightarrow$ Subscription Plan entitlements $\rightarrow$ Per-tenant custom overrides in `tenantOverrides`.
+- [x] **REQ-56-03**: Build the Super Admin Feature Flags management UI in `/superadmin/features` with interactive switch controls for global defaults and granular per-tenant toggles.
+- [x] **REQ-56-04**: Enforce feature flag guards across application layout navigation and backend tRPC routers, hiding disabled modules and preventing unauthorized API execution.
+- [x] **REQ-56-05**: Develop automated Vitest test suite validating cascading feature resolution and route guards.
 
 ### Phase 57: Global Integration Center & Third-Party Service Health Monitoring
 - [x] **REQ-57-01**: Build `/superadmin/integrations` dashboard displaying real-time connectivity status, response latency, and operational health for Dodo Payments, Svix Webhooks, Neon Object Storage, and Email Service.
@@ -27,8 +27,8 @@ Deliver an enterprise-grade Super Admin command center for DevCRM. Enable platfo
 - [x] **REQ-58-05**: Vitest tests for audit log creation, pagination, and tenant inspector aggregations.
 
 ### Phase 59: Global Staff Administration & User Access Governance
-- [ ] **REQ-59-01**: Expand `/superadmin/users` with full global user governance: search and filter across all organizations, role elevation (`SUPER_ADMIN` vs `USER`), and account suspension toggle (`isActive`).
-- [ ] **REQ-59-02**: Implement administrative password reset and secure staff onboarding flow.
-- [ ] **REQ-59-03**: Implement session revocation procedure (`revokeUserSessions`) immediately terminating active sessions for suspended or compromised accounts.
-- [ ] **REQ-59-04**: Update `/superadmin` navigation sidebar with dedicated links for Overview, Tenants, Plans, Features, Integrations, Audit Logs, and Global Users.
-- [ ] **REQ-59-05**: Comprehensive verification: 100% Vitest test pass rate and clean Next.js production build (`pnpm build`) covering all static and dynamic routes.
+- [x] **REQ-59-01**: Expand `/superadmin/users` with full global user governance: search and filter across all organizations, role elevation (`SUPER_ADMIN` vs `USER`), and account suspension toggle (`isActive`).
+- [x] **REQ-59-02**: Implement administrative password reset and secure staff onboarding flow.
+- [x] **REQ-59-03**: Implement session revocation procedure (`revokeUserSessions`) immediately terminating active sessions for suspended or compromised accounts.
+- [x] **REQ-59-04**: Update `/superadmin` navigation sidebar with dedicated links for Overview, Tenants, Plans, Features, Integrations, Audit Logs, and Global Users.
+- [x] **REQ-59-05**: Comprehensive verification: 100% Vitest test pass rate and clean Next.js production build (`pnpm build`) covering all static and dynamic routes.

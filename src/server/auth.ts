@@ -72,6 +72,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 				});
 
 				if (!existingUser || !existingUser.passwordHash) return null;
+				if (existingUser.isActive === false) return null;
 
 				const isValid = await compare.compare(
 					password,

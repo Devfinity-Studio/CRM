@@ -62,6 +62,7 @@ export const users = createTable("user", (d) => ({
 	phone: d.varchar({ length: 50 }),
 	passwordHash: d.text(),
 	systemRole: userRoleEnum("system_role").default("USER").notNull(),
+	isActive: d.boolean().default(true).notNull(),
 	onboardingComplete: d.boolean().default(false).notNull(),
 	hasSeenWelcome: d.boolean().default(false).notNull(),
 	createdAt: d
