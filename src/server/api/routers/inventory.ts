@@ -1,18 +1,20 @@
+import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { organizationMembers, products } from "~/server/db/schema";
+import {
+	createTRPCRouter,
+	protectedProcedure,
+	resolveTenantContext,
+} from "~/server/api/trpc";
+import { products } from "~/server/db/schema";
 
 export const inventoryRouter = createTRPCRouter({
 	getProducts: protectedProcedure.query(async ({ ctx }) => {
-		const member = await ctx.db.query.organizationMembers.findFirst({
-			where: eq(organizationMembers.userId, ctx.session.user.id),
-		});
-		if (!member?.organizationId) throw new Error("Unauthorized");
+		const tenant = await resolveTenantContext(ctx);
 
 		return ctx.db.query.products.findMany({
-			where: eq(products.organizationId, member.organizationId),
-			orderBy: (products, { desc }) => [desc(products.createdAt)],
+			where: eq(products.organizationId, tenant.organizationId),
+			orderBy: (prods, { desc }) => [desc(prods.createdAt)],
 		});
 	}),
 
@@ -30,15 +32,12 @@ export const inventoryRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			const [product] = await ctx.db
 				.insert(products)
 				.values({
-					organizationId: member.organizationId,
+					organizationId: tenant.organizationId,
 					...input,
 				})
 				.returning();
@@ -61,11 +60,7 @@ export const inventoryRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
-
+			const tenant = await resolveTenantContext(ctx);
 			const { id, ...data } = input;
 
 			const [product] = await ctx.db
@@ -74,29 +69,31 @@ export const inventoryRouter = createTRPCRouter({
 				.where(
 					and(
 						eq(products.id, id),
-						eq(products.organizationId, member.organizationId),
+						eq(products.organizationId, tenant.organizationId),
 					),
 				)
 				.returning();
 
-			if (!product) throw new Error("Product not found");
+			if (!product) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Product not found",
+				});
+			}
 			return product;
 		}),
 
 	deleteProduct: protectedProcedure
 		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			await ctx.db
 				.delete(products)
 				.where(
 					and(
 						eq(products.id, input.id),
-						eq(products.organizationId, member.organizationId),
+						eq(products.organizationId, tenant.organizationId),
 					),
 				);
 

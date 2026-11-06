@@ -1,23 +1,27 @@
-import { addMonths, addYears } from "date-fns";
+import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { processSubscriptionRenewals, computeNextRenewalDate } from "~/server/api/services/subscription-engine";
+import {
+	computeNextRenewalDate,
+	processSubscriptionRenewals,
+} from "~/server/api/services/subscription-engine";
+import {
+	createTRPCRouter,
+	protectedProcedure,
+	resolveTenantContext,
+} from "~/server/api/trpc";
 import {
 	clientSubscriptions,
-	organizationMembers,
+	companies,
 	products,
 } from "~/server/db/schema";
 
 export const clientSubscriptionsRouter = createTRPCRouter({
 	getSubscriptions: protectedProcedure.query(async ({ ctx }) => {
-		const member = await ctx.db.query.organizationMembers.findFirst({
-			where: eq(organizationMembers.userId, ctx.session.user.id),
-		});
-		if (!member?.organizationId) throw new Error("Unauthorized");
+		const tenant = await resolveTenantContext(ctx);
 
 		return ctx.db.query.clientSubscriptions.findMany({
-			where: eq(clientSubscriptions.organizationId, member.organizationId),
+			where: eq(clientSubscriptions.organizationId, tenant.organizationId),
 			with: {
 				company: true,
 				product: true,
@@ -37,10 +41,34 @@ export const clientSubscriptionsRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
+			const tenant = await resolveTenantContext(ctx);
+
+			// Multi-tenant security check: ensure company and product belong to tenant organization
+			const targetCompany = await ctx.db.query.companies?.findFirst({
+				where: and(
+					eq(companies.id, input.companyId),
+					eq(companies.organizationId, tenant.organizationId),
+				),
 			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			if (ctx.db.query.companies && !targetCompany) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Company not found in active organization",
+				});
+			}
+
+			const targetProduct = await ctx.db.query.products?.findFirst({
+				where: and(
+					eq(products.id, input.productId),
+					eq(products.organizationId, tenant.organizationId),
+				),
+			});
+			if (ctx.db.query.products && !targetProduct) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Product not found in active organization",
+				});
+			}
 
 			const nextRenewalDate = computeNextRenewalDate(
 				input.startDate,
@@ -50,7 +78,7 @@ export const clientSubscriptionsRouter = createTRPCRouter({
 			const [sub] = await ctx.db
 				.insert(clientSubscriptions)
 				.values({
-					organizationId: member.organizationId,
+					organizationId: tenant.organizationId,
 					companyId: input.companyId,
 					productId: input.productId,
 					status: "ACTIVE",
@@ -74,11 +102,7 @@ export const clientSubscriptionsRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
-
+			const tenant = await resolveTenantContext(ctx);
 			const { id, ...data } = input;
 
 			const [sub] = await ctx.db
@@ -87,29 +111,31 @@ export const clientSubscriptionsRouter = createTRPCRouter({
 				.where(
 					and(
 						eq(clientSubscriptions.id, id),
-						eq(clientSubscriptions.organizationId, member.organizationId),
+						eq(clientSubscriptions.organizationId, tenant.organizationId),
 					),
 				)
 				.returning();
 
-			if (!sub) throw new Error("Subscription not found");
+			if (!sub) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Subscription not found",
+				});
+			}
 			return sub;
 		}),
 
 	deleteSubscription: protectedProcedure
 		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			await ctx.db
 				.delete(clientSubscriptions)
 				.where(
 					and(
 						eq(clientSubscriptions.id, input.id),
-						eq(clientSubscriptions.organizationId, member.organizationId),
+						eq(clientSubscriptions.organizationId, tenant.organizationId),
 					),
 				);
 
@@ -117,11 +143,7 @@ export const clientSubscriptionsRouter = createTRPCRouter({
 		}),
 
 	triggerRenewals: protectedProcedure.mutation(async ({ ctx }) => {
-		const member = await ctx.db.query.organizationMembers.findFirst({
-			where: eq(organizationMembers.userId, ctx.session.user.id),
-		});
-		if (!member?.organizationId) throw new Error("Unauthorized");
-
-		return processSubscriptionRenewals(ctx.db, member.organizationId);
+		const tenant = await resolveTenantContext(ctx);
+		return processSubscriptionRenewals(ctx.db, tenant.organizationId);
 	}),
 });

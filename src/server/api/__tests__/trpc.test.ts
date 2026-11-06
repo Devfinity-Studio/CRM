@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { db } from "~/server/db";
-import { createTRPCContext } from "../trpc";
+import { createTRPCContext, resolveTenantContext } from "../trpc";
 
 // Mock auth
 vi.mock("~/server/auth", () => ({
@@ -15,6 +15,12 @@ vi.mock("~/server/db", () => ({
 	db: {
 		query: {
 			apiKeys: {
+				findFirst: vi.fn(),
+			},
+			organizationMembers: {
+				findFirst: vi.fn(),
+			},
+			organizations: {
 				findFirst: vi.fn(),
 			},
 		},
@@ -77,6 +83,79 @@ describe("TRPC Context - API Key Authentication", () => {
 		// The organization ID injected into the mock session
 		expect(ctx.session?.user && (ctx.session.user as any).organizationId).toBe(
 			"org-123",
+		);
+	});
+});
+
+describe("resolveTenantContext - Multi-Tenant Isolation & Impersonation", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("should resolve tenant context via impersonatedOrgId for Super Admin", async () => {
+		const ctx = {
+			db,
+			session: {
+				user: {
+					id: "superadmin-1",
+					systemRole: "SUPER_ADMIN",
+					organizationId: "default-org",
+				},
+			},
+			impersonatedOrgId: "impersonated-org-99",
+		};
+
+		const tenant = await resolveTenantContext(ctx as any);
+		expect(tenant.organizationId).toBe("impersonated-org-99");
+		expect(tenant.isOwner).toBe(true);
+		expect(tenant.isAdmin).toBe(true);
+		expect(tenant.role).toBe("SUPER_ADMIN");
+	});
+
+	it("should resolve tenant context from x-tenant-id header for regular user with membership", async () => {
+		(db.query.organizationMembers.findFirst as any).mockResolvedValue({
+			organizationId: "org-header-456",
+			userId: "user-123",
+			role: "ADMIN",
+		});
+
+		const headers = new Headers();
+		headers.set("x-tenant-id", "org-header-456");
+
+		const ctx = {
+			db,
+			session: {
+				user: {
+					id: "user-123",
+					systemRole: "USER",
+					organizationId: "fallback-org",
+				},
+			},
+			headers,
+		};
+
+		const tenant = await resolveTenantContext(ctx as any);
+		expect(tenant.organizationId).toBe("org-header-456");
+		expect(tenant.role).toBe("ADMIN");
+		expect(tenant.isAdmin).toBe(true);
+		expect(tenant.isOwner).toBe(false);
+	});
+
+	it("should throw FORBIDDEN when user has no active tenant membership", async () => {
+		(db.query.organizationMembers.findFirst as any).mockResolvedValue(null);
+
+		const ctx = {
+			db,
+			session: {
+				user: {
+					id: "user-unattached",
+					systemRole: "USER",
+				},
+			},
+		};
+
+		await expect(resolveTenantContext(ctx as any)).rejects.toThrow(
+			"No active tenant membership found.",
 		);
 	});
 });

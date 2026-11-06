@@ -271,7 +271,7 @@ export const companies = createTable("company", (d) => ({
 	currency: d.varchar({ length: 10 }),
 	hasGst: d.boolean().default(false).notNull(),
 	gstin: d.varchar({ length: 50 }),
-	businessPan: d.varchar({ length: 50 }),
+	businessPan: d.text(),
 	businessType: d.varchar({ length: 100 }),
 	useCases: d.text(),
 	addressStreet: d.text(),
@@ -333,9 +333,9 @@ export const contacts = createTable("contact", (d) => ({
 	additionalPhones: d.jsonb().default([]), // Array of phones
 
 	// Tax Info
-	pan: d.varchar({ length: 50 }),
-	aadhaar: d.varchar({ length: 50 }),
-	passport: d.varchar({ length: 50 }),
+	pan: d.text(),
+	aadhaar: d.text(),
+	passport: d.text(),
 
 	// Social Profiles
 	socialLinks: d.jsonb().default({}), // Object with fb, linkedin, twitter, etc.

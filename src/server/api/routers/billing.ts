@@ -14,7 +14,8 @@ import {
 	listStatesForCountry,
 	listSupportedCountries,
 } from "~/server/api/services/tax-engine";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { TRPCError } from "@trpc/server";
+import { createTRPCRouter, protectedProcedure, resolveTenantContext } from "~/server/api/trpc";
 import {
 	automationLogs,
 	contacts,
@@ -104,14 +105,11 @@ export const billingRouter = createTRPCRouter({
 
 	// --- USER SETTINGS ---
 	getUserSettings: protectedProcedure.query(async ({ ctx }) => {
-		const member = await ctx.db.query.organizationMembers.findFirst({
-			where: eq(organizationMembers.userId, ctx.session.user.id),
-		});
-		if (!member?.organizationId) throw new Error("Unauthorized");
+		const tenant = await resolveTenantContext(ctx);
 
 		let settings = await ctx.db.query.userSettings.findFirst({
 			where: and(
-				eq(userSettings.organizationId, member.organizationId),
+				eq(userSettings.organizationId, tenant.organizationId),
 				eq(userSettings.userId, ctx.session.user.id),
 			),
 		});
@@ -120,7 +118,7 @@ export const billingRouter = createTRPCRouter({
 			const [newSettings] = await ctx.db
 				.insert(userSettings)
 				.values({
-					organizationId: member.organizationId,
+					organizationId: tenant.organizationId,
 					userId: ctx.session.user.id,
 				})
 				.returning();
@@ -145,17 +143,14 @@ export const billingRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			const [updated] = await ctx.db
 				.update(userSettings)
 				.set(input)
 				.where(
 					and(
-						eq(userSettings.organizationId, member.organizationId),
+						eq(userSettings.organizationId, tenant.organizationId),
 						eq(userSettings.userId, ctx.session.user.id),
 					),
 				)
@@ -166,15 +161,12 @@ export const billingRouter = createTRPCRouter({
 
 	// --- PRODUCTS ---
 	getProducts: protectedProcedure.query(async ({ ctx }) => {
-		const member = await ctx.db.query.organizationMembers.findFirst({
-			where: eq(organizationMembers.userId, ctx.session.user.id),
-		});
-		if (!member?.organizationId) throw new Error("Unauthorized");
+		const tenant = await resolveTenantContext(ctx);
 
 		return ctx.db
 			.select()
 			.from(products)
-			.where(eq(products.organizationId, member.organizationId))
+			.where(eq(products.organizationId, tenant.organizationId))
 			.orderBy(desc(products.createdAt));
 	}),
 
@@ -191,14 +183,11 @@ export const billingRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			const [product] = await ctx.db
 				.insert(products)
-				.values({ ...input, organizationId: member.organizationId })
+				.values({ ...input, organizationId: tenant.organizationId })
 				.returning();
 			return product;
 		}),
@@ -208,27 +197,21 @@ export const billingRouter = createTRPCRouter({
 	getQuoteById: protectedProcedure
 		.input(z.object({ id: z.string() }))
 		.query(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			return ctx.db.query.quotes.findFirst({
 				where: and(
 					eq(quotes.id, input.id),
-					eq(quotes.organizationId, member.organizationId),
+					eq(quotes.organizationId, tenant.organizationId),
 				),
 			});
 		}),
 
 	getQuotes: protectedProcedure.query(async ({ ctx }) => {
-		const member = await ctx.db.query.organizationMembers.findFirst({
-			where: eq(organizationMembers.userId, ctx.session.user.id),
-		});
-		if (!member?.organizationId) throw new Error("Unauthorized");
+		const tenant = await resolveTenantContext(ctx);
 
 		return ctx.db.query.quotes.findMany({
-			where: eq(quotes.organizationId, member.organizationId),
+			where: eq(quotes.organizationId, tenant.organizationId),
 			orderBy: [desc(quotes.createdAt)],
 			with: {
 				company: true,
@@ -265,16 +248,13 @@ export const billingRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			const [quote] = await ctx.db
 				.insert(quotes)
 				.values({
 					...input,
-					organizationId: member.organizationId,
+					organizationId: tenant.organizationId,
 					status: "DRAFT",
 				})
 				.returning();
@@ -282,7 +262,7 @@ export const billingRouter = createTRPCRouter({
 			// Background parsing
 			await saveDocumentPattern(
 				ctx,
-				member.organizationId,
+				tenant.organizationId,
 				ctx.session.user.id,
 				"quote",
 				input.quoteNumber,
@@ -295,17 +275,14 @@ export const billingRouter = createTRPCRouter({
 	deleteQuote: protectedProcedure
 		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			await ctx.db
 				.delete(quotes)
 				.where(
 					and(
 						eq(quotes.id, input.id),
-						eq(quotes.organizationId, member.organizationId),
+						eq(quotes.organizationId, tenant.organizationId),
 					),
 				);
 			return { success: true };
@@ -314,15 +291,12 @@ export const billingRouter = createTRPCRouter({
 	reviseQuote: protectedProcedure
 		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			const original = await ctx.db.query.quotes.findFirst({
 				where: and(
 					eq(quotes.id, input.id),
-					eq(quotes.organizationId, member.organizationId),
+					eq(quotes.organizationId, tenant.organizationId),
 				),
 			});
 
@@ -366,15 +340,12 @@ export const billingRouter = createTRPCRouter({
 	convertToInvoice: protectedProcedure
 		.input(z.object({ quoteId: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			const quote = await ctx.db.query.quotes.findFirst({
 				where: and(
 					eq(quotes.id, input.quoteId),
-					eq(quotes.organizationId, member.organizationId),
+					eq(quotes.organizationId, tenant.organizationId),
 				),
 			});
 
@@ -427,7 +398,7 @@ export const billingRouter = createTRPCRouter({
 				.returning();
 
 			// Dispatch webhook
-			await dispatchWebhook(member.organizationId, "invoice.created", {
+			await dispatchWebhook(tenant.organizationId, "invoice.created", {
 				invoice: newInvoice,
 			});
 
@@ -436,13 +407,10 @@ export const billingRouter = createTRPCRouter({
 
 	// --- INVOICES ---
 	getInvoices: protectedProcedure.query(async ({ ctx }) => {
-		const member = await ctx.db.query.organizationMembers.findFirst({
-			where: eq(organizationMembers.userId, ctx.session.user.id),
-		});
-		if (!member?.organizationId) throw new Error("Unauthorized");
+		const tenant = await resolveTenantContext(ctx);
 
 		return ctx.db.query.invoices.findMany({
-			where: eq(invoices.organizationId, member.organizationId),
+			where: eq(invoices.organizationId, tenant.organizationId),
 			orderBy: [desc(invoices.createdAt)],
 			with: {
 				company: true,
@@ -453,16 +421,13 @@ export const billingRouter = createTRPCRouter({
 	createInvoice: protectedProcedure
 		.input(z.any()) // TODO: properly type this when invoice saving is implemented
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			// Temporary dummy till actual invoice insert is implemented
 			if (input.invoiceNumber) {
 				await saveDocumentPattern(
 					ctx,
-					member.organizationId,
+					tenant.organizationId,
 					ctx.session.user.id,
 					"invoice",
 					input.invoiceNumber,
@@ -484,7 +449,7 @@ export const billingRouter = createTRPCRouter({
 						const product = await ctx.db.query.products.findFirst({
 							where: and(
 								eq(products.id, item.productId),
-								eq(products.organizationId, member.organizationId),
+								eq(products.organizationId, tenant.organizationId),
 								eq(products.type, "PRODUCT"),
 							),
 						});
@@ -506,17 +471,20 @@ export const billingRouter = createTRPCRouter({
 	deleteInvoice: protectedProcedure
 		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
+			if (!tenant.isAdmin) {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Requires Organization Admin or Owner privileges",
+				});
+			}
 
 			await ctx.db
 				.delete(invoices)
 				.where(
 					and(
 						eq(invoices.id, input.id),
-						eq(invoices.organizationId, member.organizationId),
+						eq(invoices.organizationId, tenant.organizationId),
 					),
 				);
 			return { success: true };
@@ -525,15 +493,12 @@ export const billingRouter = createTRPCRouter({
 	reviseInvoice: protectedProcedure
 		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			const original = await ctx.db.query.invoices.findFirst({
 				where: and(
 					eq(invoices.id, input.id),
-					eq(invoices.organizationId, member.organizationId),
+					eq(invoices.organizationId, tenant.organizationId),
 				),
 			});
 
@@ -578,15 +543,12 @@ export const billingRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			const invoice = await ctx.db.query.invoices.findFirst({
 				where: and(
 					eq(invoices.id, input.invoiceId),
-					eq(invoices.organizationId, member.organizationId),
+					eq(invoices.organizationId, tenant.organizationId),
 				),
 			});
 
@@ -596,7 +558,7 @@ export const billingRouter = createTRPCRouter({
 			const [payment] = await ctx.db
 				.insert(payments)
 				.values({
-					organizationId: member.organizationId,
+					organizationId: tenant.organizationId,
 					invoiceId: invoice.id,
 					amount: input.amount,
 					paymentDate: input.paymentDate,
@@ -622,14 +584,14 @@ export const billingRouter = createTRPCRouter({
 				})
 				.where(eq(invoices.id, invoice.id));
 
-			await dispatchWebhook(member.organizationId, "invoice.payment_recorded", {
+			await dispatchWebhook(tenant.organizationId, "invoice.payment_recorded", {
 				payment,
 				invoiceId: invoice.id,
 				isPaid,
 			});
 
 			if (isPaid) {
-				await dispatchWebhook(member.organizationId, "invoice.paid", {
+				await dispatchWebhook(tenant.organizationId, "invoice.paid", {
 					invoiceId: invoice.id,
 				});
 			}
@@ -640,15 +602,12 @@ export const billingRouter = createTRPCRouter({
 	getInvoicePayments: protectedProcedure
 		.input(z.object({ invoiceId: z.string() }))
 		.query(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			return ctx.db.query.payments.findMany({
 				where: and(
 					eq(payments.invoiceId, input.invoiceId),
-					eq(payments.organizationId, member.organizationId),
+					eq(payments.organizationId, tenant.organizationId),
 				),
 				orderBy: [desc(payments.paymentDate)],
 			});
@@ -664,10 +623,7 @@ export const billingRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			// 1. Calculate Opening Balance (all transactions BEFORE startDate)
 			// We look at invoices created before startDate (as debits) and payments before startDate (as credits)
@@ -676,7 +632,7 @@ export const billingRouter = createTRPCRouter({
 			const prevInvoices = await ctx.db.query.invoices.findMany({
 				where: and(
 					eq(invoices.companyId, input.companyId),
-					eq(invoices.organizationId, member.organizationId),
+					eq(invoices.organizationId, tenant.organizationId),
 					lt(invoices.createdAt, input.startDate),
 					// Exclude DRAFT invoices from statement calculations
 					eq(invoices.status, "SENT"), // Wait, it can be SENT, PROFORMA, PAID, OVERDUE. Let's just exclude DRAFT.
@@ -685,7 +641,7 @@ export const billingRouter = createTRPCRouter({
 
 			const prevPayments = await ctx.db.query.payments.findMany({
 				where: and(
-					eq(payments.organizationId, member.organizationId),
+					eq(payments.organizationId, tenant.organizationId),
 					lt(payments.paymentDate, input.startDate),
 				),
 				with: {
@@ -715,7 +671,7 @@ export const billingRouter = createTRPCRouter({
 			const periodInvoices = await ctx.db.query.invoices.findMany({
 				where: and(
 					eq(invoices.companyId, input.companyId),
-					eq(invoices.organizationId, member.organizationId),
+					eq(invoices.organizationId, tenant.organizationId),
 					gte(invoices.createdAt, input.startDate),
 					lte(invoices.createdAt, input.endDate),
 				),
@@ -723,7 +679,7 @@ export const billingRouter = createTRPCRouter({
 
 			const periodPayments = await ctx.db.query.payments.findMany({
 				where: and(
-					eq(payments.organizationId, member.organizationId),
+					eq(payments.organizationId, tenant.organizationId),
 					gte(payments.paymentDate, input.startDate),
 					lte(payments.paymentDate, input.endDate),
 				),
@@ -784,7 +740,7 @@ export const billingRouter = createTRPCRouter({
 			const [statement] = await ctx.db
 				.insert(statements)
 				.values({
-					organizationId: member.organizationId,
+					organizationId: tenant.organizationId,
 					companyId: input.companyId,
 					statementNumber,
 					startDate: input.startDate,
@@ -799,13 +755,10 @@ export const billingRouter = createTRPCRouter({
 		}),
 
 	getStatements: protectedProcedure.query(async ({ ctx }) => {
-		const member = await ctx.db.query.organizationMembers.findFirst({
-			where: eq(organizationMembers.userId, ctx.session.user.id),
-		});
-		if (!member?.organizationId) throw new Error("Unauthorized");
+		const tenant = await resolveTenantContext(ctx);
 
 		return ctx.db.query.statements.findMany({
-			where: eq(statements.organizationId, member.organizationId),
+			where: eq(statements.organizationId, tenant.organizationId),
 			with: {
 				company: true,
 			},
@@ -821,15 +774,12 @@ export const billingRouter = createTRPCRouter({
 			}),
 		)
 		.query(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			// 1. Get pattern
 			const settings = await ctx.db.query.userSettings.findFirst({
 				where: and(
-					eq(userSettings.organizationId, member.organizationId),
+					eq(userSettings.organizationId, tenant.organizationId),
 					eq(userSettings.userId, ctx.session.user.id),
 				),
 			});
@@ -856,7 +806,7 @@ export const billingRouter = createTRPCRouter({
 			if (input.type === "quote") {
 				const matching = await ctx.db.query.quotes.findMany({
 					where: and(
-						eq(quotes.organizationId, member.organizationId),
+						eq(quotes.organizationId, tenant.organizationId),
 						like(quotes.quoteNumber, `${prefix}%`),
 					),
 					columns: { quoteNumber: true, createdAt: true },
@@ -871,7 +821,7 @@ export const billingRouter = createTRPCRouter({
 				}
 
 				const latest = await ctx.db.query.quotes.findFirst({
-					where: eq(quotes.organizationId, member.organizationId),
+					where: eq(quotes.organizationId, tenant.organizationId),
 					orderBy: [desc(quotes.createdAt)],
 					columns: { quoteNumber: true, createdAt: true },
 				});
@@ -882,7 +832,7 @@ export const billingRouter = createTRPCRouter({
 			} else {
 				const matching = await ctx.db.query.invoices.findMany({
 					where: and(
-						eq(invoices.organizationId, member.organizationId),
+						eq(invoices.organizationId, tenant.organizationId),
 						like(invoices.invoiceNumber, `${prefix}%`),
 					),
 					columns: { invoiceNumber: true, createdAt: true },
@@ -897,7 +847,7 @@ export const billingRouter = createTRPCRouter({
 				}
 
 				const latest = await ctx.db.query.invoices.findFirst({
-					where: eq(invoices.organizationId, member.organizationId),
+					where: eq(invoices.organizationId, tenant.organizationId),
 					orderBy: [desc(invoices.createdAt)],
 					columns: { invoiceNumber: true, createdAt: true },
 				});
@@ -921,15 +871,12 @@ export const billingRouter = createTRPCRouter({
 	getPaymentsByInvoice: protectedProcedure
 		.input(z.object({ invoiceId: z.string() }))
 		.query(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			return ctx.db.query.payments.findMany({
 				where: and(
 					eq(payments.invoiceId, input.invoiceId),
-					eq(payments.organizationId, member.organizationId),
+					eq(payments.organizationId, tenant.organizationId),
 				),
 				orderBy: [desc(payments.paymentDate), desc(payments.createdAt)],
 			});
@@ -952,15 +899,12 @@ export const billingRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			const invoice = await ctx.db.query.invoices.findFirst({
 				where: and(
 					eq(invoices.id, input.invoiceId),
-					eq(invoices.organizationId, member.organizationId),
+					eq(invoices.organizationId, tenant.organizationId),
 				),
 			});
 
@@ -972,7 +916,7 @@ export const billingRouter = createTRPCRouter({
 			const [payment] = await ctx.db
 				.insert(payments)
 				.values({
-					organizationId: member.organizationId,
+					organizationId: tenant.organizationId,
 					invoiceId: input.invoiceId,
 					amount: input.amount,
 					paymentDate: input.paymentDate,
@@ -997,7 +941,7 @@ export const billingRouter = createTRPCRouter({
 			// 3. Send email receipt (simulated for now, webhook/email trigger)
 			await dispatchWebhook(
 				ctx.db,
-				member.organizationId,
+				tenant.organizationId,
 				"invoice.payment_recorded",
 				{
 					invoiceId: invoice.id,
@@ -1014,15 +958,12 @@ export const billingRouter = createTRPCRouter({
 	voidPayment: protectedProcedure
 		.input(z.object({ paymentId: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			const payment = await ctx.db.query.payments.findFirst({
 				where: and(
 					eq(payments.id, input.paymentId),
-					eq(payments.organizationId, member.organizationId),
+					eq(payments.organizationId, tenant.organizationId),
 				),
 			});
 
@@ -1031,7 +972,7 @@ export const billingRouter = createTRPCRouter({
 			const invoice = await ctx.db.query.invoices.findFirst({
 				where: and(
 					eq(invoices.id, payment.invoiceId),
-					eq(invoices.organizationId, member.organizationId),
+					eq(invoices.organizationId, tenant.organizationId),
 				),
 			});
 
@@ -1068,16 +1009,13 @@ export const billingRouter = createTRPCRouter({
 			}),
 		)
 		.query(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			// Fetch all non-draft invoices for company
 			const companyInvoices = await ctx.db.query.invoices.findMany({
 				where: and(
 					eq(invoices.companyId, input.companyId),
-					eq(invoices.organizationId, member.organizationId),
+					eq(invoices.organizationId, tenant.organizationId),
 				),
 			});
 			const validInvoices = companyInvoices.filter((i) => i.status !== "DRAFT");
@@ -1088,7 +1026,7 @@ export const billingRouter = createTRPCRouter({
 				companyPayments = await ctx.db.query.payments.findMany({
 					where: and(
 						inArray(payments.invoiceId, invoiceIds),
-						eq(payments.organizationId, member.organizationId),
+						eq(payments.organizationId, tenant.organizationId),
 					),
 				});
 			}
@@ -1165,17 +1103,14 @@ export const billingRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			// We call the same internal logic via a helper or just re-execute the ledger fetch here.
 			// Since it's a backend mutation, we can just re-fetch in memory.
 			const companyInvoices = await ctx.db.query.invoices.findMany({
 				where: and(
 					eq(invoices.companyId, input.companyId),
-					eq(invoices.organizationId, member.organizationId),
+					eq(invoices.organizationId, tenant.organizationId),
 				),
 			});
 			const validInvoices = companyInvoices.filter((i) => i.status !== "DRAFT");
@@ -1186,7 +1121,7 @@ export const billingRouter = createTRPCRouter({
 				companyPayments = await ctx.db.query.payments.findMany({
 					where: and(
 						inArray(payments.invoiceId, invoiceIds),
-						eq(payments.organizationId, member.organizationId),
+						eq(payments.organizationId, tenant.organizationId),
 					),
 				});
 			}
@@ -1253,7 +1188,7 @@ export const billingRouter = createTRPCRouter({
 			const [stmt] = await ctx.db
 				.insert(statements)
 				.values({
-					organizationId: member.organizationId,
+					organizationId: tenant.organizationId,
 					companyId: input.companyId,
 					statementNumber,
 					startDate: input.startDate,
@@ -1270,15 +1205,12 @@ export const billingRouter = createTRPCRouter({
 	getStatementsByCompany: protectedProcedure
 		.input(z.object({ companyId: z.string() }))
 		.query(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			return ctx.db.query.statements.findMany({
 				where: and(
 					eq(statements.companyId, input.companyId),
-					eq(statements.organizationId, member.organizationId),
+					eq(statements.organizationId, tenant.organizationId),
 				),
 				orderBy: [desc(statements.createdAt)],
 			});
@@ -1304,15 +1236,12 @@ export const billingRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			const invoice = await ctx.db.query.invoices.findFirst({
 				where: and(
 					eq(invoices.id, input.invoiceId),
-					eq(invoices.organizationId, member.organizationId),
+					eq(invoices.organizationId, tenant.organizationId),
 				),
 			});
 			if (!invoice) throw new Error("Invoice not found");
@@ -1347,7 +1276,7 @@ export const billingRouter = createTRPCRouter({
 				await fulfillInvoiceStock(ctx.db, invoice.id, ctx.session.user.id);
 			}
 
-			await dispatchWebhook(member.organizationId, "invoice.status_changed", {
+			await dispatchWebhook(tenant.organizationId, "invoice.status_changed", {
 				invoice: updated,
 				previousStatus: invoice.status,
 			});
@@ -1358,10 +1287,7 @@ export const billingRouter = createTRPCRouter({
 	fulfillInvoice: protectedProcedure
 		.input(z.object({ invoiceId: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			return fulfillInvoiceStock(ctx.db, input.invoiceId, ctx.session.user.id);
 		}),
@@ -1374,10 +1300,13 @@ export const billingRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
+			if (!tenant.isAdmin) {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Requires Organization Admin or Owner privileges",
+				});
+			}
 
 			return issueInvoiceCreditNote(
 				ctx.db,
@@ -1390,13 +1319,10 @@ export const billingRouter = createTRPCRouter({
 	getStockMovements: protectedProcedure
 		.input(z.object({ productId: z.string().optional() }).optional())
 		.query(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			const conditions = [
-				eq(stockMovements.organizationId, member.organizationId),
+				eq(stockMovements.organizationId, tenant.organizationId),
 			];
 			if (input?.productId) {
 				conditions.push(eq(stockMovements.productId, input.productId));
@@ -1423,13 +1349,10 @@ export const billingRouter = createTRPCRouter({
 		}),
 
 	getPlatformSubscription: protectedProcedure.query(async ({ ctx }) => {
-		const member = await ctx.db.query.organizationMembers.findFirst({
-			where: eq(organizationMembers.userId, ctx.session.user.id),
-		});
-		if (!member?.organizationId) throw new Error("Unauthorized");
+		const tenant = await resolveTenantContext(ctx);
 
 		const org = await ctx.db.query.organizations.findFirst({
-			where: eq(organizations.id, member.organizationId),
+			where: eq(organizations.id, tenant.organizationId),
 		});
 		if (!org) throw new Error("Organization not found");
 
@@ -1440,23 +1363,23 @@ export const billingRouter = createTRPCRouter({
 			: null;
 
 		const sub = await ctx.db.query.subscriptions.findFirst({
-			where: eq(subscriptions.organizationId, member.organizationId),
+			where: eq(subscriptions.organizationId, tenant.organizationId),
 		});
 
 		const [contactsResult] = await ctx.db
 			.select({ val: count() })
 			.from(contacts)
-			.where(eq(contacts.organizationId, member.organizationId));
+			.where(eq(contacts.organizationId, tenant.organizationId));
 
 		const [invoicesResult] = await ctx.db
 			.select({ val: count() })
 			.from(invoices)
-			.where(eq(invoices.organizationId, member.organizationId));
+			.where(eq(invoices.organizationId, tenant.organizationId));
 
 		const [membersResult] = await ctx.db
 			.select({ val: count() })
 			.from(organizationMembers)
-			.where(eq(organizationMembers.organizationId, member.organizationId));
+			.where(eq(organizationMembers.organizationId, tenant.organizationId));
 
 		const monthStart = new Date();
 		monthStart.setDate(1);
@@ -1467,7 +1390,7 @@ export const billingRouter = createTRPCRouter({
 			.from(automationLogs)
 			.where(
 				and(
-					eq(automationLogs.organizationId, member.organizationId),
+					eq(automationLogs.organizationId, tenant.organizationId),
 					gte(automationLogs.executedAt, monthStart),
 				),
 			);
@@ -1539,13 +1462,10 @@ export const billingRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			return createPlatformCheckoutSession(ctx.db, {
-				organizationId: member.organizationId,
+				organizationId: tenant.organizationId,
 				planId: input.planId,
 				billingCycle: input.billingCycle,
 				customerEmail: ctx.session.user.email ?? "billing@devfinity.net",
@@ -1561,14 +1481,11 @@ export const billingRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			return createPlatformCustomerPortalSession(
 				ctx.db,
-				member.organizationId,
+				tenant.organizationId,
 				input.returnUrl,
 			);
 		}),

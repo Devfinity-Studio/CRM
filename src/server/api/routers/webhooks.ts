@@ -1,19 +1,25 @@
+import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { svix } from "~/lib/svix";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { organizationMembers, organizations } from "~/server/db/schema";
+import {
+	createTRPCRouter,
+	protectedProcedure,
+	resolveTenantContext,
+} from "~/server/api/trpc";
+import { organizations } from "~/server/db/schema";
 
 export const webhooksRouter = createTRPCRouter({
 	getAppPortalUrl: protectedProcedure.query(async ({ ctx }) => {
-		const member = await ctx.db.query.organizationMembers.findFirst({
-			where: eq(organizationMembers.userId, ctx.session.user.id),
-		});
+		const tenant = await resolveTenantContext(ctx);
 
-		if (!member?.organizationId) {
-			throw new Error("Organization not found");
+		if (!tenant.isAdmin) {
+			throw new TRPCError({
+				code: "FORBIDDEN",
+				message: "Requires Organization Admin or Owner privileges",
+			});
 		}
 
-		const orgId = member.organizationId;
+		const orgId = tenant.organizationId;
 
 		// 1. Get the organization to check if it has a svixAppId
 		const org = await ctx.db.query.organizations.findFirst({
@@ -21,7 +27,10 @@ export const webhooksRouter = createTRPCRouter({
 		});
 
 		if (!org) {
-			throw new Error("Organization not found");
+			throw new TRPCError({
+				code: "NOT_FOUND",
+				message: "Organization not found",
+			});
 		}
 
 		let svixAppId = org.svixAppId;
@@ -44,9 +53,7 @@ export const webhooksRouter = createTRPCRouter({
 		// 3. Generate a magic link to the App Portal for this specific app
 		const dashboardAccess = await svix.authentication.appPortalAccess(
 			svixAppId,
-			{
-				// We can pass options here if needed, but defaults are usually fine
-			},
+			{},
 		);
 
 		return {

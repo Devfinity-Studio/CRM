@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { deals, invoices, payments, quotes, statements } from "~/server/db/schema";
@@ -178,20 +178,33 @@ export const publicRouter = createTRPCRouter({
 		.input(
 			z.object({
 				orgId: z.string(),
-				name: z.string(),
-				email: z.string(),
+				name: z.string().min(1),
+				email: z.string().email(),
 				phone: z.string().optional(),
-				items: z.array(
-					z.object({
-						productId: z.string(),
-						quantity: z.number(),
-						price: z.number(),
-					}),
-				),
+				items: z
+					.array(
+						z.object({
+							productId: z.string(),
+							quantity: z.number().int().min(1),
+							price: z.number().optional(),
+						}),
+					)
+					.min(1),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
 			const { orgId, name, email, phone, items } = input;
+
+			// Verify organization exists and is active
+			const org = await ctx.db.query.organizations.findFirst({
+				where: eq(ctx.db.schema.organizations.id, orgId),
+			});
+			if (!org || !org.isActive) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Organization not found or inactive",
+				});
+			}
 
 			// Upsert contact based on email
 			let contact = await ctx.db.query.contacts.findFirst({
@@ -202,12 +215,12 @@ export const publicRouter = createTRPCRouter({
 			});
 
 			if (!contact) {
-				const parts = name.split(" ");
+				const parts = name.trim().split(" ");
 				const [newContact] = await ctx.db
 					.insert(ctx.db.schema.contacts)
 					.values({
 						organizationId: orgId,
-						firstName: parts[0],
+						firstName: parts[0] || name,
 						lastName: parts.slice(1).join(" "),
 						email: email,
 						phone: phone,
@@ -217,10 +230,26 @@ export const publicRouter = createTRPCRouter({
 				contact = newContact;
 			}
 
-			const totalAmount = items.reduce(
-				(acc, item) => acc + item.price * item.quantity,
-				0,
-			);
+			// Fetch authentic products from database to prevent price manipulation
+			const productIds = items.map((i) => i.productId);
+			const dbProducts = await ctx.db.query.products.findMany({
+				where: and(
+					eq(ctx.db.schema.products.organizationId, orgId),
+					inArray(ctx.db.schema.products.id, productIds),
+				),
+			});
+			const productMap = new Map(dbProducts.map((p) => [p.id, p]));
+
+			let totalAmount = 0;
+			for (const item of items) {
+				const product = productMap.get(item.productId);
+				// If product exists in database, use its authentic unitPrice; otherwise fallback to non-negative item price
+				const unitPrice = product
+					? product.unitPrice
+					: Math.max(0, item.price || 0);
+				totalAmount += unitPrice * item.quantity;
+			}
+
 			const quoteNumber = `QTR-${Date.now().toString().slice(-6)}`;
 
 			// Create Quote

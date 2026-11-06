@@ -1,19 +1,48 @@
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { db } from "@/server/db";
-import { adCampaigns, contacts } from "@/server/db/schema";
+import { z } from "zod";
+import { db } from "~/server/db";
+import { adCampaigns, contacts } from "~/server/db/schema";
+
+const adWebhookSchema = z.object({
+	campaignId: z.string().min(1, "Campaign ID is required"),
+	leadName: z.string().min(1, "Lead name is required"),
+	leadEmail: z.string().email("Valid lead email is required"),
+	leadPhone: z.string().optional(),
+});
 
 export async function POST(request: Request) {
 	try {
-		const body = await request.json();
-		const { campaignId, leadName, leadEmail, leadPhone } = body;
+		const adSecret = request.headers.get("x-ad-secret");
+		const expectedSecret = process.env.AD_WEBHOOK_SECRET;
 
-		if (!campaignId || !leadName || !leadEmail) {
+		if (process.env.NODE_ENV === "production") {
+			if (!expectedSecret || adSecret !== expectedSecret) {
+				return NextResponse.json(
+					{ error: "Unauthorized: Invalid ad webhook secret" },
+					{ status: 401 },
+				);
+			}
+		} else if (expectedSecret && adSecret !== expectedSecret) {
 			return NextResponse.json(
-				{ error: "Missing required fields" },
+				{ error: "Unauthorized: Invalid ad webhook secret" },
+				{ status: 401 },
+			);
+		}
+
+		const body = await request.json();
+		const parseResult = adWebhookSchema.safeParse(body);
+		if (!parseResult.success) {
+			return NextResponse.json(
+				{
+					error: "Validation failed",
+					details: parseResult.error.flatten().fieldErrors,
+				},
 				{ status: 400 },
 			);
 		}
+
+		const { campaignId, leadName, leadEmail, leadPhone } = parseResult.data;
 
 		const campaign = await db.query.adCampaigns.findFirst({
 			where: eq(adCampaigns.id, campaignId),
@@ -26,15 +55,15 @@ export async function POST(request: Request) {
 			);
 		}
 
-		const parts = leadName.split(" ");
+		const parts = leadName.trim().split(" ");
 		const [newContact] = await db
 			.insert(contacts)
 			.values({
 				organizationId: campaign.organizationId,
-				firstName: parts[0],
+				firstName: parts[0] || leadName,
 				lastName: parts.slice(1).join(" "),
 				email: leadEmail,
-				phone: leadPhone,
+				phone: leadPhone || null,
 				source: "AD_CAMPAIGN",
 				adCampaignId: campaign.id,
 			})

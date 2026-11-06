@@ -1,6 +1,6 @@
 import { and, desc, eq, ilike, sql } from "drizzle-orm";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, resolveTenantContext } from "~/server/api/trpc";
 import {
 	activityNotes,
 	assignmentHistory,
@@ -12,40 +12,71 @@ import {
 	quotes,
 	tags,
 } from "~/server/db/schema";
+import {
+	decryptPII,
+	encryptPII,
+	maskAadhaar,
+	maskPan,
+	maskPassport,
+} from "~/server/security/encryption";
 import { dispatchWebhook } from "~/server/webhooks/dispatch";
 export const crmRouter = createTRPCRouter({
 	// Contacts / POC Procedures
 	getContacts: protectedProcedure.query(async ({ ctx }) => {
-		const member = await ctx.db.query.organizationMembers.findFirst({
-			where: eq(organizationMembers.userId, ctx.session.user.id),
-		});
-		if (!member?.organizationId) throw new Error("Unauthorized");
+		const tenant = await resolveTenantContext(ctx);
 
-		return ctx.db
+		const rows = await ctx.db
 			.select()
 			.from(contacts)
-			.where(eq(contacts.organizationId, member.organizationId))
+			.where(eq(contacts.organizationId, tenant.organizationId))
 			.orderBy(desc(contacts.createdAt));
+
+		return rows.map((c) => {
+			const panDec = c.pan ? decryptPII(c.pan) : null;
+			const aadhaarDec = c.aadhaar ? decryptPII(c.aadhaar) : null;
+			const passportDec = c.passport ? decryptPII(c.passport) : null;
+			return {
+				...c,
+				pan: panDec,
+				aadhaar: aadhaarDec,
+				passport: passportDec,
+				panMasked: maskPan(panDec),
+				aadhaarMasked: maskAadhaar(aadhaarDec),
+				passportMasked: maskPassport(passportDec),
+			};
+		});
 	}),
 
 	getPOCsByCompanyId: protectedProcedure
 		.input(z.object({ companyId: z.string() }))
 		.query(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
-			return ctx.db
+			const rows = await ctx.db
 				.select()
 				.from(contacts)
 				.where(
 					and(
-						eq(contacts.organizationId, member.organizationId),
+						eq(contacts.organizationId, tenant.organizationId),
 						eq(contacts.companyId, input.companyId),
 					),
 				)
 				.orderBy(desc(contacts.createdAt));
+
+			return rows.map((c) => {
+				const panDec = c.pan ? decryptPII(c.pan) : null;
+				const aadhaarDec = c.aadhaar ? decryptPII(c.aadhaar) : null;
+				const passportDec = c.passport ? decryptPII(c.passport) : null;
+				return {
+					...c,
+					pan: panDec,
+					aadhaar: aadhaarDec,
+					passport: passportDec,
+					panMasked: maskPan(panDec),
+					aadhaarMasked: maskAadhaar(aadhaarDec),
+					passportMasked: maskPassport(passportDec),
+				};
+			});
 		}),
 
 	createContact: protectedProcedure
@@ -78,16 +109,13 @@ export const crmRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			// Auto-generate a simple UID
 			const countResult = await ctx.db
 				.select({ count: sql<number>`count(*)` })
 				.from(contacts)
-				.where(eq(contacts.organizationId, member.organizationId));
+				.where(eq(contacts.organizationId, tenant.organizationId));
 			const count = Number(countResult[0]?.count || 0) + 1;
 			const uid = `POC-${String(count).padStart(4, "0")}`;
 
@@ -95,37 +123,43 @@ export const crmRouter = createTRPCRouter({
 				.insert(contacts)
 				.values({
 					...input,
-					organizationId: member.organizationId,
+					pan: input.pan ? encryptPII(input.pan) : input.pan,
+					aadhaar: input.aadhaar ? encryptPII(input.aadhaar) : input.aadhaar,
+					passport: input.passport ? encryptPII(input.passport) : input.passport,
+					organizationId: tenant.organizationId,
 					uid,
 				})
 				.returning();
 
 			// Dispatch webhook
-			await dispatchWebhook(member.organizationId, "client.added", { contact });
+			await dispatchWebhook(tenant.organizationId, "client.added", { contact });
 
 			return contact;
 		}),
 
 	getCompanies: protectedProcedure.query(async ({ ctx }) => {
-		const member = await ctx.db.query.organizationMembers.findFirst({
-			where: eq(organizationMembers.userId, ctx.session.user.id),
-		});
-		if (!member?.organizationId) throw new Error("Unauthorized");
+		const tenant = await resolveTenantContext(ctx);
 
-		return ctx.db
+		const rows = await ctx.db
 			.select()
 			.from(companies)
-			.where(eq(companies.organizationId, member.organizationId))
+			.where(eq(companies.organizationId, tenant.organizationId))
 			.orderBy(desc(companies.createdAt));
+
+		return rows.map((comp) => {
+			const decPan = comp.businessPan ? decryptPII(comp.businessPan) : null;
+			return {
+				...comp,
+				businessPan: decPan,
+				businessPanMasked: maskPan(decPan),
+			};
+		});
 	}),
 
 	getCompanyByName: protectedProcedure
 		.input(z.object({ name: z.string() }))
 		.query(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			if (!input.name || input.name.trim() === "") return null;
 
@@ -134,36 +168,45 @@ export const crmRouter = createTRPCRouter({
 				.from(companies)
 				.where(
 					and(
-						eq(companies.organizationId, member.organizationId),
+						eq(companies.organizationId, tenant.organizationId),
 						// case-insensitive match
 						ilike(companies.name, input.name.trim()),
 					),
 				)
 				.limit(1);
 
-			return company || null;
+			if (!company) return null;
+			const decPan = company.businessPan ? decryptPII(company.businessPan) : null;
+			return {
+				...company,
+				businessPan: decPan,
+				businessPanMasked: maskPan(decPan),
+			};
 		}),
 
 	getCompanyById: protectedProcedure
 		.input(z.object({ id: z.string() }))
 		.query(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			const [company] = await ctx.db
 				.select()
 				.from(companies)
 				.where(
 					and(
-						eq(companies.organizationId, member.organizationId),
+						eq(companies.organizationId, tenant.organizationId),
 						eq(companies.id, input.id),
 					),
 				)
 				.limit(1);
 
-			return company || null;
+			if (!company) return null;
+			const decPan = company.businessPan ? decryptPII(company.businessPan) : null;
+			return {
+				...company,
+				businessPan: decPan,
+				businessPanMasked: maskPan(decPan),
+			};
 		}),
 
 	createCompany: protectedProcedure
@@ -205,17 +248,20 @@ export const crmRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			const [company] = await ctx.db
 				.insert(companies)
-				.values({ ...input, organizationId: member.organizationId })
+				.values({
+					...input,
+					businessPan: input.businessPan
+						? encryptPII(input.businessPan)
+						: input.businessPan,
+					organizationId: tenant.organizationId,
+				})
 				.returning();
 
-			await dispatchWebhook(member.organizationId, "company.added", {
+			await dispatchWebhook(tenant.organizationId, "company.added", {
 				company,
 			});
 
@@ -234,13 +280,10 @@ export const crmRouter = createTRPCRouter({
 				.optional(),
 		)
 		.query(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			const conditions = [
-				eq(activityNotes.organizationId, member.organizationId),
+				eq(activityNotes.organizationId, tenant.organizationId),
 			];
 			if (input?.companyId) {
 				conditions.push(eq(activityNotes.companyId, input.companyId));
@@ -269,16 +312,13 @@ export const crmRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
+			const tenant = await resolveTenantContext(ctx);
 
 			const [note] = await ctx.db
 				.insert(activityNotes)
 				.values({
 					...input,
-					organizationId: member.organizationId,
+					organizationId: tenant.organizationId,
 					authorId: ctx.session.user.id,
 				})
 				.returning();
@@ -294,11 +334,8 @@ export const crmRouter = createTRPCRouter({
 			}),
 		)
 		.query(async ({ ctx, input }) => {
-			const member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, ctx.session.user.id),
-			});
-			if (!member?.organizationId) throw new Error("Unauthorized");
-			const orgId = member.organizationId;
+			const tenant = await resolveTenantContext(ctx);
+			const orgId = tenant.organizationId;
 
 			// 1. Fetch Notes
 			const noteConditions = [eq(activityNotes.organizationId, orgId)];

@@ -130,56 +130,112 @@ export const superAdminProcedure = protectedProcedure.use(({ ctx, next }) => {
 	return next();
 });
 
+/**
+ * Standardized tenant context resolver for multi-tenant isolation,
+ * Super Admin impersonation, and role resolution.
+ */
+export async function resolveTenantContext(
+	ctx: {
+		db: any;
+		session: {
+			user: {
+				id: string;
+				systemRole?: string | null;
+				organizationId?: string | null;
+			};
+		};
+		headers?: Headers | { get: (name: string) => string | null } | null;
+		impersonatedOrgId?: string | null;
+	},
+	requestedOrgId?: string | null,
+): Promise<{
+	organizationId: string;
+	role: string;
+	isOwner: boolean;
+	isAdmin: boolean;
+}> {
+	const user = ctx.session.user;
+	const isSuperAdmin = user.systemRole === "SUPER_ADMIN";
+
+	// 1. Determine target org ID from request / session / impersonation
+	const headerOrgId = ctx.headers?.get ? ctx.headers.get("x-tenant-id") : null;
+	const headerSlug = ctx.headers?.get ? ctx.headers.get("x-tenant-slug") : null;
+
+	let targetOrgId =
+		requestedOrgId ||
+		ctx.impersonatedOrgId ||
+		headerOrgId ||
+		user.organizationId ||
+		null;
+
+	if (!targetOrgId && headerSlug && ctx.db?.query?.organizations?.findFirst) {
+		const orgBySlug = await ctx.db.query.organizations.findFirst({
+			where: eq(organizations.slug, headerSlug),
+		});
+		if (orgBySlug) {
+			targetOrgId = orgBySlug.id;
+		}
+	}
+
+	// 2. Super Admin bypass if target org is defined
+	if (isSuperAdmin && targetOrgId) {
+		return {
+			organizationId: targetOrgId,
+			role: "SUPER_ADMIN",
+			isOwner: true,
+			isAdmin: true,
+		};
+	}
+
+	// 3. Find tenant membership
+	let member: any = null;
+	if (targetOrgId && ctx.db?.query?.organizationMembers?.findFirst) {
+		member = await ctx.db.query.organizationMembers.findFirst({
+			where: and(
+				eq(organizationMembers.organizationId, targetOrgId),
+				eq(organizationMembers.userId, user.id),
+			),
+		});
+	}
+
+	// Fallback to first membership for user
+	if (!member && ctx.db?.query?.organizationMembers?.findFirst) {
+		member = await ctx.db.query.organizationMembers.findFirst({
+			where: eq(organizationMembers.userId, user.id),
+		});
+	}
+
+	if (!member) {
+		if (isSuperAdmin && targetOrgId) {
+			return {
+				organizationId: targetOrgId,
+				role: "SUPER_ADMIN",
+				isOwner: true,
+				isAdmin: true,
+			};
+		}
+		throw new TRPCError({
+			code: "FORBIDDEN",
+			message: "No active tenant membership found.",
+		});
+	}
+
+	const role = member.role || "MEMBER";
+	return {
+		organizationId: member.organizationId,
+		role,
+		isOwner: role === "OWNER" || isSuperAdmin,
+		isAdmin: role === "OWNER" || role === "ADMIN" || isSuperAdmin,
+	};
+}
+
 // --- TENANT PROCEDURE WITH AUTOMATIC ISOLATION ---
 export const tenantProcedure = protectedProcedure.use(
 	async ({ ctx, next }) => {
-		const user = ctx.session.user;
-		const isSuperAdmin = user.systemRole === "SUPER_ADMIN";
-
-		// 1. Resolve organization by header, session, or active membership
-		const headerSlug = ctx.headers.get("x-tenant-slug");
-		const headerOrgId = ctx.headers.get("x-tenant-id");
-
-		let orgId = headerOrgId || user.organizationId;
-
-		if (!orgId && headerSlug) {
-			const orgBySlug = await ctx.db.query.organizations.findFirst({
-				where: eq(organizations.slug, headerSlug),
-			});
-			if (orgBySlug) {
-				orgId = orgBySlug.id;
-			}
-		}
-
-		// 2. Fall back to user's first membership if not resolved
-		let member: any = null;
-		if (orgId) {
-			member = await ctx.db.query.organizationMembers.findFirst({
-				where: and(
-					eq(organizationMembers.organizationId, orgId),
-					eq(organizationMembers.userId, user.id),
-				),
-			});
-		}
-
-		if (!member) {
-			member = await ctx.db.query.organizationMembers.findFirst({
-				where: eq(organizationMembers.userId, user.id),
-			});
-			if (member) {
-				orgId = member.organizationId;
-			}
-		}
-
-		if (!orgId || (!member && !isSuperAdmin)) {
-			throw new TRPCError({
-				code: "FORBIDDEN",
-				message: "No active tenant membership found.",
-			});
-		}
+		const tenantCtx = await resolveTenantContext(ctx as any);
 
 		const org = await ctx.db.query.organizations.findFirst({
-			where: eq(organizations.id, orgId),
+			where: eq(organizations.id, tenantCtx.organizationId),
 		});
 
 		if (!org) {
@@ -189,17 +245,14 @@ export const tenantProcedure = protectedProcedure.use(
 			});
 		}
 
-		const role = isSuperAdmin ? "SUPER_ADMIN" : (member?.role || "MEMBER");
-		const permissions = member?.permissions || null;
-
 		const tenant: TenantContext = {
 			id: org.id,
 			name: org.name,
 			slug: org.slug,
-			role,
-			permissions,
-			isOwner: role === "OWNER" || isSuperAdmin,
-			isAdmin: role === "OWNER" || role === "ADMIN" || isSuperAdmin,
+			role: tenantCtx.role,
+			permissions: null,
+			isOwner: tenantCtx.isOwner,
+			isAdmin: tenantCtx.isAdmin,
 		};
 
 		return next({
