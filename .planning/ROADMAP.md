@@ -2,6 +2,13 @@
 
 ## Milestones & Phases
 
+### Milestone 20: Modular Architecture, Dynamic Feature Registry & Data Access Layer (DAL) (Active)
+- [ ] **Phase 60: Modular Feature Architecture, Data Access Layer (DAL) & Dynamic Registry Baseline**
+  - **Goal**: Refactor application into a decoupled architectural baseline: strict tenant-isolated Data Access Layer (DAL), modular feature boundaries (`src/features/<feature-name>/`), centralized feature registry (`src/lib/features/registry.ts`) with dynamic imports, and decoupled CMS/content configuration layer.
+  - **Depends on**: Phase 59
+  - **Requirements**: REQ-60-01, REQ-60-02, REQ-60-03, REQ-60-04
+  - **Plans**: 0 plans (not planned yet)
+
 ### Milestone 19: Super Admin Platform Engine: Feature Management, Integrations Hub & System Governance (Completed)
 - [x] **Phase 56: Dynamic Feature Flags & Cascading Module Toggles**
   - **Goal**: Implement hierarchical feature flag resolution (Global -> Plan -> Tenant) and UI controls in `/superadmin/features`.

@@ -1,30 +1,27 @@
 ---
-current_phase: 59
-milestone: 19
-status: completed
-plans_count: 2
+current_phase: 60
+milestone: 20
+status: ready_to_plan
+plans_count: 0
 ---
 
 # STATE.md - DevCRM
 
 ## Current Position
 
-Phase: 59 (Global Staff Administration & User Access Governance)
-Milestone: 19 (Super Admin Platform Engine: Feature Management, Integrations Hub & System Governance)
-Status: Completed
-Last activity: 2026-11-06 — Completed Phase 59 (Global Staff Administration & User Access Governance) and completed Milestone 19. Added `isActive` account status flag, NextAuth suspension enforcement, Superadmin procedures (`getGlobalUsers`, `updateUserSystemRole`, `toggleUserActiveStatus`, `adminResetUserPassword`, `revokeUserSessions`, `createStaffUser`), built `/superadmin/users` command center, updated `/superadmin` navigation, verified with 22 Vitest test suites (103 tests passing) and Next.js 15 production build (58/58 routes).
+Phase: 60 (Modular Feature Architecture, Data Access Layer & Dynamic Registry Baseline)
+Milestone: 20 (Modular Architecture, Dynamic Feature Registry & Data Access Layer)
+Status: Ready to plan
+Last activity: 2026-11-24 — Added Phase 60 to establish a clean, decoupled architectural baseline: strict tenant-isolated Data Access Layer (DAL), self-contained feature modules (`src/features/<feature-name>/`), centralized feature registry (`src/lib/features/registry.ts`) with dynamic imports, and CMS/brand configuration separation.
 
 ## Accumulated Context
 
-### Completed Milestone 19
-- Milestone 19: Super Admin Platform Engine: Feature Management, Integrations Hub & System Governance (Phases 56-59)
-  - Phase 56: Dynamic Feature Flags & Cascading Module Toggles (COMPLETED)
-  - Phase 56.1: Security Hardening & PII Encryption (COMPLETED)
-  - Phase 57: Global Integration Center & Third-Party Service Health Monitoring (COMPLETED)
-  - Phase 58: Tenant Deep Inspection & Superadmin Activity Audit Trail (COMPLETED)
-  - Phase 59: Global Staff Administration & User Access Governance (COMPLETED)
+### Active Milestone
+- Milestone 20: Modular Architecture, Dynamic Feature Registry & Data Access Layer (Phases 60+)
+  - Phase 60: Modular Feature Architecture, Data Access Layer (DAL) & Dynamic Registry Baseline (READY TO PLAN)
 
 ### Roadmap Evolution
+- Phase 60 added: Modular Feature Architecture, Data Access Layer (DAL) & Dynamic Registry Baseline
 - Phase 56.1 inserted after Phase 56: Security Hardening & PII Encryption (COMPLETED)
 
 ### Shipped Milestones
