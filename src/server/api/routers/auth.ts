@@ -17,10 +17,13 @@ export const authRouter = createTRPCRouter({
 		)
 		.mutation(async ({ ctx, input }) => {
 			// Check if user exists
+			const normalizedEmail = input.email.trim().toLowerCase();
+			const phone = input.phone?.trim() || null;
+
 			const existingUser = await ctx.db.query.users.findFirst({
 				where: or(
-					eq(users.email, input.email),
-					input.phone ? eq(users.phone, input.phone) : undefined,
+					eq(users.email, normalizedEmail),
+					phone ? eq(users.phone, phone) : undefined,
 				),
 			});
 
@@ -37,11 +40,14 @@ export const authRouter = createTRPCRouter({
 
 			await ctx.db.insert(users).values({
 				id: userId,
-				name: input.name,
-				email: input.email,
-				phone: input.phone,
+				name: input.name.trim(),
+				email: normalizedEmail,
+				phone,
 				passwordHash,
 				systemRole: "USER",
+				isActive: true,
+				onboardingComplete: false,
+				hasSeenWelcome: false,
 			});
 
 			return { success: true };

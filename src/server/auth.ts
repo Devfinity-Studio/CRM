@@ -1,5 +1,5 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import compare from "bcryptjs";
+import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import NextAuth, { type DefaultSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -64,17 +64,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 				if (!credentials?.identifier || !credentials?.password) return null;
 
 				const identifier = String(credentials.identifier).trim();
+				const normalizedEmail = identifier.toLowerCase();
 				const password = String(credentials.password);
 
 				const existingUser = await db.query.users.findFirst({
 					where: (u, { eq, or }) =>
-						or(eq(u.email, identifier), eq(u.phone, identifier)),
+						or(eq(u.email, normalizedEmail), eq(u.phone, identifier)),
 				});
 
 				if (!existingUser || !existingUser.passwordHash) return null;
 				if (existingUser.isActive === false) return null;
 
-				const isValid = await compare.compare(
+				const isValid = await bcrypt.compare(
 					password,
 					existingUser.passwordHash,
 				);
